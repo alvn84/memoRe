@@ -32,7 +32,7 @@ class _LoginScreenState extends State<LoginScreen>
         children: [
           const SizedBox(height: 80),
           const Text(
-            'TRAVELOG',
+            'Memo:Re',
             style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 20),
