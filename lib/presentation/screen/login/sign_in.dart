@@ -23,6 +23,7 @@ class SignIn extends StatelessWidget {
             ),
             const SizedBox(height: 32),
             const TextField(
+              autofocus: true,
               decoration: InputDecoration(
                 labelText: 'Email',
                 border: OutlineInputBorder(),

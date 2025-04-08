@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'sign_in.dart';
-import 'sign_up.dart';
+import 'sign_up/sign_up.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -51,7 +51,7 @@ class _LoginScreenState extends State<LoginScreen>
               controller: _tabController,
               children: [
                 const SignIn(),
-                SignUp(tabController: _tabController),
+                SignUpScreen(tabController: _tabController),
               ],
             ),
           ),
