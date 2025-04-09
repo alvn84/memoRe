@@ -34,7 +34,9 @@ class _HomeScreenState extends State<HomeScreen> {
             onPressed: () => Scaffold.of(context).openDrawer(),
           ),
         ),
-        title: const Text('Memo:Re'),
+        title: const Text('Memo:Re', style: TextStyle(
+          fontSize: 30,
+        ),),
         centerTitle: true,
       ),
       body: Column(
@@ -42,47 +44,6 @@ class _HomeScreenState extends State<HomeScreen> {
           const Divider(height: 1, thickness: 1),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
-            child: Row(
-              children: [
-                Expanded(
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 300),
-                    width: _isSearching
-                        ? MediaQuery.of(context).size.width - 64
-                        : 0,
-                    // 아이콘 포함 고려
-                    height: 40,
-                    // ✅ 높이 고정
-                    curve: Curves.easeInOut,
-                    child: Opacity(
-                      opacity: _isSearching ? 1 : 0,
-                      child: TextField(
-                        controller: _searchController,
-                        decoration: const InputDecoration(
-                          hintText: '검색어를 입력하세요',
-                          border: OutlineInputBorder(),
-                          isDense: true,
-                          contentPadding:
-                              EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-                IconButton(
-                  icon: Icon(_isSearching ? Icons.close : Icons.search),
-                  onPressed: () {
-                    setState(() {
-                      _isSearching = !_isSearching;
-                      if (!_isSearching) {
-                        _searchController.clear();
-                        FocusScope.of(context).unfocus(); // ✅ 키보드 숨기기
-                      }
-                    });
-                  },
-                ),
-              ],
-            ),
           ),
           SmoothPageIndicator(
             controller: _pageController,
