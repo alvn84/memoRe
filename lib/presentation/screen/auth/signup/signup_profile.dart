@@ -10,8 +10,8 @@ class SignUpProfile extends StatefulWidget {
 }
 
 class _SignUpProfileState extends State<SignUpProfile> {
-  final List<String> genderOptions = ['남자', '여자', '답변 안 함'];
-  final List<String> jobOptions = ['학생', '개발자', '디자이너', '기타'];
+  final List<String> genderOptions = ['Male', 'Female', 'Prefer not to say'];
+  final List<String> jobOptions = ['Student', 'Developer', 'Designer', 'Other'];
 
   String? selectedGender;
   String? selectedJob;
@@ -37,95 +37,219 @@ class _SignUpProfileState extends State<SignUpProfile> {
                 style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 32),
-              DropdownButtonFormField<String>(
-                value: selectedGender,
-                items: genderOptions
-                    .map((gender) => DropdownMenuItem(value: gender, child: Text(gender)))
-                    .toList(),
-                onChanged: (value) => setState(() => selectedGender = value),
-                decoration: const InputDecoration(
-                  labelText: 'Gender',
-                  border: OutlineInputBorder(),
+              Center(
+                child: SizedBox(
+                  width: 290,
+                  child: DropdownButtonFormField<String>(
+                    value: selectedGender,
+                    items: genderOptions
+                        .map((gender) => DropdownMenuItem(
+                            value: gender,
+                            child: Text(
+                              gender,
+                              style: const TextStyle(
+                                fontSize: 14, // ✅ 폰트 크기
+                                fontWeight: FontWeight.w600, // ✅ 텍스트 굵게
+                              ),
+                            )))
+                        .toList(),
+                    onChanged: (value) =>
+                        setState(() => selectedGender = value),
+                    decoration: InputDecoration(
+                      labelText: 'Gender',
+                      labelStyle: const TextStyle(
+                        fontSize: 14, // ✨ 라벨 글자 크기 줄이기
+                        fontWeight: FontWeight.w500, // (선택) 살짝 굵게
+                      ),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(
+                        vertical: 12,
+                        horizontal: 16,
+                      ),
+                    ),
+                  ),
                 ),
               ),
               const SizedBox(height: 16),
               Row(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Expanded(
+                  SizedBox(
+                    width: 92,
                     child: DropdownButtonFormField<int>(
                       value: selectedYear,
                       items: List.generate(100, (index) => 2025 - index)
-                          .map((year) => DropdownMenuItem(value: year, child: Text('$year')))
+                          .map((year) => DropdownMenuItem(
+                              value: year,
+                              child: Text(
+                                '$year',
+                                style: const TextStyle(
+                                  fontSize: 14, // ✨ 여기서 글자 크기 줄이기
+                                  fontWeight: FontWeight.w600, // (선택) 글자 약간 두껍게
+                                ),
+                              )))
                           .toList(),
-                      onChanged: (value) => setState(() => selectedYear = value),
-                      decoration: const InputDecoration(
+                      onChanged: (value) =>
+                          setState(() => selectedYear = value),
+                      decoration: InputDecoration(
                         labelText: 'Year',
-                        border: OutlineInputBorder(),
+                        labelStyle: const TextStyle(
+                          fontSize: 12, // ✨ 라벨 글자 크기 줄이기
+                          fontWeight: FontWeight.w500, // (선택) 살짝 굵게
+                        ),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(
+                          vertical: 12,
+                          horizontal: 16,
+                        ),
                       ),
                     ),
                   ),
                   const SizedBox(width: 8),
-                  Expanded(
+                  SizedBox(
+                    width: 92,
                     child: DropdownButtonFormField<int>(
                       value: selectedMonth,
                       items: List.generate(12, (index) => index + 1)
-                          .map((month) => DropdownMenuItem(value: month, child: Text('$month')))
+                          .map((month) => DropdownMenuItem(
+                              value: month,
+                              child: Text(
+                                '$month',
+                                style: const TextStyle(
+                                  fontSize: 14, // ✅ 폰트 크기
+                                  fontWeight: FontWeight.w600, // ✅ 텍스트 굵게
+                                ),
+                              )))
                           .toList(),
-                      onChanged: (value) => setState(() => selectedMonth = value),
-                      decoration: const InputDecoration(
+                      onChanged: (value) =>
+                          setState(() => selectedMonth = value),
+                      decoration: InputDecoration(
                         labelText: 'Month',
-                        border: OutlineInputBorder(),
+                        labelStyle: const TextStyle(
+                          fontSize: 12, // ✨ 라벨 글자 크기 줄이기
+                          fontWeight: FontWeight.w500, // (선택) 살짝 굵게
+                        ),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(
+                          vertical: 12,
+                          horizontal: 16,
+                        ),
                       ),
                     ),
                   ),
                   const SizedBox(width: 8),
-                  Expanded(
+                  SizedBox(
+                    width: 92,
                     child: DropdownButtonFormField<int>(
                       value: selectedDay,
                       items: List.generate(31, (index) => index + 1)
-                          .map((day) => DropdownMenuItem(value: day, child: Text('$day')))
+                          .map((day) => DropdownMenuItem(
+                              value: day,
+                              child: Text(
+                                '$day',
+                                style: const TextStyle(
+                                  fontSize: 14, // ✅ 폰트 크기
+                                  fontWeight: FontWeight.w600, // ✅ 텍스트 굵게
+                                ),
+                              )))
                           .toList(),
                       onChanged: (value) => setState(() => selectedDay = value),
-                      decoration: const InputDecoration(
+                      decoration: InputDecoration(
                         labelText: 'Day',
-                        border: OutlineInputBorder(),
+                        labelStyle: const TextStyle(
+                          fontSize: 12, // ✨ 라벨 글자 크기 줄이기
+                          fontWeight: FontWeight.w500, // (선택) 살짝 굵게
+                        ),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(
+                          vertical: 12,
+                          horizontal: 16,
+                        ),
                       ),
                     ),
                   ),
                 ],
               ),
               const SizedBox(height: 16),
-              DropdownButtonFormField<String>(
-                value: selectedJob,
-                items: jobOptions
-                    .map((job) => DropdownMenuItem(value: job, child: Text(job)))
-                    .toList(),
-                onChanged: (value) => setState(() => selectedJob = value),
-                decoration: const InputDecoration(
-                  labelText: 'Job',
-                  border: OutlineInputBorder(),
+              Center(
+                child: SizedBox(
+                  width: 290,
+                  child: DropdownButtonFormField<String>(
+                    value: selectedJob,
+                    items: jobOptions
+                        .map((job) => DropdownMenuItem(
+                            value: job,
+                            child: Text(
+                              job,
+                              style: const TextStyle(
+                                fontSize: 14, // ✅ 폰트 크기
+                                fontWeight: FontWeight.w600, // ✅ 텍스트 굵게
+                              ),
+                            )))
+                        .toList(),
+                    onChanged: (value) => setState(() => selectedJob = value),
+                    decoration: InputDecoration(
+                      labelText: 'Job',
+                      labelStyle: const TextStyle(
+                        fontSize: 14, // ✅ labelText(라벨) 폰트 크기 줄이기
+                        fontWeight: FontWeight.w500,
+                      ),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(
+                        vertical: 12,
+                        horizontal: 16,
+                      ),
+                    ),
+                  ),
                 ),
               ),
-              const SizedBox(height: 32),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: () {
-                    if (selectedGender == null ||
-                        selectedYear == null ||
-                        selectedMonth == null ||
-                        selectedDay == null ||
-                        selectedJob == null) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Please complete all fields')),
-                      );
-                      return;
-                    }
+              const SizedBox(height: 48),
+              Center(
+                child: SizedBox(
+                  width: 230,
+                  height: 40,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      if (selectedGender == null ||
+                          selectedYear == null ||
+                          selectedMonth == null ||
+                          selectedDay == null ||
+                          selectedJob == null) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text(
+                              'Please complete all fields',
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600, // ✅ 스낵바 텍스트도 굵게
+                              ),
+                            ),
+                          ),
+                        );
+                        return;
+                      }
 
-                    FocusScope.of(context).unfocus(); // ✅ 완료 시 키보드 먼저 내리기
-                    widget.onComplete(); // ✅ 이후 완료 로직 호출
-                  },
-                  child: const Text('Complete Sign Up'),
+                      FocusScope.of(context).unfocus(); // ✅ 완료 시 키보드 먼저 내리기
+                      widget.onComplete(); // ✅ 이후 완료 로직 호출
+                    },
+                    child: const Text(
+                      'Complete Sign Up',
+                      style: TextStyle(
+                        fontSize: 14, // ✅ 적당한 폰트 크기
+                        fontWeight: FontWeight.w600, // ✅ 버튼 텍스트 굵게
+                      ),
+                    ),
+                  ),
                 ),
               ),
             ],

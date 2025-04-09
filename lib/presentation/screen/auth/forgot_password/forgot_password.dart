@@ -43,16 +43,27 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                     const Text(
                       'Enter your email address\nto receive a password reset link.',
                       textAlign: TextAlign.center,
-                      style: TextStyle(fontSize: 16, color: Colors.black54),
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600, // ✅ 약간 굵게
+                        color: Colors.black45,
+                      ),
                     ),
                     const SizedBox(height: 32),
                     TextField(
                       controller: _emailController,
                       keyboardType: TextInputType.emailAddress,
-                      decoration: const InputDecoration(
+                      decoration: InputDecoration(
                         labelText: 'Email Address',
+                        labelStyle: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500, // ✅ 라벨도 굵게
+                        ),
                         hintText: 'example@email.com',
-                        border: OutlineInputBorder(),
+                        border: OutlineInputBorder(
+                          borderRadius:
+                              BorderRadius.circular(20), // ✅ 텍스트필드 둥글게
+                        ),
                         isDense: true,
                         contentPadding: EdgeInsets.symmetric(
                           horizontal: 12,
@@ -61,41 +72,67 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                       ),
                     ),
                     const SizedBox(height: 24),
-                    SizedBox(
-                      width: double.infinity,
-                      height: 48,
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.lightBlue,
-                          textStyle: const TextStyle(fontSize: 16),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
+                    Center(
+                      child: SizedBox(
+                        width: 150,
+                        height: 48,
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.purple[100],
+                            foregroundColor: Colors.white,
+                            textStyle: const TextStyle(
+                              fontFamily: 'Anton',
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600, // ✅ 버튼 텍스트 굵게
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius:
+                                  BorderRadius.circular(25), // ✅ 버튼 둥글게
+                            ),
+                          ).copyWith(
+                            overlayColor: MaterialStateProperty.all(
+                                Colors.purple[200]), // ✨ 눌렀을 때 색상
                           ),
-                        ),
-                        onPressed: () {
-                          if (_emailController.text.isEmpty) {
+                          onPressed: () {
+                            if (_emailController.text.isEmpty) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text(
+                                    'Please enter your email.',
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      fontWeight:
+                                          FontWeight.w600, // ✅ 스낵바 텍스트도 굵게
+                                    ),
+                                  ),
+                                ),
+                              );
+                              return;
+                            }
+                            // TODO: 이메일 인증 요청 처리
                             ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('Please enter your email.')),
+                              const SnackBar(
+                                  content: Text('Password reset link sent!')),
                             );
-                            return;
-                          }
-                          // TODO: 이메일 인증 요청 처리
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Password reset link sent!')),
-                          );
-                        },
-                        child: const Text('Send Reset Link'),
+                          },
+                          child: const Text('Send Reset Link'),
+                        ),
                       ),
                     ),
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 32),
                     TextButton(
                       onPressed: () {
                         Navigator.pop(context); // 로그인 화면으로 돌아가기
                       },
                       child: const Text(
-                        'Remember your password? Go back to Sign In',
-                        style: TextStyle(fontSize: 13, color: Colors.deepPurple),
+                        'Back to Sign In',
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600, // (선택) 약간 굵게 하면 더 깔끔
+                          color: Colors.deepPurple,
+                        ),
                         textAlign: TextAlign.center,
+                        softWrap: true, // ✨ 줄바꿈 부드럽게
                       ),
                     ),
                   ],

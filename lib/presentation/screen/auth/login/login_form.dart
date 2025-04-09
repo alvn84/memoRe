@@ -28,41 +28,77 @@ class _LoginFormState extends State<LoginForm> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        TextField(
-          controller: _emailController,
-          focusNode: _emailFocusNode,
-          keyboardType: TextInputType.emailAddress,
-          autofocus: false,
-          decoration: const InputDecoration(
-            labelText: 'Email',
-            border: OutlineInputBorder(),
+        Center(
+          child: SizedBox(
+            width: 280,
+            child: TextField(
+              controller: _emailController,
+              focusNode: _emailFocusNode,
+              keyboardType: TextInputType.emailAddress,
+              autofocus: false,
+              style: const TextStyle( // ✨ 추가
+                fontWeight: FontWeight.w600, // 몬트세라트 w500 중간 두께
+              ),
+              decoration: InputDecoration(
+                labelText: 'Email',
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(25), // 텍스트필드 둥글기 조절
+                ),
+                contentPadding: const EdgeInsets.symmetric(
+                    vertical: 12, horizontal: 16), // ✨ 추가
+              ),
+            ),
           ),
         ),
         const SizedBox(height: 16),
-        TextField(
-          controller: _passwordController,
-          focusNode: _passwordFocusNode,
-          obscureText: true,
-          autofocus: false,
-          decoration: const InputDecoration(
-            labelText: 'Password',
-            border: OutlineInputBorder(),
+        Center(
+          child: SizedBox(
+            width: 280,
+            child: TextField(
+              controller: _passwordController,
+              focusNode: _passwordFocusNode,
+              obscureText: true,
+              autofocus: false,
+              decoration: InputDecoration(
+                labelText: 'Password',
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(25), // 텍스트필드 둥글기 조절
+                ),
+                contentPadding: const EdgeInsets.symmetric(
+                    vertical: 12, horizontal: 16), // ✨ 추가
+              ),
+            ),
           ),
         ),
         const SizedBox(height: 24),
-        SizedBox(
-          width: double.infinity,
-          height: 48,
-          child: ElevatedButton(
-            onPressed: () {
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(builder: (context) => const HomeScreen()),
-              );
-            },
-            child: const Text('Sign In'),
+        Center(
+          child: FractionallySizedBox(
+            widthFactor: 0.4,
+            child: SizedBox(
+              width: double.infinity,
+              height: 40,
+              child: ElevatedButton(
+
+                onPressed: () {
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(builder: (context) => const HomeScreen()),
+                  );
+                },
+                child: const Text(
+                  'Sign In',
+                  style: TextStyle(
+                    fontSize: 14,
+                    // ⭐️ 폰트 크기
+                    fontWeight: FontWeight.w600,
+                    // ⭐️ 약간 두껍게 (Montserrat랑 잘 어울림)
+                  ),
+                ),
+              ),
+            ),
           ),
         ),
+
         const SizedBox(height: 12),
         Center( // skip 버튼 없애려면 여기 이 Center 컴포넌트랑 바로 위 SizedBox 날려버리기
           child: TextButton(
@@ -81,6 +117,9 @@ class _LoginFormState extends State<LoginForm> {
             ),
           ),
         ),
+
+
+        
       ],
     );
   }
