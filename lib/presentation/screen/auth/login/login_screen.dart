@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import '../signup/signup_screen.dart';
-import 'login_form.dart'; // ✅ LoginForm import 추가
+import 'login_form.dart';
 import '../forgot_password/forgot_password.dart';
+import 'social_login_buttons.dart';
 import '../social_login/google_login_screen.dart';
 import '../social_login/kakao_login_screen.dart';
 
@@ -10,110 +11,125 @@ class LoginScreen extends StatefulWidget {
 
   @override
   State<LoginScreen> createState() => _LoginScreenState();
+
 }
 
 class _LoginScreenState extends State<LoginScreen> {
+
+  Key _formKey = UniqueKey(); // ⭐️ 키를 매번 새로 주기
+
+  void _refreshForm() {
+    setState(() {
+      _formKey = UniqueKey(); // 새 키 부여 → LoginForm 강제 rebuild
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text(
-          'Memo:Re',
-          style: TextStyle(fontWeight: FontWeight.bold),
-        ),
-        centerTitle: true,
-        elevation: 0.5,
-      ),
-      body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 24.0),
-        child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 40),
-              const Text(
-                'Sign In',
-                style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 32),
-
-              const LoginForm(), // ✅ 여기! 직접 TextField 작성 대신 LoginForm 사용!
-
-              const SizedBox(height: 12),
-              Align(
-                alignment: Alignment.centerRight,
-                child: TextButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) =>
-                              const ForgotPasswordScreen()), // ✅ 이동
-                    );
-                  },
-                  child: const Text('Forgot Password?'),
-                ),
-              ),
-              const SizedBox(height: 12),
-              Row(
-                children: const [
-                  Expanded(child: Divider()),
-                  Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 8.0),
-                    child: Text('OR'),
-                  ),
-                  Expanded(child: Divider()),
-                ],
-              ),
-              const SizedBox(height: 24),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
+    return GestureDetector(
+      behavior: HitTestBehavior.translucent, // 빈 공간도 터치 감지
+      onTap: () {
+        FocusScope.of(context).unfocus(); // 키보드 내리기
+      },
+      child: Scaffold(
+        body: SafeArea(
+          child: Center(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(horizontal: 24.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  IconButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => const GoogleLoginScreen()),
-                      );
-                    },
-                    icon: SizedBox(
-                      width: 40,
-                      height: 40,
-                      child: Image.asset('assets/icons/google_logo.png',
-                          fit: BoxFit.contain),
+                  const SizedBox(height: 32),
+                  Center(
+                    child: Text(
+                      'Memo:Re',
+                      style: TextStyle(
+                        fontSize: 32,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.deepPurple,
+                      ),
                     ),
                   ),
-                  const SizedBox(width: 20),
-                  IconButton(
-                    onPressed: () {
+                  const SizedBox(height: 32),
+                  LoginForm(key: _formKey), // ✅ 여기에 key 줌
+                  const SizedBox(height: 12),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: TextButton(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const ForgotPasswordScreen(),
+                          ),
+                        ).then((_) {
+                          FocusScope.of(context).unfocus();
+                          _refreshForm(); // ⭐️ 돌아왔을 때 폼 새로 만듦
+                        });
+                      },
+                      child: const Text('Forgot Password?'),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    children: const [
+                      Expanded(child: Divider()),
+                      Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 8.0),
+                        child: Text('OR'),
+                      ),
+                      Expanded(child: Divider()),
+                    ],
+                  ),
+                  const SizedBox(height: 24),
+                  SocialLoginButtons(
+                    onGoogleLogin: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => const KakaoLoginScreen()),
-                      );
+                        MaterialPageRoute(
+                          builder: (context) => const GoogleLoginScreen(),
+                        ),
+                      ).then((_) {
+                        FocusScope.of(context).unfocus();
+                        _refreshForm(); // 돌아오면 폼 새로 리셋
+                      });
                     },
-                    icon: SizedBox(
-                      width: 45,
-                      height: 45,
-                      child: Image.asset('assets/icons/kakao_logo.png',
-                          fit: BoxFit.contain),
+                    onKakaoLogin: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const KakaoLoginScreen(),
+                        ),
+                      ).then((_) {
+                        FocusScope.of(context).unfocus();
+                        _refreshForm(); // 돌아오면 폼 새로 리셋
+                      });
+                    },
+                  ),
+                  const SizedBox(height: 32),
+                  Center(
+                    child: TextButton(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const SignUpScreen(),
+                          ),
+                        ).then((_) {
+                          FocusScope.of(context).unfocus();
+                          _refreshForm(); // ⭐️ 돌아왔을 때 폼 새로 만듦
+                        });
+                      },
+                      child: const Text(
+                        "Don't have an account? Sign Up",
+                        style: TextStyle(fontSize: 16),
+                      ),
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: 24),
-              Center(
-                child: TextButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => const SignUpScreen()),
-                    );
-                  },
-                  child: const Text("Don't have an account? Sign Up"),
-                ),
-              ),
-            ],
+            ),
           ),
         ),
       ),

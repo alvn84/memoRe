@@ -63,6 +63,24 @@ class _LoginFormState extends State<LoginForm> {
             child: const Text('Sign In'),
           ),
         ),
+        const SizedBox(height: 12),
+        Center( // skip 버튼 없애려면 여기 이 Center 컴포넌트랑 바로 위 SizedBox 날려버리기
+          child: TextButton(
+            onPressed: () {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => const HomeScreen()),
+              );
+            },
+            child: const Text(
+              'Skip (테스트용)',
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.grey, // ✅ 메인 포인트 컬러도 아님. 그냥 조용하게 회색.
+              ),
+            ),
+          ),
+        ),
       ],
     );
   }
