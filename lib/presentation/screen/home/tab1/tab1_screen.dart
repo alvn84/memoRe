@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:convert';
 import '../folder/folder_detail.dart';
 
 class Tab1Screen extends StatefulWidget {
@@ -12,23 +14,77 @@ class _Tab1ScreenState extends State<Tab1Screen> {
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
 
-  List<Map<String, dynamic>> folders = [
-    {'name': 'Default', 'color': Colors.black, 'icon': Icons.check_box},
-    {'name': 'Starred', 'color': Colors.black, 'icon': Icons.star},
-    {'name': 'Trash', 'color': Colors.black, 'icon': Icons.delete},
-    {'name': 'Japan', 'color': Colors.deepPurple, 'icon': Icons.folder},
-    {'name': 'Yeonnam', 'color': Colors.teal, 'icon': Icons.folder},
-    {'name': 'Hongkong', 'color': Colors.redAccent, 'icon': Icons.folder},
-  ];
+  List<Map<String, dynamic>> folders = [];
 
+  @override
+  void initState() {
+    super.initState();
+    _loadFoldersFromPrefs();
+  }
+
+  Future<void> _saveFoldersToPrefs() async {
+    final prefs = await SharedPreferences.getInstance();
+    final folderListJson = jsonEncode(folders.map((folder) {
+      return {
+        'name': folder['name'],
+        'color': folder['color'].value,
+        'icon': folder['icon'].codePoint,
+        'isStarred': folder['isStarred'] ?? false,
+      };
+    }).toList());
+    await prefs.setString('folder_list', folderListJson);
+  }
+
+  Future<void> _loadFoldersFromPrefs() async {
+    final prefs = await SharedPreferences.getInstance();
+    final folderListJson = prefs.getString('folder_list');
+    if (folderListJson != null) {
+      final decoded = jsonDecode(folderListJson);
+      setState(() {
+        folders = List<Map<String, dynamic>>.from(decoded.map((item) {
+          return {
+            'name': item['name'],
+            'color': Color(item['color']),
+            'icon': IconData(item['icon'], fontFamily: 'MaterialIcons'),
+            'isStarred': item['isStarred'] ?? false,
+          };
+        }));
+      });
+    } else {
+      folders = [
+        {'name': 'Default', 'color': Colors.black, 'icon': Icons.check_box, 'isStarred': false},
+        {'name': 'Starred', 'color': Colors.black, 'icon': Icons.star, 'isStarred': false},
+        {'name': 'Trash', 'color': Colors.black, 'icon': Icons.delete, 'isStarred': false},
+      ];
+    }
+  }
+
+  // 폴더 추가
   void _addNewFolder(String name) {
     setState(() {
       folders.add({
         'name': name,
-        'color': Colors.blueAccent,
+        'color': Colors.deepPurpleAccent,
         'icon': Icons.folder,
+        'isStarred': false,
       });
     });
+    _saveFoldersToPrefs();
+  }
+
+  // 폴더 삭제
+  void _deleteFolder(int index) {
+    setState(() {
+      folders.removeAt(index);
+    });
+    _saveFoldersToPrefs();
+  }
+
+  void _toggleStar(int index) {
+    setState(() {
+      folders[index]['isStarred'] = !(folders[index]['isStarred'] ?? false);
+    });
+    _saveFoldersToPrefs();
   }
 
   void _showAddFolderDialog() {
@@ -44,9 +100,7 @@ class _Tab1ScreenState extends State<Tab1Screen> {
         ),
         actions: [
           TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-            },
+            onPressed: () => Navigator.of(context).pop(),
             child: const Text('취소'),
           ),
           ElevatedButton(
@@ -99,7 +153,7 @@ class _Tab1ScreenState extends State<Tab1Screen> {
                 )
                     : null,
                 border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8.0),
+                  borderRadius: BorderRadius.circular(30.0),
                 ),
               ),
               onChanged: (value) {
@@ -123,6 +177,7 @@ class _Tab1ScreenState extends State<Tab1Screen> {
                 ),
                 itemBuilder: (context, index) {
                   final folder = filteredFolders[index];
+                  final originalIndex = folders.indexOf(folder);
                   return InkWell(
                     onTap: () {
                       Navigator.push(
@@ -133,13 +188,53 @@ class _Tab1ScreenState extends State<Tab1Screen> {
                         ),
                       );
                     },
+                    onLongPress: () {
+                      showModalBottomSheet(
+                        context: context,
+                        builder: (_) => Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            ListTile(
+                              leading: Icon(
+                                folder['isStarred']
+                                    ? Icons.star
+                                    : Icons.star_border,
+                              ),
+                              title: Text(folder['isStarred']
+                                  ? '즐겨찾기 해제'
+                                  : '즐겨찾기 추가'),
+                              onTap: () {
+                                Navigator.pop(context);
+                                _toggleStar(originalIndex);
+                              },
+                            ),
+                            ListTile(
+                              leading: const Icon(Icons.delete),
+                              title: const Text('삭제'),
+                              onTap: () {
+                                Navigator.pop(context);
+                                _deleteFolder(originalIndex);
+                              },
+                            ),
+                          ],
+                        ),
+                      );
+                    },
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(
-                          folder['icon'],
-                          color: folder['color'],
-                          size: 65,
+                        Stack(
+                          alignment: Alignment.topRight,
+                          children: [
+                            Icon(
+                              folder['icon'],
+                              color: folder['color'],
+                              size: 65,
+                            ),
+                            if (folder['isStarred'])
+                              const Icon(Icons.star,
+                                  color: Colors.amber, size: 20),
+                          ],
                         ),
                         const SizedBox(height: 8),
                         Text(

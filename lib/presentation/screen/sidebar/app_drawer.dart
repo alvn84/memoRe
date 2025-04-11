@@ -11,16 +11,39 @@ class AppDrawer extends StatelessWidget {
       child: ListView(
         padding: EdgeInsets.zero,
         children: [
-          // Drawer 상단 유저 정보 영역
-          const UserAccountsDrawerHeader(
-            accountName: Text('사용자 이름'),
-            accountEmail: Text('email@example.com'),
-            currentAccountPicture: CircleAvatar(
-              backgroundImage:
-                  AssetImage('assets/images/profile.png'), // 프로필 이미지 있으면 사용
-            ),
-            decoration: BoxDecoration(
-              color: Colors.deepPurple,
+
+          SafeArea( // 시계 영역과 겹치지 않도록 SafeArea 사용
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // 앱 이름
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 10.0),
+                  child: const Text(
+                    'Memo:Re',
+                    style: TextStyle(
+                      color: Colors.black,
+                      fontSize: 30,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+
+                // 앱 이름과 유저 정보 사이 간격 ↓ 아주 작게
+
+                // 사용자 정보
+                const UserAccountsDrawerHeader(
+                  accountName: Text('사용자 이름'),
+                  accountEmail: Text('email@example.com'),
+                  currentAccountPicture: CircleAvatar(
+                    backgroundImage: AssetImage('assets/images/profile.png'),
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.deepPurple,
+                  ),
+                ),
+              ],
             ),
           ),
 
