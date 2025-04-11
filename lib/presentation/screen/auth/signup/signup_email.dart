@@ -1,14 +1,65 @@
 import 'package:flutter/material.dart';
 
-class SignUpEmail extends StatelessWidget {
+class SignUpEmail extends StatefulWidget {
   final VoidCallback onNext;
 
   const SignUpEmail({super.key, required this.onNext});
 
   @override
-  Widget build(BuildContext context) {
-    final TextEditingController _emailController = TextEditingController();
+  State<SignUpEmail> createState() => _SignUpEmailState();
+}
 
+class _SignUpEmailState extends State<SignUpEmail> {
+  late final TextEditingController _emailController;
+  late final RegExp emailRegex;
+
+  @override
+  void initState() {
+    super.initState();
+    _emailController = TextEditingController();
+    emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+  }
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    super.dispose();
+  }
+
+  void _handleNext() {
+    String email = _emailController.text.trim();
+
+    if (email.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Please enter your email',
+            style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+          ),
+        ),
+      );
+      return;
+    }
+
+    if (!emailRegex.hasMatch(email)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Please enter a valid email address',
+            style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+          ),
+        ),
+      );
+      return;
+    }
+
+    // ✅ 이메일 형식까지 맞으면 통과
+    FocusScope.of(context).unfocus();
+    widget.onNext();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 32.0),
       child: Column(
@@ -30,6 +81,7 @@ class SignUpEmail extends StatelessWidget {
                 // ✅ 고쳤다! (자동 키보드 뜨지 않게)
                 autocorrect: false,
                 textInputAction: TextInputAction.done,
+                onSubmitted: (_) => _handleNext(), // ✨ 여기 추가
                 style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
@@ -52,22 +104,37 @@ class SignUpEmail extends StatelessWidget {
                   height: 40,
                   child: ElevatedButton(
                     onPressed: () {
-                      if (_emailController.text.isNotEmpty) {
-                        FocusScope.of(context).unfocus(); // ✅ 키보드 먼저 내리기
-                        onNext(); // ✅ 그 다음 페이지 이동
-                      } else {
+                      String email = _emailController.text.trim();
+
+                      if (email.isEmpty) {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: const Text(
+                          const SnackBar(
+                            content: Text(
                               'Please enter your email',
                               style: TextStyle(
-                                fontSize: 14, // ✨ 폰트 크기도 조금 정리
-                                fontWeight: FontWeight.w600, // ✨ 굵기 추가
-                              ),
+                                  fontSize: 14, fontWeight: FontWeight.w600),
                             ),
                           ),
                         );
+                        return;
                       }
+
+                      if (!emailRegex.hasMatch(email)) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text(
+                              'Please enter a valid email address',
+                              style: TextStyle(
+                                  fontSize: 14, fontWeight: FontWeight.w600),
+                            ),
+                          ),
+                        );
+                        return;
+                      }
+
+                      // ✅ 이메일 형식까지 맞으면 통과
+                      FocusScope.of(context).unfocus();
+                      widget.onNext();
                     },
                     child: const Text(
                       'Continue',

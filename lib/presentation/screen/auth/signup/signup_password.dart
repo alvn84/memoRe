@@ -5,6 +5,23 @@ class SignUpPassword extends StatelessWidget {
 
   const SignUpPassword({super.key, required this.onNext});
 
+  bool isPasswordValid(String password) {
+    // 8자 이상, 영어 + 숫자
+    final passwordRegex = RegExp(r'^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$');
+    return passwordRegex.hasMatch(password);
+  }
+
+  void _showSnackBar(BuildContext context, String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          message,
+          style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final TextEditingController _passwordController = TextEditingController();
@@ -56,40 +73,28 @@ class SignUpPassword extends StatelessWidget {
                 height: 40,
                 child: ElevatedButton(
                   onPressed: () {
-                    if (_passwordController.text.isEmpty ||
-                        _confirmPasswordController.text.isEmpty) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text(
-                            'Please fill in all fields',
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ),
-                      );
+                    String password = _passwordController.text.trim();
+                    String confirmPassword =
+                        _confirmPasswordController.text.trim();
+
+                    if (password.isEmpty || confirmPassword.isEmpty) {
+                      _showSnackBar(context, 'Please fill in all fields.');
                       return;
                     }
 
-                    if (_passwordController.text !=
-                        _confirmPasswordController.text) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text(
-                            'Passwords do not match',
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ),
-                      );
+                    if (!isPasswordValid(password)) {
+                      _showSnackBar(context,
+                          'Password must be at least 8 characters long\nand include both letters and numbers.');
                       return;
                     }
 
-                    FocusScope.of(context).unfocus(); // ✅ 먼저 키보드 내리기
-                    onNext(); // ✅ 그 다음에 다음 페이지 이동
+                    if (password != confirmPassword) {
+                      _showSnackBar(context, 'Passwords do not match.');
+                      return;
+                    }
+
+                    FocusScope.of(context).unfocus();
+                    onNext();
                   },
                   child: const Text(
                     'Continue',

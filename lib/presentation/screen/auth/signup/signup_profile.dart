@@ -19,6 +19,20 @@ class _SignUpProfileState extends State<SignUpProfile> {
   int? selectedMonth;
   int? selectedDay;
 
+  void _showSnackBar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          message,
+          style: const TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -220,27 +234,24 @@ class _SignUpProfileState extends State<SignUpProfile> {
                   height: 40,
                   child: ElevatedButton(
                     onPressed: () {
-                      if (selectedGender == null ||
-                          selectedYear == null ||
+                      if (selectedGender == null) {
+                        _showSnackBar('Please select your gender.');
+                        return;
+                      }
+                      if (selectedYear == null ||
                           selectedMonth == null ||
-                          selectedDay == null ||
-                          selectedJob == null) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text(
-                              'Please complete all fields',
-                              style: TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w600, // ✅ 스낵바 텍스트도 굵게
-                              ),
-                            ),
-                          ),
-                        );
+                          selectedDay == null) {
+                        _showSnackBar('Please select your full birth date.');
+                        return;
+                      }
+                      if (selectedJob == null) {
+                        _showSnackBar('Please select your job.');
                         return;
                       }
 
-                      FocusScope.of(context).unfocus(); // ✅ 완료 시 키보드 먼저 내리기
-                      widget.onComplete(); // ✅ 이후 완료 로직 호출
+                      // ✅ 다 통과하면
+                      FocusScope.of(context).unfocus();
+                      widget.onComplete();
                     },
                     child: const Text(
                       'Complete Sign Up',

@@ -14,6 +14,8 @@ class _LoginFormState extends State<LoginForm> {
   final FocusNode _emailFocusNode = FocusNode();
   final FocusNode _passwordFocusNode = FocusNode();
 
+  final RegExp emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+
   @override
   void dispose() {
     _emailController.dispose();
@@ -36,7 +38,8 @@ class _LoginFormState extends State<LoginForm> {
               focusNode: _emailFocusNode,
               keyboardType: TextInputType.emailAddress,
               autofocus: false,
-              style: const TextStyle( // ✨ 추가
+              style: const TextStyle(
+                // ✨ 추가
                 fontWeight: FontWeight.w600, // 몬트세라트 w500 중간 두께
               ),
               decoration: InputDecoration(
@@ -78,8 +81,63 @@ class _LoginFormState extends State<LoginForm> {
               width: double.infinity,
               height: 40,
               child: ElevatedButton(
-
                 onPressed: () {
+                  String email = _emailController.text.trim();
+                  String password = _passwordController.text;
+
+                  if (email.isEmpty) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text(
+                          'Please enter your email.',
+                          style: TextStyle(
+                              fontSize: 14, fontWeight: FontWeight.w600),
+                        ),
+                      ),
+                    );
+                    return;
+                  }
+
+                  if (!emailRegex.hasMatch(email)) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text(
+                          'Please enter a valid email address.',
+                          style: TextStyle(
+                              fontSize: 14, fontWeight: FontWeight.w600),
+                        ),
+                      ),
+                    );
+                    return;
+                  }
+
+                  if (password.isEmpty) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text(
+                          'Please enter your password.',
+                          style: TextStyle(
+                              fontSize: 14, fontWeight: FontWeight.w600),
+                        ),
+                      ),
+                    );
+                    return;
+                  }
+
+                  if (password.length < 6) {
+                    // ✨ 추가된 부분
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text(
+                          'Password must be at least 6 characters.',
+                          style: TextStyle(
+                              fontSize: 14, fontWeight: FontWeight.w600),
+                        ),
+                      ),
+                    );
+                    return;
+                  }
+
                   Navigator.pushReplacement(
                     context,
                     MaterialPageRoute(builder: (context) => const HomeScreen()),
@@ -98,9 +156,9 @@ class _LoginFormState extends State<LoginForm> {
             ),
           ),
         ),
-
         const SizedBox(height: 12),
-        Center( // skip 버튼 없애려면 여기 이 Center 컴포넌트랑 바로 위 SizedBox 날려버리기
+        Center(
+          // skip 버튼 없애려면 여기 이 Center 컴포넌트랑 바로 위 SizedBox 날려버리기
           child: TextButton(
             onPressed: () {
               Navigator.pushReplacement(
@@ -117,9 +175,6 @@ class _LoginFormState extends State<LoginForm> {
             ),
           ),
         ),
-
-
-        
       ],
     );
   }
