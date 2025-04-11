@@ -34,8 +34,8 @@ class _HomeScreenState extends State<HomeScreen> {
             onPressed: () => Scaffold.of(context).openDrawer(),
           ),
         ),
-        title: const Text('Memo:Re', style: TextStyle(
-          fontSize: 30,
+        title: const Text('목록', style: TextStyle(
+          fontSize: 20,
         ),),
         centerTitle: true,
       ),

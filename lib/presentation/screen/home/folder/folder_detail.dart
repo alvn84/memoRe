@@ -78,44 +78,54 @@ class _FolderDetailScreenState extends State<FolderDetailScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.folderName),
-        centerTitle: true,
-      ),
-      body: Column(
-        children: [
-          const Divider(height: 1, thickness: 1), // ✅ 여기 추가!
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: notes.isEmpty
-                  ? const Center(child: Text('작성된 메모가 없습니다.'))
-                  : GridView.builder(
-                itemCount: notes.length,
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  crossAxisSpacing: 16.0,
-                  mainAxisSpacing: 16.0,
-                  childAspectRatio: 1,
+      body: CustomScrollView( // SliverAppBar와 함께 사용하기 위해 CustomScrollView로 감싸기
+        slivers: [
+          SliverAppBar(
+            expandedHeight: 200.0, // 앱바 확장 높이 설정
+            floating: false,
+            pinned: true, // 스크롤 시에도 앱바가 남아있게 하기
+            flexibleSpace: FlexibleSpaceBar(
+              title: Text(widget.folderName),
+              centerTitle: false,
+
+            ),
+          ),
+          SliverList(
+            delegate: SliverChildListDelegate(
+              [
+                const Divider(height: 1, thickness: 1), // ✅ 여기 추가!
+                Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: notes.isEmpty
+                      ? const Center(child: Text('작성된 메모가 없습니다.'))
+                      : GridView.builder(
+                    itemCount: notes.length,
+                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
+                      crossAxisSpacing: 16.0,
+                      mainAxisSpacing: 16.0,
+                      childAspectRatio: 1,
+                    ),
+                    itemBuilder: (context, index) {
+                      return Card(
+                        elevation: 4,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(12.0),
+                          child: Text(
+                            notes[index],
+                            style: const TextStyle(fontSize: 16),
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 6,
+                          ),
+                        ),
+                      );
+                    },
+                  ),
                 ),
-                itemBuilder: (context, index) {
-                  return Card(
-                    elevation: 4,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(12.0),
-                      child: Text(
-                        notes[index],
-                        style: const TextStyle(fontSize: 16),
-                        overflow: TextOverflow.ellipsis,
-                        maxLines: 6,
-                      ),
-                    ),
-                  );
-                },
-              ),
+              ],
             ),
           ),
         ],
