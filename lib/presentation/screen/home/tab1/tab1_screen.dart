@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'dart:convert';
-import '../folder/folder_detail.dart';
+import 'folder_model.dart';
+import 'folder_storage.dart';
+import 'add_folder_dialog.dart';
+import '../folder/folder_detail_screen.dart'; // 기존 폴더 디테일 화면
 
 class Tab1Screen extends StatefulWidget {
   const Tab1Screen({super.key});
@@ -11,165 +12,108 @@ class Tab1Screen extends StatefulWidget {
 }
 
 class _Tab1ScreenState extends State<Tab1Screen> {
-  final TextEditingController _searchController = TextEditingController();
+  List<Folder> folders = [];
   String _searchQuery = '';
-
-  List<Map<String, dynamic>> folders = [];
 
   @override
   void initState() {
     super.initState();
-    _loadFoldersFromPrefs();
+    _loadFolders();
   }
 
-  Future<void> _saveFoldersToPrefs() async {
-    final prefs = await SharedPreferences.getInstance();
-    final folderListJson = jsonEncode(folders.map((folder) {
-      return {
-        'name': folder['name'],
-        'color': folder['color'].value,
-        'icon': folder['icon'].codePoint,
-        'isStarred': folder['isStarred'] ?? false,
-      };
-    }).toList());
-    await prefs.setString('folder_list', folderListJson);
+  Future<void> _loadFolders() async {
+    folders = await FolderStorage.loadFolders();
+    setState(() {});
   }
 
-  Future<void> _loadFoldersFromPrefs() async {
-    final prefs = await SharedPreferences.getInstance();
-    final folderListJson = prefs.getString('folder_list');
-    if (folderListJson != null) {
-      final decoded = jsonDecode(folderListJson);
+  Future<void> _saveFolders() async {
+    await FolderStorage.saveFolders(folders);
+  }
+
+  Future<void> _addNewFolder() async {
+    final folderName = await showAddFolderDialog(context);
+    if (folderName != null && folderName.isNotEmpty) {
       setState(() {
-        folders = List<Map<String, dynamic>>.from(decoded.map((item) {
-          return {
-            'name': item['name'],
-            'color': Color(item['color']),
-            'icon': IconData(item['icon'], fontFamily: 'MaterialIcons'),
-            'isStarred': item['isStarred'] ?? false,
-          };
-        }));
+        folders.add(
+          Folder(
+            name: folderName,
+            color: Colors.deepPurpleAccent,
+            icon: Icons.folder,
+          ),
+        );
       });
-    } else {
-      folders = [
-        {'name': 'Default', 'color': Colors.black, 'icon': Icons.check_box, 'isStarred': false},
-        {'name': 'Starred', 'color': Colors.black, 'icon': Icons.star, 'isStarred': false},
-        {'name': 'Trash', 'color': Colors.black, 'icon': Icons.delete, 'isStarred': false},
-      ];
+      _saveFolders();
     }
   }
 
-  // 폴더 추가
-  void _addNewFolder(String name) {
-    setState(() {
-      folders.add({
-        'name': name,
-        'color': Colors.deepPurpleAccent,
-        'icon': Icons.folder,
-        'isStarred': false,
-      });
-    });
-    _saveFoldersToPrefs();
-  }
-
-  // 폴더 삭제
   void _deleteFolder(int index) {
     setState(() {
       folders.removeAt(index);
     });
-    _saveFoldersToPrefs();
+    _saveFolders();
   }
 
   void _toggleStar(int index) {
     setState(() {
-      folders[index]['isStarred'] = !(folders[index]['isStarred'] ?? false);
+      folders[index] = Folder(
+        name: folders[index].name,
+        color: folders[index].color,
+        icon: folders[index].icon,
+        isStarred: !folders[index].isStarred,
+      );
     });
-    _saveFoldersToPrefs();
-  }
-
-  void _showAddFolderDialog() {
-    String folderName = '';
-
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('새 폴더 만들기'),
-        content: TextField(
-          decoration: const InputDecoration(hintText: '폴더 이름 입력'),
-          onChanged: (value) => folderName = value,
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('취소'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              if (folderName.trim().isNotEmpty) {
-                _addNewFolder(folderName.trim());
-              }
-              Navigator.of(context).pop();
-            },
-            child: const Text('확인'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  @override
-  void dispose() {
-    _searchController.dispose();
-    super.dispose();
+    _saveFolders();
   }
 
   @override
   Widget build(BuildContext context) {
-    List<Map<String, dynamic>> filteredFolders = folders
-        .where((folder) => folder['name']
-        .toLowerCase()
-        .contains(_searchQuery.toLowerCase()))
+    final filteredFolders = folders
+        .where((folder) =>
+            folder.name.toLowerCase().contains(_searchQuery.toLowerCase()))
         .toList();
 
     return Scaffold(
+      appBar: AppBar(
+        title: TextField(
+          onChanged: (value) {
+            setState(() {
+              _searchQuery = value;
+            });
+          },
+          decoration: const InputDecoration(
+            hintText: '검색',
+            border: InputBorder.none,
+          ),
+        ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.sort),
+            onPressed: () {
+              setState(() {
+                // 1. Default 폴더 분리
+                final defaultFolder =
+                    folders.firstWhere((folder) => folder.name == 'Default');
+                final userFolders = folders
+                    .where((folder) => folder.name != 'Default')
+                    .toList();
+
+                // 2. 사용자 폴더만 정렬
+                userFolders.sort((a, b) => a.name.compareTo(b.name));
+
+                // 3. 다시 합치기 (Default 맨 앞)
+                folders = [defaultFolder, ...userFolders];
+              });
+            },
+          ),
+        ],
+      ),
       body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 1.0),
-        child: Column(
-          children: [
-            TextField(
-              controller: _searchController,
-              decoration: InputDecoration(
-                hintText: '검색',
-                prefixIcon: const Icon(Icons.search),
-                suffixIcon: _searchQuery.isNotEmpty
-                    ? IconButton(
-                  icon: const Icon(Icons.clear),
-                  onPressed: () {
-                    setState(() {
-                      _searchQuery = '';
-                      _searchController.clear();
-                    });
-                  },
-                )
-                    : null,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(30.0),
-                ),
-              ),
-              onChanged: (value) {
-                setState(() {
-                  _searchQuery = value;
-                });
-              },
-            ),
-            const SizedBox(height: 16),
-            Expanded(
-              child: filteredFolders.isEmpty
-                  ? const Center(child: Text('검색 결과 없음'))
-                  : GridView.builder(
+        padding: const EdgeInsets.all(16.0),
+        child: filteredFolders.isEmpty
+            ? const Center(child: Text('검색 결과 없음'))
+            : GridView.builder(
                 itemCount: filteredFolders.length,
-                gridDelegate:
-                const SliverGridDelegateWithFixedCrossAxisCount(
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: 3,
                   crossAxisSpacing: 16.0,
                   mainAxisSpacing: 16.0,
@@ -178,31 +122,30 @@ class _Tab1ScreenState extends State<Tab1Screen> {
                 itemBuilder: (context, index) {
                   final folder = filteredFolders[index];
                   final originalIndex = folders.indexOf(folder);
+
                   return InkWell(
                     onTap: () {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (_) => FolderDetailScreen(
-                              folderName: folder['name']),
+                          builder: (_) =>
+                              FolderDetailScreen(folderName: folder.name),
                         ),
                       );
                     },
                     onLongPress: () {
+                      if (folder.name == 'Default') return; // ⭐️ Default는 막기
                       showModalBottomSheet(
                         context: context,
                         builder: (_) => Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             ListTile(
-                              leading: Icon(
-                                folder['isStarred']
-                                    ? Icons.star
-                                    : Icons.star_border,
-                              ),
-                              title: Text(folder['isStarred']
-                                  ? '즐겨찾기 해제'
-                                  : '즐겨찾기 추가'),
+                              leading: Icon(folder.isStarred
+                                  ? Icons.star
+                                  : Icons.star_border),
+                              title: Text(
+                                  folder.isStarred ? '즐겨찾기 해제' : '즐겨찾기 추가'),
                               onTap: () {
                                 Navigator.pop(context);
                                 _toggleStar(originalIndex);
@@ -226,19 +169,15 @@ class _Tab1ScreenState extends State<Tab1Screen> {
                         Stack(
                           alignment: Alignment.topRight,
                           children: [
-                            Icon(
-                              folder['icon'],
-                              color: folder['color'],
-                              size: 65,
-                            ),
-                            if (folder['isStarred'])
+                            Icon(folder.icon, color: folder.color, size: 65),
+                            if (folder.isStarred)
                               const Icon(Icons.star,
                                   color: Colors.amber, size: 20),
                           ],
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          folder['name'],
+                          folder.name,
                           style: const TextStyle(fontSize: 15),
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -247,9 +186,6 @@ class _Tab1ScreenState extends State<Tab1Screen> {
                   );
                 },
               ),
-            ),
-          ],
-        ),
       ),
       bottomNavigationBar: Container(
         height: 72,
@@ -262,18 +198,18 @@ class _Tab1ScreenState extends State<Tab1Screen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               IconButton(
-                onPressed: _showAddFolderDialog,
+                onPressed: _addNewFolder, // 폴더 추가 함수
                 icon: const Icon(Icons.create_new_folder),
                 iconSize: 35,
-                tooltip: '새 폴더',
+                tooltip: '새 폴더 만들기',
               ),
               IconButton(
                 onPressed: () {
-                  print('새 파일 만들기');
+                  // TODO: 새 메모 만들기 동작 (추가하고 싶으면 이 함수 지정)
                 },
                 icon: const Icon(Icons.note_add),
                 iconSize: 35,
-                tooltip: '새 파일',
+                tooltip: '새 메모 만들기',
               ),
             ],
           ),

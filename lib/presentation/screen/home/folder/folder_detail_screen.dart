@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../memo/memo.dart';
+import '../memo/memo_screen.dart';
 
 class FolderDetailScreen extends StatefulWidget {
   final String folderName;

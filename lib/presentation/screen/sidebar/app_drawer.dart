@@ -1,59 +1,50 @@
 import 'package:flutter/material.dart';
+import 'package:memore/presentation/screen/sidebar/profile/profile_card.dart';
 import '../auth/login/login_screen.dart';
-import '../setting/setting_screen.dart';
-
+import 'package:memore/presentation/screen/sidebar/favorite/favorite_screen.dart';
+import 'package:memore/presentation/screen/sidebar/trash/trash_screen.dart';
+import 'package:memore/presentation/screen/sidebar/setting/setting_screen.dart';
 class AppDrawer extends StatelessWidget {
   const AppDrawer({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Drawer(
-      child: ListView(
-        padding: EdgeInsets.zero,
+      child: Column(
+        // ✅ ListView -> Column 변경
         children: [
-
-          SafeArea( // 시계 영역과 겹치지 않도록 SafeArea 사용
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // 앱 이름
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 10.0),
-                  child: const Text(
-                    'Memo:Re',
-                    style: TextStyle(
-                      color: Colors.black,
-                      fontSize: 30,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-
-                // 앱 이름과 유저 정보 사이 간격 ↓ 아주 작게
-
-                // 사용자 정보
-                const UserAccountsDrawerHeader(
-                  accountName: Text('사용자 이름'),
-                  accountEmail: Text('email@example.com'),
-                  currentAccountPicture: CircleAvatar(
-                    backgroundImage: AssetImage('assets/images/profile.png'),
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.deepPurple,
-                  ),
-                ),
-              ],
-            ),
+          const SafeArea(
+            child: ProfileCard(),
           ),
-
-          // 메뉴 리스트
+// 메뉴 리스트
           ListTile(
-            leading: const Icon(Icons.home),
-            title: const Text('홈'),
+            leading: const Icon(Icons.star),
+            title: const Text('즐겨찾기'),
             onTap: () {
-              Navigator.pop(context); // 드로어 닫기
-              // Navigator.push(context, MaterialPageRoute(...)); ← 홈 이동 예시
+              Navigator.pop(context); // 드로어 닫고
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const FavoriteScreen()),
+              );
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.group_add),
+            title: const Text('친구 추가'),
+            onTap: () {
+              Navigator.pop(context);
+              // TODO: 친구 추가 화면 이동 (추후 연결)
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.delete),
+            title: const Text('휴지통'),
+            onTap: () {
+              Navigator.pop(context); // 먼저 드로어 닫고
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const TrashScreen()), // TrashScreen으로 이동
+              );
             },
           ),
           ListTile(
@@ -67,42 +58,27 @@ class AppDrawer extends StatelessWidget {
               );
             },
           ),
-          ListTile(
-            leading: const Icon(Icons.info),
-            title: const Text('앱 정보'),
-              onTap: () {
-                Navigator.pop(context); // 드로어 닫기
-                showDialog(
-                  context: context,
-                  builder: (context) {
-                    return AlertDialog(
-                      title: const Text('앱 정보'),
-                      content: const Text('버전: 1.0.0\n개발자: TRAVELOG Team\n이 앱은 여행 메모를 위한 앱입니다.'),
-                      actions: [
-                        TextButton(
-                          onPressed: () => Navigator.pop(context),
-                          child: const Text('닫기'),
-                        ),
-                      ],
-                    );
-                  },
-                );
-              }
-          ),
-          const Divider(),
 
-          // 로그아웃
-          ListTile(
-            leading: const Icon(Icons.logout),
-            title: const Text('로그아웃'),
-            onTap: () {
-              Navigator.pop(context);
-              Navigator.pushAndRemoveUntil(
-                context,
-                MaterialPageRoute(builder: (context) => const LoginScreen()),
-                (route) => false, // ← 이전 스택 모두 제거
-              );
-            },
+          const Spacer(), // 👈 위 메뉴들 밀어올리고
+
+// 하단 영역
+          Padding(
+            padding:
+                const EdgeInsets.only(left: 16.0, right: 16.0, bottom: 16.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween, // 👈 좌우 끝으로 배치
+              children: [
+                const Text(
+                  '© 2025 Memo:Re\n당신의 여행을 기록합니다.',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.blueGrey,
+                    height: 1.5, // 줄 간격 조금 늘림
+                  ),
+                  textAlign: TextAlign.left,
+                ),
+              ],
+            ),
           ),
         ],
       ),
