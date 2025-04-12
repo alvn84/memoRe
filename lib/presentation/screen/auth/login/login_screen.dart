@@ -111,26 +111,53 @@ class _LoginScreenState extends State<LoginScreen> {
                       ],
                     ),
                     const SizedBox(height: 16),
+                    // 회원가입 문장과 버튼
                     Center(
-                      child: TextButton(
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const SignUpScreen(),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Text(
+                            "Don't have an account? ",
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontFamily: 'Montserrat',
+                              fontWeight: FontWeight.w500,
                             ),
-                          ).then((_) {
-                            FocusScope.of(context).unfocus();
-                            _refreshForm();
-                          });
-                        },
-                        child: const Text(
-                          "Don't have an account? Sign Up",
-                          style: signUpLinkStyle, // ⭐️ 통합 스타일 사용
+                          ),
+                          TextButton(
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const SignUpScreen(),
+                                ),
+                              ).then((_) {
+                                FocusScope.of(context).unfocus();
+                                _refreshForm();
+                              });
+                            },
+                            child: const Text(
+                              "Sign Up",
+                              style: signUpLinkStyle,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    const SizedBox(height: 24),
+
+                    Center(
+                      child: Text(
+                        "Continue with Social Account",
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: Colors.grey[600],
+                          fontFamily: 'Montserrat',
                         ),
                       ),
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 16),
                     SocialLoginButtons(
                       onGoogleLogin: () {
                         Navigator.push(

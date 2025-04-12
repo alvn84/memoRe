@@ -129,7 +129,7 @@ class _EmailInputScreenState extends State<EmailInputScreen> {
                               MaterialPageRoute(builder: (context) => const ResetPasswordScreen()),
                             );
                           },
-                          child: const Text('Send Reset Link'),
+                          child: const Text('Continue'),
                         ),
                       ),
                     ),
