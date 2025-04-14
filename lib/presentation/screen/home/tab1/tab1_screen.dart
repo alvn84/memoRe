@@ -199,7 +199,7 @@ class _Tab1ScreenState extends State<Tab1Screen> {
             children: [
               IconButton(
                 onPressed: _addNewFolder, // 폴더 추가 함수
-                icon: const Icon(Icons.create_new_folder),
+                icon: const Icon(Icons.create_new_folder, color: Color(0xFF8B674C)),
                 iconSize: 35,
                 tooltip: '새 폴더 만들기',
               ),
@@ -207,7 +207,7 @@ class _Tab1ScreenState extends State<Tab1Screen> {
                 onPressed: () {
                   // TODO: 새 메모 만들기 동작 (추가하고 싶으면 이 함수 지정)
                 },
-                icon: const Icon(Icons.note_add),
+                icon: const Icon(Icons.note_add, color: Color(0xFF8B674C)),
                 iconSize: 35,
                 tooltip: '새 메모 만들기',
               ),

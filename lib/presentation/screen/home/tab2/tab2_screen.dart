@@ -21,15 +21,12 @@ class _Tab2ScreenState extends State<Tab2Screen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFFAF5FF),
       body: CustomScrollView(
         slivers: [
           SliverAppBar(
             pinned: true,
             expandedHeight: 360,
-            backgroundColor: const Color(0xFFFAF5FF),
             flexibleSpace: Container(
-              color: const Color(0xFFFAF5FF),
               child: FlexibleSpaceBar(
                 background: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16.0),
@@ -121,7 +118,7 @@ class _Tab2ScreenState extends State<Tab2Screen> {
                 onPressed: () {
                   print('Tab2 - 새 파일 만들기');
                 },
-                icon: const Icon(Icons.note_add),
+                icon: const Icon(Icons.note_add, color: Color(0xFF8B674C)),
                 iconSize: 35,
                 tooltip: '새 파일',
               ),
