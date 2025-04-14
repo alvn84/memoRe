@@ -28,6 +28,8 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       drawer: const AppDrawer(),
       appBar: AppBar(
+        backgroundColor: Colors.transparent, // 완전 투명 처리
+        elevation: 0,  // 그림자 제거 (없애는게 깔끔)
         leading: Builder(
           builder: (context) => IconButton(
             icon: const Icon(Icons.menu),
@@ -45,7 +47,9 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       body: Column(
         children: [
+          const SizedBox(height: 3),
           const Divider(height: 1, thickness: 1),
+          const SizedBox(height: 3),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
           ),
@@ -56,10 +60,10 @@ class _HomeScreenState extends State<HomeScreen> {
               dotHeight: 8,
               dotWidth: 8,
               spacing: 12,
-              activeDotColor: Colors.deepPurple,
+              activeDotColor: Color(0xFF8B674C),
             ),
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 15),
           // 탭 간 구분 선
           // SizedBox(
           //   height: 2,
@@ -84,7 +88,6 @@ class _HomeScreenState extends State<HomeScreen> {
           //     },
           //   ),
           // ),
-          const SizedBox(height: 8),
           Expanded(
             child: PageView(
               controller: _pageController,

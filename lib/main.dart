@@ -7,7 +7,8 @@ void main() {
       title: 'Memo:Re',
       theme: ThemeData(
           fontFamily: 'Montserrat',
-          // 다른 테마 속성도 같이 설정 가능
+        scaffoldBackgroundColor: Color(0xFFFFFBF5), // 배경 색상 통일
+        // 다른 테마 속성도 같이 설정 가능
           ),
       debugShowCheckedModeBanner: false,
       home: LoginScreen(),

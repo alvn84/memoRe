@@ -25,8 +25,9 @@ class _Tab2ScreenState extends State<Tab2Screen> {
         slivers: [
           SliverAppBar(
             pinned: true,
-            expandedHeight: 360,
+            expandedHeight: 320,
             flexibleSpace: Container(
+              color: Color(0xFFFFFBF5), // 예: 연베이지톤 배경색
               child: FlexibleSpaceBar(
                 background: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16.0),
@@ -34,7 +35,7 @@ class _Tab2ScreenState extends State<Tab2Screen> {
                     availableCalendarFormats: const {
                       CalendarFormat.month: 'Month',
                     },
-                    rowHeight: 42,
+                    rowHeight: 40,
                     firstDay: DateTime.utc(2020, 1, 1),
                     lastDay: DateTime.utc(2030, 12, 31),
                     focusedDay: _focusedDay,
@@ -45,10 +46,41 @@ class _Tab2ScreenState extends State<Tab2Screen> {
                         _focusedDay = focusedDay;
                       });
                     },
+                    headerStyle: const HeaderStyle(
+                      titleTextStyle: TextStyle(
+                        fontWeight: FontWeight.w700, // 년도, 월 글씨 두껍게
+                        fontSize: 18,
+                        color: Color(0xFF4F4F4F), // 연검정
+                      ),
+                      formatButtonVisible: false, // format 변경 버튼 제거
+                      titleCentered: true, // 년도, 월 가운데 정렬
+                    ),
+                    daysOfWeekStyle: const DaysOfWeekStyle(
+                      weekdayStyle: TextStyle(
+                        fontWeight: FontWeight.w600, // 평일 요일 글씨 두껍게
+                        color: Color(0xFF4F4F4F),
+                      ),
+                      weekendStyle: TextStyle(
+                        fontWeight: FontWeight.w600, // 주말 요일 글씨 두껍게
+                        color: Colors.redAccent,
+                      ),
+                    ),
                     calendarStyle: const CalendarStyle(
+                      defaultTextStyle: TextStyle(
+                        fontWeight: FontWeight.w600,  // 평소 글씨 두껍게
+                        color: Color(0xFF4F4F4F), // 살짝 연한 검정 느낌
+                      ),
+                      weekendTextStyle: TextStyle(
+                        fontWeight: FontWeight.w600,  // 주말 글씨 두껍게
+                        color: Colors.redAccent,      // 주말 색상 (선택)
+                      ),
                       selectedDecoration: BoxDecoration(
-                        color: Colors.deepPurpleAccent,
+                        color: Color(0xFFE5CFC3),
                         shape: BoxShape.circle,
+                      ),
+                      selectedTextStyle: TextStyle(
+                        fontWeight: FontWeight.w900,  // 선택 날짜 글씨 더 두껍게
+                        color: Colors.white,  // 선택 날짜 글씨색 (배경이 진하니까 흰색)
                       ),
                       todayDecoration: BoxDecoration(),
                     ),
@@ -60,9 +92,7 @@ class _Tab2ScreenState extends State<Tab2Screen> {
                           child: Text(
                             '${day.day}',
                             style: TextStyle(
-                              fontWeight: isSelected
-                                  ? FontWeight.bold
-                                  : FontWeight.normal,
+                              fontWeight: isSelected ? FontWeight.w900 : FontWeight.normal,
                               color: isSelected ? Colors.white : Colors.black87,
                             ),
                           ),

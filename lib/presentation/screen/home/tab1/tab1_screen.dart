@@ -74,15 +74,32 @@ class _Tab1ScreenState extends State<Tab1Screen> {
 
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: Colors.transparent,
         title: TextField(
           onChanged: (value) {
             setState(() {
               _searchQuery = value;
             });
           },
-          decoration: const InputDecoration(
+          decoration: InputDecoration(
             hintText: '검색',
-            border: InputBorder.none,
+            contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 12), // 내부 여백
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(10), // 여기서 둥글게 정도 조절
+              borderSide: const BorderSide(
+                color: Color(0xFFD6CFC8),  // 테두리 색상 (연회색)
+                width: 0.5,  // 테두리 두께 (얇게)
+              ),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(10),
+              borderSide: const BorderSide(
+                color: Color(0xFF8B674C), // 포커스 시 테두리 색 (모카무스)
+                width: 1.2,
+              ),
+            ),
+            filled: true, // 배경 채우기
+            fillColor: Colors.transparent, // 검색창 배경색 (연한 회색 느낌)
           ),
         ),
         actions: [
@@ -96,10 +113,8 @@ class _Tab1ScreenState extends State<Tab1Screen> {
                 final userFolders = folders
                     .where((folder) => folder.name != 'Default')
                     .toList();
-
                 // 2. 사용자 폴더만 정렬
                 userFolders.sort((a, b) => a.name.compareTo(b.name));
-
                 // 3. 다시 합치기 (Default 맨 앞)
                 folders = [defaultFolder, ...userFolders];
               });
