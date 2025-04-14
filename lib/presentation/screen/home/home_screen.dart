@@ -34,9 +34,12 @@ class _HomeScreenState extends State<HomeScreen> {
             onPressed: () => Scaffold.of(context).openDrawer(),
           ),
         ),
-        title: Image.asset(
-          'assets/images/logo.png',  // 로고 이미지 경로
-          height: 40,         // 크기 조절
+        title: const Text(
+          '목록',  // 여기에 원하는 텍스트 넣기
+          style: TextStyle(
+            fontSize: 20,  // 글씨 크기
+            color: Colors.black,  // 글씨 색상
+          ),
         ),
         centerTitle: true,
       ),

@@ -11,6 +11,7 @@ class AppDrawer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Drawer(
+      backgroundColor: Color(0xFFFFFEFA),
       child: Column(
         // ✅ ListView -> Column 변경
         children: [

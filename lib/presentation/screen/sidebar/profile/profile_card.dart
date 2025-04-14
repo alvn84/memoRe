@@ -12,16 +12,13 @@ class ProfileCard extends StatelessWidget {
         // 앱 이름
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
-          child: const Text(
-            'Memo:Re',
-            style: TextStyle(
-              color: Colors.black,
-              fontSize: 28,
-              fontWeight: FontWeight.bold,
-            ),
+          child: Image.asset(
+            'assets/images/logo.png',
+            height: 45,
+            fit: BoxFit.contain, // 비율 유지하면서 꽉 채우기
           ),
         ),
-
+        const SizedBox(height: 5),
         // 프로필 카드 (👉 InkWell 추가해서 터치 가능하게!)
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16.0),
@@ -40,7 +37,7 @@ class ProfileCard extends StatelessWidget {
                 borderRadius: BorderRadius.circular(12),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.deepPurple.withOpacity(0.15),
+                    color: Color(0xFFFFF1E6),
                     blurRadius: 8,
                     offset: const Offset(0, 4),
                   ),
@@ -59,7 +56,6 @@ class ProfileCard extends StatelessWidget {
                       Text(
                         '사용자 이름',
                         style: TextStyle(
-                          fontWeight: FontWeight.bold,
                           fontSize: 16,
                         ),
                       ),
@@ -79,7 +75,7 @@ class ProfileCard extends StatelessWidget {
           ),
         ),
 
-        const SizedBox(height: 16),
+        const SizedBox(height: 10),
       ],
     );
   }
