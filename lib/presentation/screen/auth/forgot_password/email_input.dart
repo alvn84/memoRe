@@ -40,7 +40,6 @@ class _EmailInputScreenState extends State<EmailInputScreen> {
                       style: TextStyle(
                         fontSize: 28,
                         fontWeight: FontWeight.bold,
-                        color: Colors.deepPurple,
                       ),
                     ),
                     const SizedBox(height: 16),

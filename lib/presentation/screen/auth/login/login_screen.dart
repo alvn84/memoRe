@@ -23,15 +23,18 @@ const TextStyle logoTextStyle = TextStyle(
 
 const TextStyle forgotPasswordStyle = TextStyle(
   fontSize: 13,
-  color: Colors.blueGrey,
+  color: Color(0xFF8B674C),
   fontFamily: 'Montserrat',
   fontWeight: FontWeight.w800,
+
 );
 
 const TextStyle signUpLinkStyle = TextStyle(
-  fontSize: 14,
-  fontFamily: 'Montserrat',
-  fontWeight: FontWeight.w800,
+    fontSize: 14,
+    fontFamily: 'Montserrat',
+    fontWeight: FontWeight.w800,
+    color: Color(0xFF8B674C)
+
 );
 
 class _LoginScreenState extends State<LoginScreen> {
@@ -60,11 +63,13 @@ class _LoginScreenState extends State<LoginScreen> {
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 70),
                     Center(
-                      child: Text(
-                        'Memo:Re',
-                        style: logoTextStyle, // ⭐️ 통합 스타일 사용
+                      child:
+                      Image.asset(
+                        'assets/images/logo.png',
+                        height: 60,  // 로고 크기 조절
+                        fit: BoxFit.contain,  // 비율 유지하면서 꽉 차게
                       ),
                     ),
                     const SizedBox(height: 24),
@@ -93,7 +98,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                       ),
                     ),
-                    const SizedBox(height: 10),
+                    const SizedBox(height: 40),
                     Row(
                       // 중간선
                       children: const [
@@ -110,7 +115,6 @@ class _LoginScreenState extends State<LoginScreen> {
                         Expanded(child: Divider()),
                       ],
                     ),
-                    const SizedBox(height: 16),
                     // 회원가입 문장과 버튼
                     Center(
                       child: Row(
@@ -144,8 +148,6 @@ class _LoginScreenState extends State<LoginScreen> {
                         ],
                       ),
                     ),
-
-                    const SizedBox(height: 24),
 
                     Center(
                       child: Text(

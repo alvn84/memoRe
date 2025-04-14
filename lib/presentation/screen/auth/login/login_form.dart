@@ -30,9 +30,10 @@ class _LoginFormState extends State<LoginForm> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        const SizedBox(height: 16),
         Center(
           child: SizedBox(
-            width: 280,
+            width: 250,
             child: TextField(
               controller: _emailController,
               focusNode: _emailFocusNode,
@@ -45,7 +46,20 @@ class _LoginFormState extends State<LoginForm> {
               decoration: InputDecoration(
                 labelText: 'Email',
                 border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(25), // 텍스트필드 둥글기 조절
+                  borderRadius: BorderRadius.circular(15), // 텍스트필드 둥글기 조절
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(15),
+                  borderSide: const BorderSide(
+                    color: Color(0xFFE5CFC3), // 기본 테두리 색상
+                  ),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(15),
+                  borderSide: const BorderSide(
+                    color: Color(0xFFB89B89), // 포커스(선택 시) 테두리 색상
+                    width: 2.0, // 테두리 두께 (선택)
+                  ),
                 ),
                 contentPadding: const EdgeInsets.symmetric(
                     vertical: 12, horizontal: 16), // ✨ 추가
@@ -56,7 +70,7 @@ class _LoginFormState extends State<LoginForm> {
         const SizedBox(height: 16),
         Center(
           child: SizedBox(
-            width: 280,
+            width: 250,
             child: TextField(
               controller: _passwordController,
               focusNode: _passwordFocusNode,
@@ -65,7 +79,20 @@ class _LoginFormState extends State<LoginForm> {
               decoration: InputDecoration(
                 labelText: 'Password',
                 border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(25), // 텍스트필드 둥글기 조절
+                  borderRadius: BorderRadius.circular(15), // 텍스트필드 둥글기 조절
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(15),
+                  borderSide: const BorderSide(
+                    color: Color(0xFFE5CFC3), // 기본 테두리 색상
+                  ),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(15),
+                  borderSide: const BorderSide(
+                    color: Color(0xFFB89B89), // 포커스(선택 시) 테두리 색상
+                    width: 2.0, // 테두리 두께 (선택)
+                  ),
                 ),
                 contentPadding: const EdgeInsets.symmetric(
                     vertical: 12, horizontal: 16), // ✨ 추가
@@ -73,7 +100,7 @@ class _LoginFormState extends State<LoginForm> {
             ),
           ),
         ),
-        const SizedBox(height: 24),
+        const SizedBox(height: 40),
         Center(
           child: FractionallySizedBox(
             widthFactor: 0.4,
@@ -81,6 +108,9 @@ class _LoginFormState extends State<LoginForm> {
               width: double.infinity,
               height: 40,
               child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Color(0xFFB89B89), // 배경색
+                ),
                 onPressed: () {
                   String email = _emailController.text.trim();
                   String password = _passwordController.text;
@@ -97,7 +127,6 @@ class _LoginFormState extends State<LoginForm> {
                     );
                     return;
                   }
-
                   if (!emailRegex.hasMatch(email)) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
@@ -110,7 +139,6 @@ class _LoginFormState extends State<LoginForm> {
                     );
                     return;
                   }
-
                   if (password.isEmpty) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
@@ -123,7 +151,6 @@ class _LoginFormState extends State<LoginForm> {
                     );
                     return;
                   }
-
                   if (password.length < 6) {
                     // ✨ 추가된 부분
                     ScaffoldMessenger.of(context).showSnackBar(
@@ -146,16 +173,16 @@ class _LoginFormState extends State<LoginForm> {
                 child: const Text(
                   'Sign In',
                   style: TextStyle(
-                    fontSize: 14,
-                    // ⭐️ 폰트 크기
-                    fontWeight: FontWeight.w600,
-                    // ⭐️ 약간 두껍게 (Montserrat랑 잘 어울림)
+                    fontSize: 14, // ⭐️ 폰트 크기
+                    fontWeight: FontWeight.w900, // ⭐️ 약간 두껍게 (Montserrat랑 잘 어울림)
+                    color: Color(0xFFFFFBF5), // 글씨 색상 (모카무스 느낌)
                   ),
                 ),
               ),
             ),
           ),
         ),
+/*
         const SizedBox(height: 12),
         Center(
           // skip 버튼 없애려면 여기 이 Center 컴포넌트랑 바로 위 SizedBox 날려버리기
@@ -175,6 +202,7 @@ class _LoginFormState extends State<LoginForm> {
             ),
           ),
         ),
+*/
       ],
     );
   }
