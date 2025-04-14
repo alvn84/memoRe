@@ -182,7 +182,6 @@ class _LoginFormState extends State<LoginForm> {
             ),
           ),
         ),
-/*
         const SizedBox(height: 12),
         Center(
           // skip 버튼 없애려면 여기 이 Center 컴포넌트랑 바로 위 SizedBox 날려버리기
@@ -202,7 +201,6 @@ class _LoginFormState extends State<LoginForm> {
             ),
           ),
         ),
-*/
       ],
     );
   }
