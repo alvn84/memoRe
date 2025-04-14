@@ -34,9 +34,10 @@ class _HomeScreenState extends State<HomeScreen> {
             onPressed: () => Scaffold.of(context).openDrawer(),
           ),
         ),
-        title: const Text('목록', style: TextStyle(
-          fontSize: 20,
-        ),),
+        title: Image.asset(
+          'assets/images/logo.png',  // 로고 이미지 경로
+          height: 40,         // 크기 조절
+        ),
         centerTitle: true,
       ),
       body: Column(
