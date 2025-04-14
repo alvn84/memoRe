@@ -188,7 +188,7 @@ class _Tab1ScreenState extends State<Tab1Screen> {
               ),
       ),
       bottomNavigationBar: Container(
-        height: 72,
+        height: 60,
         decoration: const BoxDecoration(
           border: Border(top: BorderSide(color: Colors.grey, width: 0.5)),
         ),

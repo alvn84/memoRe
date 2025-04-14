@@ -45,36 +45,6 @@ class _FolderDetailScreenState extends State<FolderDetailScreen> {
     );
   }
 
-  void _showAddSubFolderDialog() {
-    String folderName = '';
-
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('하위 폴더 만들기'),
-        content: TextField(
-          decoration: const InputDecoration(hintText: '폴더 이름 입력'),
-          onChanged: (value) => folderName = value,
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('취소'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              if (folderName.trim().isNotEmpty) {
-                _addSubFolder(folderName.trim());
-              }
-              Navigator.of(context).pop();
-            },
-            child: const Text('확인'),
-          ),
-        ],
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(

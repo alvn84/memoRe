@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:memore/presentation/screen/sidebar/profile/profile_card.dart';
 import '../auth/login/login_screen.dart';
+import 'package:memore/presentation/screen/sidebar/profile/profile_card.dart';
 import 'package:memore/presentation/screen/sidebar/favorite/favorite_screen.dart';
 import 'package:memore/presentation/screen/sidebar/trash/trash_screen.dart';
+import 'package:memore/presentation/screen/sidebar/friend/friend_screen.dart';
 import 'package:memore/presentation/screen/sidebar/setting/setting_screen.dart';
 class AppDrawer extends StatelessWidget {
   const AppDrawer({super.key});
@@ -30,10 +31,14 @@ class AppDrawer extends StatelessWidget {
           ),
           ListTile(
             leading: const Icon(Icons.group_add),
-            title: const Text('친구 추가'),
+            title: const Text('친구 목록'),
             onTap: () {
               Navigator.pop(context);
-              // TODO: 친구 추가 화면 이동 (추후 연결)
+              // TODO: 친구 추가 화면 이동 (규나 진행중)
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const FriendScreen()),
+              );
             },
           ),
           ListTile(

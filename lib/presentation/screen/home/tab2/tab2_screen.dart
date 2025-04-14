@@ -108,23 +108,15 @@ class _Tab2ScreenState extends State<Tab2Screen> {
         ],
       ),
       bottomNavigationBar: Container(
-        height: 72,
+        height: 60,
         decoration: const BoxDecoration(
           border: Border(top: BorderSide(color: Colors.grey, width: 0.3)),
         ),
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24.0),
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              IconButton(
-                onPressed: () {
-                  print('Tab2 - 새 폴더 만들기');
-                },
-                icon: const Icon(Icons.create_new_folder),
-                iconSize: 35,
-                tooltip: '새 폴더',
-              ),
+              Spacer(), // 왼쪽 여백 처리
               IconButton(
                 onPressed: () {
                   print('Tab2 - 새 파일 만들기');
