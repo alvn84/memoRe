@@ -14,7 +14,7 @@ class ProfileCard extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
           child: Image.asset(
             'assets/images/logo.png',
-            height: 45,
+            height: 30,
             fit: BoxFit.contain, // 비율 유지하면서 꽉 채우기
           ),
         ),
@@ -54,16 +54,16 @@ class ProfileCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: const [
                       Text(
-                        '사용자 이름',
+                        'User',
                         style: TextStyle(
-                          fontSize: 16,
+                          fontSize: 13,
                         ),
                       ),
                       SizedBox(height: 4),
                       Text(
                         'email@example.com',
                         style: TextStyle(
-                          fontSize: 13,
+                          fontSize: 11,
                           color: Colors.grey,
                         ),
                       ),

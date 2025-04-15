@@ -37,7 +37,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
         title: const Text(
-          'Notes',  // 여기에 원하는 텍스트 넣기
+          'List',  // 여기에 원하는 텍스트 넣기
           style: TextStyle(
             fontSize: 17,  // 글씨 크기
             fontWeight: FontWeight.bold,
