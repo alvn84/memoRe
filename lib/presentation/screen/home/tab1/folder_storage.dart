@@ -9,8 +9,6 @@ class FolderStorage {
   // 폴더 리스트 저장
   static Future<void> saveFolders(List<Folder> folders) async {
     final prefs = await SharedPreferences.getInstance();
-    final userFolders =
-        folders.where((folder) => folder.name != 'Default').toList();
     final folderListJson = jsonEncode(
       folders.map((folder) => folder.toJson()).toList(),
     );
@@ -22,17 +20,27 @@ class FolderStorage {
     final prefs = await SharedPreferences.getInstance();
     final folderListJson = prefs.getString(_key);
 
-    List<Folder> userFolders = [];
+    List<Folder> loadedFolders = [];
 
     if (folderListJson != null) {
       final decoded = jsonDecode(folderListJson) as List;
-      userFolders = decoded.map((item) => Folder.fromJson(item)).toList();
+      loadedFolders = decoded.map((item) => Folder.fromJson(item)).toList();
     }
 
-    // Default 폴더는 항상 존재
-    return [
-      Folder(name: 'Default', color: Color(0xFF000000), icon: Icons.folder),
-      ...userFolders,
-    ];
+    // ✅ Default 폴더가 없으면 추가
+    final hasDefault = loadedFolders.any((f) => f.name == 'Default');
+    if (!hasDefault) {
+      loadedFolders.insert(
+        0,
+        Folder(
+          name: 'Default',
+          color: const Color(0xFFCFCFCF),
+          icon: Icons.folder,
+          createdAt: DateTime.now(),
+        ),
+      );
+    }
+
+    return loadedFolders;
   }
 }

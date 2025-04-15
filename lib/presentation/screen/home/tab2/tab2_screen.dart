@@ -134,28 +134,6 @@ class _Tab2ScreenState extends State<Tab2Screen> {
           ),
         ],
       ),
-      bottomNavigationBar: Container(
-        height: 60,
-        decoration: const BoxDecoration(
-          border: Border(top: BorderSide(color: Colors.grey, width: 0.3)),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24.0),
-          child: Row(
-            children: [
-              Spacer(), // 왼쪽 여백 처리
-              IconButton(
-                onPressed: () {
-                  print('Tab2 - 새 파일 만들기');
-                },
-                icon: const Icon(Icons.note_add, color: Color(0xFF8B674C)),
-                iconSize: 35,
-                tooltip: '새 파일',
-              ),
-            ],
-          ),
-        ),
-      ),
     );
   }
 }

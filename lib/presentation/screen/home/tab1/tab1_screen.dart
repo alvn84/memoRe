@@ -3,6 +3,7 @@ import 'folder_model.dart';
 import 'folder_storage.dart';
 import 'add_folder_dialog.dart';
 import '../folder/folder_detail_screen.dart';
+import 'package:intl/intl.dart';
 
 class Tab1Screen extends StatefulWidget {
   const Tab1Screen({super.key});
@@ -16,6 +17,15 @@ class _Tab1ScreenState extends State<Tab1Screen> {
   String _searchQuery = '';
   bool _isFabExpanded = false;
   final FocusNode _searchFocusNode = FocusNode();  // FocusNode 추가
+  final List<Color> pastelColors = [
+    Color(0xFFFFC1CC), // 연핑크
+    Color(0xFFFFAB91), // 살구색
+    Color(0xFFFFE082), // 연노랑
+    Color(0xFFAED581), // 연초록
+    Color(0xFF81D4FA), // 하늘색
+    Color(0xFFCE93D8), // 연보라
+    Color(0xFFB0BEC5), // 그레이블루
+  ];
 
   @override
   void initState() {
@@ -39,8 +49,9 @@ class _Tab1ScreenState extends State<Tab1Screen> {
         folders.add(
           Folder(
             name: folderName,
-            color: Color(0xFF8B674C),
+            color: Color(0xFFFFE082),
             icon: Icons.folder,
+            createdAt : DateTime.now(),
           ),
         );
       });
@@ -48,6 +59,7 @@ class _Tab1ScreenState extends State<Tab1Screen> {
     }
   }
 
+  // 폴더 삭제 함수
   void _deleteFolder(int index) {
     setState(() {
       folders.removeAt(index);
@@ -55,6 +67,7 @@ class _Tab1ScreenState extends State<Tab1Screen> {
     _saveFolders();
   }
 
+  // 즐겨찾기 등록 함수
   void _toggleStar(int index) {
     setState(() {
       folders[index] = Folder(
@@ -62,9 +75,93 @@ class _Tab1ScreenState extends State<Tab1Screen> {
         color: folders[index].color,
         icon: folders[index].icon,
         isStarred: !folders[index].isStarred,
+        createdAt: folders[index].createdAt,
       );
     });
     _saveFolders();
+  }
+
+  // 폴더 색상 변경 함수
+  void _showColorPicker(BuildContext context, int index) {
+    showModalBottomSheet(
+      backgroundColor: Color(0xFFFFFBF5),
+      context: context,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (_) => Padding(
+        padding: const EdgeInsets.all(20),
+        child: Wrap(
+          spacing: 12,
+          runSpacing: 12,
+          children: pastelColors.map((color) {
+            return GestureDetector(
+              onTap: () {
+                setState(() {
+                  folders[index] = Folder(
+                    name: folders[index].name,
+                    color: color,
+                    icon: folders[index].icon,
+                    isStarred: folders[index].isStarred,
+                    createdAt: folders[index].createdAt,
+                  );
+                });
+                _saveFolders();
+                Navigator.pop(context);
+              },
+              child: CircleAvatar(
+                backgroundColor: color,
+                radius: 16,
+              ),
+            );
+          }).toList(),
+        ),
+      ),
+    );
+  }
+
+  void _renameFolder(BuildContext context, int index) {
+    String newName = folders[index].name;
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('폴더 이름 변경'),
+        content: TextField(
+          autofocus: true,
+          decoration: const InputDecoration(
+            hintText: '새 폴더 이름 입력',
+          ),
+          onChanged: (value) {
+            newName = value;
+          },
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('취소'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              if (newName.trim().isNotEmpty) {
+                setState(() {
+                  folders[index] = Folder(
+                    name: newName.trim(),
+                    color: folders[index].color,
+                    icon: folders[index].icon,
+                    isStarred: folders[index].isStarred,
+                    createdAt: folders[index].createdAt,
+                  );
+                });
+                _saveFolders();
+                Navigator.pop(context);
+              }
+            },
+            child: const Text('확인'),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -164,25 +261,56 @@ class _Tab1ScreenState extends State<Tab1Screen> {
                 onLongPress: () {
                   if (folder.name == 'Default') return;
                   showModalBottomSheet(
+                    backgroundColor: Color(0xFFFFFBF5),
                     context: context,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                    ),
                     builder: (_) => Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         ListTile(
-                          leading: Icon(folder.isStarred
-                              ? Icons.star
-                              : Icons.star_border),
-                          title: Text(folder.isStarred
-                              ? '즐겨찾기 해제'
-                              : '즐겨찾기 추가'),
+                          leading: Icon(Icons.color_lens, color: Color(0xFF8B674C)),
+                          title: Text(
+                              '폴더 색상 변경',
+                              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600))
+                          ,
+                          onTap: () {
+                            Navigator.pop(context);
+                            _showColorPicker(context, originalIndex);
+                          },
+                        ),
+
+                        ListTile(
+                          leading: const Icon(Icons.edit, color: Color(0xFF8B674C)),
+                          title: const Text('폴더 이름 변경',
+                              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+                          onTap: () {
+                            Navigator.pop(context);
+                            _renameFolder(context, originalIndex);
+                          },
+                        ),
+
+                        ListTile(
+                          leading: Icon(
+                            folder.isStarred ? Icons.star : Icons.star_border,
+                            color: Colors.amber,
+                          ),
+                          title: Text(
+                            folder.isStarred ? '즐겨찾기 해제' : '즐겨찾기 추가',
+                            style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+                          ),
                           onTap: () {
                             Navigator.pop(context);
                             _toggleStar(originalIndex);
                           },
                         ),
                         ListTile(
-                          leading: const Icon(Icons.delete),
-                          title: const Text('삭제'),
+                          leading: Icon(Icons.delete, color: Colors.redAccent),
+                          title: Text(
+                            '삭제',
+                            style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+                          ),
                           onTap: () {
                             Navigator.pop(context);
                             _deleteFolder(originalIndex);
@@ -205,12 +333,17 @@ class _Tab1ScreenState extends State<Tab1Screen> {
                               color: Colors.amber, size: 20),
                       ],
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 1),
                     Text(
                       folder.name,
-                      style: const TextStyle(fontSize: 13),
+                      style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
                       overflow: TextOverflow.ellipsis,
                     ),
+                    Text(
+                        DateFormat('yy/MM/dd').format(folder.createdAt),
+                        style: const TextStyle(fontSize: 10, color: Colors.grey),
+                    ),
+
                   ],
                 ),
               );

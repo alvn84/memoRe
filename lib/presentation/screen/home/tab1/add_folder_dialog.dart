@@ -2,11 +2,12 @@ import 'package:flutter/material.dart';
 
 Future<String?> showAddFolderDialog(BuildContext context) {
   String folderName = '';
-
+  
   return showDialog<String>(
     context: context,
     builder: (context) => AlertDialog(
       title: const Text('새 폴더 만들기'),
+      backgroundColor: Color(0xFFFFFBF5),
       content: TextField(
         autofocus: true,
         decoration: const InputDecoration(hintText: '폴더 이름 입력'),
