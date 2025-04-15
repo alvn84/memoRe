@@ -1,115 +1,144 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:intl/intl.dart';
 import '../memo/memo_screen.dart';
 
 class FolderDetailScreen extends StatefulWidget {
   final String folderName;
+  final String? imagePath;
 
-  const FolderDetailScreen({super.key, required this.folderName});
+  const FolderDetailScreen({
+    super.key,
+    required this.folderName,
+    this.imagePath,
+  });
 
   @override
   State<FolderDetailScreen> createState() => _FolderDetailScreenState();
 }
 
 class _FolderDetailScreenState extends State<FolderDetailScreen> {
-  List<Map<String, dynamic>> subFolders = [];
-  List<String> notes = [];
+  List<String> noteTitles = [];
 
-  void _addSubFolder(String name) {
-    setState(() {
-      subFolders.add({
-        'name': name,
-        'color': Colors.green,
-        'icon': Icons.folder,
-      });
-    });
+  @override
+  void initState() {
+    super.initState();
+    _loadNotes();
   }
 
-  void _handleNoteSaved(String newNote) {
+  Future<void> _loadNotes() async {
+    final prefs = await SharedPreferences.getInstance();
+    final notes = prefs.getStringList(widget.folderName) ?? [];
+    final uniqueNotes = notes.toSet().toList(); // 중복 제거
     setState(() {
-      notes.add(newNote);  // 메모 저장
+      noteTitles = uniqueNotes.map((e) => e.split('\n').first).toList();
     });
+    await prefs.setStringList(widget.folderName, uniqueNotes); // 중복 제거 후 저장
   }
 
-  void _addNewNote() {
-    Navigator.push(
+  void _addNewNote() async {
+    await Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => NoteEditScreen(
-          onNoteSaved: (noteText) {
-            setState(() {
-              notes.add(noteText); // 🟢 한 번만 저장됨
-            });
-          },
-        ),
+        builder: (context) => NoteEditScreen(folderKey: widget.folderName),
       ),
     );
+    _loadNotes();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: CustomScrollView( // SliverAppBar와 함께 사용하기 위해 CustomScrollView로 감싸기
+      body: CustomScrollView(
         slivers: [
           SliverAppBar(
-            expandedHeight: 200.0, // 앱바 확장 높이 설정
+            expandedHeight: 200.0,
             floating: false,
-            pinned: true, // 스크롤 시에도 앱바가 남아있게 하기
+            pinned: true,
+            backgroundColor: Color(0xFF8B674C),
             flexibleSpace: FlexibleSpaceBar(
-              title: Text(widget.folderName),
+              title: Text(
+                widget.folderName,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  shadows: [
+                    Shadow(
+                      offset: Offset(1.0, 1.0),
+                      blurRadius: 3.0,
+                      color: Colors.black54,
+                    ),
+                  ],
+                ),
+              ),
               centerTitle: false,
-
+              background: Stack(
+                fit: StackFit.expand,
+                children: [
+                  widget.imagePath != null
+                      ? Image.file(
+                    File(widget.imagePath!),
+                    fit: BoxFit.cover,
+                  )
+                      : Container(color: const Color(0xFF8B674C)),
+                  Container(
+                    color: Colors.black.withOpacity(0.3),
+                  ),
+                ],
+              ),
             ),
           ),
           SliverList(
-            delegate: SliverChildListDelegate(
-              [
-                const Divider(height: 1, thickness: 1), // ✅ 여기 추가!
-                Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: notes.isEmpty
-                      ? const Center(child: Text('작성된 메모가 없습니다.'))
-                      : GridView.builder(
-                    itemCount: notes.length,
-                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                      crossAxisSpacing: 16.0,
-                      mainAxisSpacing: 16.0,
-                      childAspectRatio: 1,
-                    ),
-                    itemBuilder: (context, index) {
-                      return Card(
-                        elevation: 4,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.all(12.0),
-                          child: Text(
-                            notes[index],
-                            style: const TextStyle(fontSize: 16),
-                            overflow: TextOverflow.ellipsis,
-                            maxLines: 6,
-                          ),
-                        ),
-                      );
-                    },
+            delegate: SliverChildListDelegate([
+              const Divider(height: 1, thickness: 1),
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: noteTitles.isEmpty
+                    ? const Center(child: Text('작성된 메모가 없습니다.'))
+                    : GridView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: noteTitles.length,
+                  gridDelegate:
+                  const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    crossAxisSpacing: 16.0,
+                    mainAxisSpacing: 16.0,
+                    childAspectRatio: 1,
                   ),
+                  itemBuilder: (context, index) {
+                    return Card(
+                      elevation: 4,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(12.0),
+                        child: Text(
+                          noteTitles[index],
+                          style: const TextStyle(fontSize: 16),
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 3,
+                        ),
+                      ),
+                    );
+                  },
                 ),
-              ],
-            ),
+              ),
+            ]),
           ),
         ],
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => NoteEditScreen(onNoteSaved: _handleNoteSaved),
-            ),
-          );
-        },
-        child: const Icon(Icons.add),
+        shape: const CircleBorder(),
+        backgroundColor: const Color(0xFF8B674C),
+        elevation: 6,
+        onPressed: _addNewNote,
+        child: const Icon(
+          Icons.add,
+          color: Color(0xFFFFFBF5),
+        ),
       ),
     );
   }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'folder_model.dart';
 import 'folder_storage.dart';
+import 'folder_reorder_screen.dart';
 import 'add_folder_dialog.dart';
 import '../folder/folder_detail_screen.dart';
 import 'package:intl/intl.dart';
@@ -76,8 +77,9 @@ class _Tab1ScreenState extends State<Tab1Screen> {
         name: folders[index].name,
         color: folders[index].color,
         icon: folders[index].icon,
-        isStarred: !folders[index].isStarred,
+        isStarred: !folders[index].isStarred,  // 즐겨찾기 상태만 변경
         createdAt: folders[index].createdAt,
+        imagePath: folders[index].imagePath,   // ⭐️ 프로필 이미지 유지
       );
     });
     _saveFolders();
@@ -276,8 +278,10 @@ class _Tab1ScreenState extends State<Tab1Screen> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (_) =>
-                          FolderDetailScreen(folderName: folder.name),
+                      builder: (_) => FolderDetailScreen(
+                        folderName: folder.name,
+                        imagePath: folder.imagePath, // 프로필 이미지 전달
+                      ),
                     ),
                   );
                 },
@@ -325,9 +329,32 @@ class _Tab1ScreenState extends State<Tab1Screen> {
                         ),
 
                         ListTile(
+                          leading: const Icon(Icons.swap_vert, color: Color(0xFF8B674C)),
+                          title: const Text('배치 변경',
+                              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+                          onTap: () {
+                            Navigator.pop(context);
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => FolderReorderScreen(
+                                  folders: folders,
+                                  onReorder: (newFolders) {
+                                    setState(() {
+                                      folders = newFolders;
+                                    });
+                                    _saveFolders();
+                                  },
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+
+                        ListTile(
                           leading: Icon(
                             folder.isStarred ? Icons.star : Icons.star_border,
-                            color: Colors.amber,
+                            color: Color(0xFF8B674C),
                           ),
                           title: Text(
                             folder.isStarred ? '즐겨찾기 해제' : '즐겨찾기 추가',
@@ -338,6 +365,7 @@ class _Tab1ScreenState extends State<Tab1Screen> {
                             _toggleStar(originalIndex);
                           },
                         ),
+
                         ListTile(
                           leading: Icon(Icons.delete, color: Colors.redAccent),
                           title: Text(

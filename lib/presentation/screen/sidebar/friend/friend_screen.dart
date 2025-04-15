@@ -31,7 +31,9 @@ class _FriendScreenState extends State<FriendScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('친구 목록'),
+        title: const Text('Friends', style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),),
+        backgroundColor: Colors.transparent,
+        centerTitle: true,
         actions: [
           IconButton(
             icon: const Icon(Icons.add),

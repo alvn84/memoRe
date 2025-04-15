@@ -28,7 +28,9 @@ class FavoriteScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('즐겨찾기'),
+        title: const Text('Favorites', style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),),
+        backgroundColor: Colors.transparent,
+        centerTitle: true,
       ),
       body: ListView(
         padding: const EdgeInsets.all(16),
