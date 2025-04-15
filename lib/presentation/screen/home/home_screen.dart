@@ -32,15 +32,16 @@ class _HomeScreenState extends State<HomeScreen> {
         elevation: 0,  // 그림자 제거 (없애는게 깔끔)
         leading: Builder(
           builder: (context) => IconButton(
-            icon: const Icon(Icons.menu),
+            icon: const Icon(Icons.menu,color: Color(0xFF8B674C)),
             onPressed: () => Scaffold.of(context).openDrawer(),
           ),
         ),
         title: const Text(
-          '목록',  // 여기에 원하는 텍스트 넣기
+          'Notes',  // 여기에 원하는 텍스트 넣기
           style: TextStyle(
-            fontSize: 20,  // 글씨 크기
-            color: Colors.black,  // 글씨 색상
+            fontSize: 17,  // 글씨 크기
+            fontWeight: FontWeight.bold,
+            color: Color(0xFF8B674C),  // 글씨 색상
           ),
         ),
         centerTitle: true,
@@ -48,7 +49,6 @@ class _HomeScreenState extends State<HomeScreen> {
       body: Column(
         children: [
           const SizedBox(height: 3),
-          const Divider(height: 1, thickness: 1),
           const SizedBox(height: 3),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
