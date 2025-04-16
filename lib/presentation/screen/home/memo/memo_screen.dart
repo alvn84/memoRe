@@ -106,7 +106,7 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
         leading: const BackButton(),
         actions: [
           IconButton(
-            icon: const Icon(Icons.bolt),
+            icon: const Icon(Icons.auto_awesome),
             tooltip: 'AI 요약',
             onPressed: _runAISummary,
           ),
