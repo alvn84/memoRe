@@ -124,9 +124,8 @@ class _FolderDetailScreenState extends State<FolderDetailScreen> {
           ),
           SliverList(
             delegate: SliverChildListDelegate([
-              const Divider(height: 1, thickness: 1),
               Padding(
-                padding: const EdgeInsets.all(16.0),
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
                 child: noteContents.isEmpty
                     ? const Center(child: Text('작성된 메모가 없습니다.'))
                     : GridView.builder(
@@ -137,7 +136,7 @@ class _FolderDetailScreenState extends State<FolderDetailScreen> {
                     crossAxisCount: _isGridView ? 2 : 1,
                     crossAxisSpacing: 16.0,
                     mainAxisSpacing: 16.0,
-                    childAspectRatio: _isGridView ? 1 : 2.5,
+                    childAspectRatio: _isGridView ? 1 : 2,
                   ),
                   itemBuilder: (context, index) {
                     final fullNote = noteContents[index];
