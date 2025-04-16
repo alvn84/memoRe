@@ -177,6 +177,7 @@ class _Tab1ScreenState extends State<Tab1Screen> {
     );
   }
 
+  // 메모리 배경 화면 설정
   void _setProfileImage(BuildContext context, int index) async {
     final picker = ImagePicker();
     final pickedFile = await picker.pickImage(source: ImageSource.gallery);
