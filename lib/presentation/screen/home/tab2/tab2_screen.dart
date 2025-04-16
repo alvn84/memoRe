@@ -67,33 +67,73 @@ class _Tab2ScreenState extends State<Tab2Screen> {
                     ),
                     calendarStyle: const CalendarStyle(
                       defaultTextStyle: TextStyle(
-                        fontWeight: FontWeight.w600,  // 평소 글씨 두껍게
+                        fontWeight: FontWeight.w600, // 평소 글씨 두껍게
                         color: Color(0xFF4F4F4F), // 살짝 연한 검정 느낌
-                      ),
-                      weekendTextStyle: TextStyle(
-                        fontWeight: FontWeight.w600,  // 주말 글씨 두껍게
-                        color: Colors.redAccent,      // 주말 색상 (선택)
                       ),
                       selectedDecoration: BoxDecoration(
                         color: Color(0xFFE5CFC3),
                         shape: BoxShape.circle,
                       ),
                       selectedTextStyle: TextStyle(
-                        fontWeight: FontWeight.w900,  // 선택 날짜 글씨 더 두껍게
-                        color: Colors.white,  // 선택 날짜 글씨색 (배경이 진하니까 흰색)
+                        fontWeight: FontWeight.w900, // 선택 날짜 글씨 더 두껍게
+                        color: Colors.white, // 선택 날짜 글씨색 (배경이 진하니까 흰색)
                       ),
                       todayDecoration: BoxDecoration(),
                     ),
                     calendarBuilders: CalendarBuilders(
                       todayBuilder: (context, day, focusedDay) {
-                        final isSelected =
-                            _selectedDay != null && isSameDay(day, _selectedDay);
+                        final isSelected = _selectedDay != null &&
+                            isSameDay(day, _selectedDay);
                         return Center(
                           child: Text(
                             '${day.day}',
                             style: TextStyle(
-                              fontWeight: isSelected ? FontWeight.w900 : FontWeight.normal,
+                              fontWeight: isSelected
+                                  ? FontWeight.w900
+                                  : FontWeight.normal,
                               color: isSelected ? Colors.white : Colors.black87,
+                            ),
+                          ),
+                        );
+                      },
+
+                      // 🔥 여기가 핵심
+                      defaultBuilder: (context, day, focusedDay) {
+                        final isSaturday = day.weekday == DateTime.saturday;
+                        final isSunday = day.weekday == DateTime.sunday;
+
+                        Color textColor = const Color(0xFF4F4F4F); // 평일 기본색
+                        if (isSaturday) {
+                          textColor = Colors.blueAccent;
+                        } else if (isSunday) {
+                          textColor = Colors.redAccent;
+                        }
+                        return Center(
+                          child: Text(
+                            '${day.day}',
+                            style: TextStyle(
+                              fontWeight: FontWeight.w600,
+                              color: textColor,
+                            ),
+                          ),
+                        );
+                      },
+                      // ✅ 요일 헤더 색상 따로 지정
+                      dowBuilder: (context, day) {
+                        final weekday = day.weekday;
+                        final text = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][weekday % 7];
+                        Color color = const Color(0xFF4F4F4F); // 기본 평일색
+                        if (weekday == DateTime.saturday) {
+                          color = Colors.blueAccent;
+                        } else if (weekday == DateTime.sunday) {
+                          color = Colors.redAccent;
+                        }
+                        return Center(
+                          child: Text(
+                            text,
+                            style: TextStyle(
+                              color: color,
+                              fontWeight: FontWeight.w600,
                             ),
                           ),
                         );
@@ -106,7 +146,8 @@ class _Tab2ScreenState extends State<Tab2Screen> {
           ),
           SliverToBoxAdapter(
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 12.0),
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 20.0, vertical: 12.0),
               child: ConstrainedBox(
                 constraints: const BoxConstraints(minHeight: 100),
                 child: LayoutBuilder(
@@ -116,12 +157,14 @@ class _Tab2ScreenState extends State<Tab2Screen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: List.generate(
-                          10, // ← 백엔드에서 받아올 메모 수에 따라 유동적. 스크롤 기능 테스트용. 숫자 늘리면 텍스트 늘어남.
-                              (index) => const Padding(
+                          1,
+                          // ← 백엔드에서 받아올 메모 수에 따라 유동적. 스크롤 기능 테스트용. 숫자 늘리면 텍스트 늘어남.
+                          (index) => const Padding(
                             padding: EdgeInsets.only(bottom: 12.0),
                             child: Text(
                               '오늘의 메모가 없습니다.',
-                              style: TextStyle(fontSize: 18, color: Colors.grey),
+                              style:
+                                  TextStyle(fontSize: 18, color: Colors.grey),
                             ),
                           ),
                         ),
