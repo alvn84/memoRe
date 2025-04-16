@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:intl/intl.dart';
+import 'package:super_editor/super_editor.dart';
 
 class NoteEditScreen extends StatefulWidget {
   final Function(String) onNoteSaved;
-  final String? initialContent; // ✅ 새로 추가
-  final int? noteIndex;         // ✅ 새로 추가
-  final String? folderKey;      // ✅ 메모 저장을 위해 폴더 이름
+  final String? initialContent;
+  final int? noteIndex;
+  final String? folderKey;
 
   const NoteEditScreen({
     super.key,
@@ -21,22 +22,63 @@ class NoteEditScreen extends StatefulWidget {
 }
 
 class _NoteEditScreenState extends State<NoteEditScreen> {
-  final TextEditingController _titleController = TextEditingController();
-  final TextEditingController _contentController = TextEditingController();
+  late MutableDocument _document;
+  late DocumentEditor _editor;
+  late DocumentComposer _composer;
 
-  String _formattedDate() {
-    final now = DateTime.now();
-    return DateFormat('MMM dd EEE').format(now);
-  }
+  final TextEditingController _titleController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
-    if (widget.initialContent != null) {
-      final lines = widget.initialContent!.split('\n');
-      _titleController.text = lines.first;
-      _contentController.text = lines.skip(1).join('\n');
+
+    final parts = widget.initialContent?.split('\n') ?? [];
+    final title = parts.isNotEmpty ? parts.first : '';
+    final content = parts.length > 1 ? parts.sublist(1).join('\n') : '';
+
+    _titleController.text = title;
+
+    _document = MutableDocument(
+      nodes: [
+        ParagraphNode(
+          id: DocumentEditor.createNodeId(),
+          text: AttributedText(content),
+        ),
+      ],
+    );
+
+    _editor = DocumentEditor(document: _document);
+    _composer = DocumentComposer();
+  }
+
+  void _autoSaveNote() async {
+    final title = _titleController.text.trim();
+    final content = _document.nodes
+        .whereType<ParagraphNode>()
+        .map((node) => node.text.text)
+        .join('\n')
+        .trim();
+    final fullNote = '$title\n$content';
+
+    if ((title.isNotEmpty || content.isNotEmpty) && widget.folderKey != null) {
+      final prefs = await SharedPreferences.getInstance();
+      final notes = prefs.getStringList(widget.folderKey!) ?? [];
+
+      if (widget.noteIndex != null && widget.noteIndex! < notes.length) {
+        notes[widget.noteIndex!] = fullNote;
+      } else {
+        notes.add(fullNote);
+      }
+
+      await prefs.setStringList(widget.folderKey!, notes);
     }
+
+    widget.onNoteSaved(fullNote);
+  }
+
+  String _formattedDate() {
+    final now = DateTime.now();
+    return DateFormat('MMM dd EEE').format(now);
   }
 
   @override
@@ -45,33 +87,14 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
     super.dispose();
   }
 
-  void _autoSaveNote() async {
-    final title = _titleController.text.trim();
-    final content = _contentController.text.trim();
-    final fullText = '$title\n$content';
-
-    if ((title.isNotEmpty || content.isNotEmpty) && widget.folderKey != null) {
-      final prefs = await SharedPreferences.getInstance();
-      final existing = prefs.getStringList(widget.folderKey!) ?? [];
-
-      if (widget.noteIndex != null && widget.noteIndex! < existing.length) {
-        existing[widget.noteIndex!] = fullText; // ✅ 덮어쓰기
-      } else {
-        existing.add(fullText); // 새로 추가
-      }
-
-      await prefs.setStringList(widget.folderKey!, existing);
-    }
-
-    widget.onNoteSaved('$title\n$content');
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xFFFFFBF5),
       appBar: AppBar(
-        leading: BackButton(),
         backgroundColor: Colors.transparent,
+        elevation: 0,
+        leading: const BackButton(),
         title: Text(_formattedDate()),
         centerTitle: true,
         actions: [
@@ -90,12 +113,9 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
             child: TextField(
               controller: _titleController,
-              style: const TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
+              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               decoration: const InputDecoration(
-                hintText: 'Title',
+                hintText: '제목을 입력하세요',
                 border: InputBorder.none,
               ),
             ),
@@ -103,14 +123,10 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
           const Divider(height: 1),
           Expanded(
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
-              child: TextField(
-                controller: _contentController,
-                maxLines: null,
-                decoration: const InputDecoration(
-                  hintText: '내용을 입력하세요...',
-                  border: InputBorder.none,
-                ),
+              padding: const EdgeInsets.all(12.0),
+              child: SuperEditor(
+                editor: _editor,
+                composer: _composer,
               ),
             ),
           ),
