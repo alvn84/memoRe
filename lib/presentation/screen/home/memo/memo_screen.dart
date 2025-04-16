@@ -3,9 +3,18 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:intl/intl.dart';
 
 class NoteEditScreen extends StatefulWidget {
-  final String folderKey;
+  final Function(String) onNoteSaved;
+  final String? initialContent; // ✅ 새로 추가
+  final int? noteIndex;         // ✅ 새로 추가
+  final String? folderKey;      // ✅ 메모 저장을 위해 폴더 이름
 
-  const NoteEditScreen({super.key, required this.folderKey});
+  const NoteEditScreen({
+    super.key,
+    required this.onNoteSaved,
+    this.initialContent,
+    this.noteIndex,
+    this.folderKey,
+  });
 
   @override
   State<NoteEditScreen> createState() => _NoteEditScreenState();
@@ -15,27 +24,46 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _contentController = TextEditingController();
 
-  Future<void> _saveNote() async {
-    final prefs = await SharedPreferences.getInstance();
-    final title = _titleController.text.trim();
-    final content = _contentController.text.trim();
-    if (title.isEmpty && content.isEmpty) return;
-
-    final note = '$title\n$content';
-    final notes = prefs.getStringList(widget.folderKey) ?? [];
-    notes.add(note);
-    await prefs.setStringList(widget.folderKey, notes);
-  }
-
   String _formattedDate() {
     final now = DateTime.now();
     return DateFormat('MMM dd EEE').format(now);
   }
 
   @override
+  void initState() {
+    super.initState();
+    if (widget.initialContent != null) {
+      final lines = widget.initialContent!.split('\n');
+      _titleController.text = lines.first;
+      _contentController.text = lines.skip(1).join('\n');
+    }
+  }
+
+  @override
   void dispose() {
-    _saveNote();
+    _autoSaveNote();
     super.dispose();
+  }
+
+  void _autoSaveNote() async {
+    final title = _titleController.text.trim();
+    final content = _contentController.text.trim();
+    final fullText = '$title\n$content';
+
+    if ((title.isNotEmpty || content.isNotEmpty) && widget.folderKey != null) {
+      final prefs = await SharedPreferences.getInstance();
+      final existing = prefs.getStringList(widget.folderKey!) ?? [];
+
+      if (widget.noteIndex != null && widget.noteIndex! < existing.length) {
+        existing[widget.noteIndex!] = fullText; // ✅ 덮어쓰기
+      } else {
+        existing.add(fullText); // 새로 추가
+      }
+
+      await prefs.setStringList(widget.folderKey!, existing);
+    }
+
+    widget.onNoteSaved('$title\n$content');
   }
 
   @override
@@ -50,7 +78,7 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
           IconButton(
             icon: const Icon(Icons.check),
             onPressed: () {
-              _saveNote();
+              _autoSaveNote();
               Navigator.pop(context);
             },
           )
