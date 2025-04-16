@@ -1,12 +1,17 @@
 import 'package:flutter/material.dart';
-import 'folder_model.dart';
-import 'folder_storage.dart';
-import 'folder_reorder_screen.dart';
-import 'add_folder_dialog.dart';
+import 'package:memore/presentation/screen/home/tab1/folder_tile.dart';
+import 'package:memore/presentation/screen/home/tab1/tab1_controller.dart';
+import '../folder/folder_model.dart';
+import '../folder/folder_storage.dart';
+import '../folder/folder_reorder_screen.dart';
+import '../folder/add_folder_dialog.dart';
 import '../folder/folder_detail_screen.dart';
 import 'package:intl/intl.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
+import 'folder_grid.dart';
+import 'folder_toolbar.dart';
+import 'folder_option_sheet.dart';
 
 class Tab1Screen extends StatefulWidget {
   const Tab1Screen({super.key});
@@ -19,7 +24,7 @@ class _Tab1ScreenState extends State<Tab1Screen> {
   List<Folder> folders = [];
   String _searchQuery = '';
   bool _isFabExpanded = false;
-  final FocusNode _searchFocusNode = FocusNode();  // FocusNode 추가
+  final FocusNode _searchFocusNode = FocusNode(); // FocusNode 추가
   final List<Color> pastelColors = [
     Color(0xFFFFC1CC), // 연핑크
     Color(0xFFFFAB91), // 살구색
@@ -37,7 +42,7 @@ class _Tab1ScreenState extends State<Tab1Screen> {
   }
 
   Future<void> _loadFolders() async {
-    folders = await FolderStorage.loadFolders();
+    folders = await Tab1Controller.loadFolders();
     setState(() {});
   }
 
@@ -54,7 +59,7 @@ class _Tab1ScreenState extends State<Tab1Screen> {
             name: folderName,
             color: Color(0xFFFFE082),
             icon: Icons.folder,
-            createdAt : DateTime.now(),
+            createdAt: DateTime.now(),
           ),
         );
       });
@@ -77,9 +82,10 @@ class _Tab1ScreenState extends State<Tab1Screen> {
         name: folders[index].name,
         color: folders[index].color,
         icon: folders[index].icon,
-        isStarred: !folders[index].isStarred,  // 즐겨찾기 상태만 변경
+        isStarred: !folders[index].isStarred,
+        // 즐겨찾기 상태만 변경
         createdAt: folders[index].createdAt,
-        imagePath: folders[index].imagePath,   // ⭐️ 프로필 이미지 유지
+        imagePath: folders[index].imagePath, // ⭐️ 프로필 이미지 유지
       );
     });
     _saveFolders();
@@ -104,11 +110,12 @@ class _Tab1ScreenState extends State<Tab1Screen> {
                 setState(() {
                   folders[index] = Folder(
                     name: folders[index].name,
-                    color: color,  // 테두리 색상만 변경
+                    color: color,
+                    // 테두리 색상만 변경
                     icon: folders[index].icon,
                     isStarred: folders[index].isStarred,
                     createdAt: folders[index].createdAt,
-                    imagePath: folders[index].imagePath,  // ⭐️ 프로필 이미지 유지
+                    imagePath: folders[index].imagePath, // ⭐️ 프로필 이미지 유지
                   );
                 });
                 _saveFolders();
@@ -193,14 +200,14 @@ class _Tab1ScreenState extends State<Tab1Screen> {
   Widget build(BuildContext context) {
     final filteredFolders = folders
         .where((folder) =>
-        folder.name.toLowerCase().contains(_searchQuery.toLowerCase()))
+            folder.name.toLowerCase().contains(_searchQuery.toLowerCase()))
         .toList();
 
     return GestureDetector(
       onTap: () {
-        _searchFocusNode.unfocus();  // 키보드 완전 해제
+        _searchFocusNode.unfocus(); // 키보드 완전 해제
         setState(() {
-          _isFabExpanded = false;    // FAB 닫기
+          _isFabExpanded = false; // FAB 닫기
         });
       },
       child: Scaffold(
@@ -209,7 +216,7 @@ class _Tab1ScreenState extends State<Tab1Screen> {
           title: SizedBox(
             height: 40,
             child: TextField(
-              focusNode: _searchFocusNode,  // FocusNode 연결
+              focusNode: _searchFocusNode, // FocusNode 연결
               onChanged: (value) {
                 setState(() {
                   _searchQuery = value;
@@ -219,7 +226,7 @@ class _Tab1ScreenState extends State<Tab1Screen> {
                 hintText: 'Search',
                 hintStyle: const TextStyle(fontSize: 15, color: Colors.grey),
                 contentPadding:
-                const EdgeInsets.symmetric(vertical: 1, horizontal: 15),
+                    const EdgeInsets.symmetric(vertical: 1, horizontal: 15),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(20),
                   borderSide: const BorderSide(
@@ -227,7 +234,6 @@ class _Tab1ScreenState extends State<Tab1Screen> {
                     width: 0.5,
                   ),
                 ),
-
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10),
                   borderSide: const BorderSide(
@@ -245,8 +251,8 @@ class _Tab1ScreenState extends State<Tab1Screen> {
               icon: const Icon(Icons.sort, color: Color(0xFF8B674C)),
               onPressed: () {
                 setState(() {
-                  final defaultFolder = folders
-                      .firstWhere((folder) => folder.name == 'Default');
+                  final defaultFolder =
+                      folders.firstWhere((folder) => folder.name == 'Default');
                   final userFolders = folders
                       .where((folder) => folder.name != 'Default')
                       .toList();
@@ -257,165 +263,103 @@ class _Tab1ScreenState extends State<Tab1Screen> {
             ),
           ],
         ),
-        body: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: filteredFolders.isEmpty
-              ? const Center(child: Text('검색 결과 없음'))
-              : GridView.builder(
-            itemCount: filteredFolders.length,
-            gridDelegate:
-            const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 3,
-              crossAxisSpacing: 12.0,
-              mainAxisSpacing: 20.0,
-              childAspectRatio: 0.8,
-            ),
-            itemBuilder: (context, index) {
-              final folder = filteredFolders[index];
-              final originalIndex = folders.indexOf(folder);
-              return InkWell(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => FolderDetailScreen(
-                        folderName: folder.name,
-                        imagePath: folder.imagePath, // 프로필 이미지 전달
-                      ),
-                    ),
-                  );
-                },
-                onLongPress: () {
-                  if (folder.name == 'Default') return;
-                  showModalBottomSheet(
-                    backgroundColor: Color(0xFFFFFBF5),
-                    context: context,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-                    ),
-                    builder: (_) => Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        ListTile(
-                          leading: const Icon(Icons.image, color: Color(0xFF8B674C)),
-                          title: const Text('배경 이미지 설정',
-                              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
-                          onTap: () {
-                            Navigator.pop(context);
-                            _setProfileImage(context, originalIndex);
-                          },
-                        ),
-
-                        ListTile(
-                          leading: Icon(Icons.color_lens, color: Color(0xFF8B674C)),
-                          title: Text(
-                              '메모리 테두리 변경',
-                              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600))
-                          ,
-                          onTap: () {
-                            Navigator.pop(context);
-                            _showColorPicker(context, originalIndex);
-                          },
-                        ),
-
-                        ListTile(
-                          leading: const Icon(Icons.edit, color: Color(0xFF8B674C)),
-                          title: const Text('메모리 이름 변경',
-                              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
-                          onTap: () {
-                            Navigator.pop(context);
-                            _renameFolder(context, originalIndex);
-                          },
-                        ),
-
-                        ListTile(
-                          leading: const Icon(Icons.swap_vert, color: Color(0xFF8B674C)),
-                          title: const Text('배치 변경',
-                              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
-                          onTap: () {
-                            Navigator.pop(context);
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => FolderReorderScreen(
-                                  folders: folders,
-                                  onReorder: (newFolders) {
-                                    setState(() {
-                                      folders = newFolders;
-                                    });
-                                    _saveFolders();
-                                  },
-                                ),
-                              ),
-                            );
-                          },
-                        ),
-
-                        ListTile(
-                          leading: Icon(
-                            folder.isStarred ? Icons.star : Icons.star_border,
-                            color: Color(0xFF8B674C),
-                          ),
-                          title: Text(
-                            folder.isStarred ? '즐겨찾기 해제' : '즐겨찾기 추가',
-                            style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
-                          ),
-                          onTap: () {
-                            Navigator.pop(context);
-                            _toggleStar(originalIndex);
-                          },
-                        ),
-
-                        ListTile(
-                          leading: Icon(Icons.delete, color: Colors.redAccent),
-                          title: Text(
-                            '삭제',
-                            style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
-                          ),
-                          onTap: () {
-                            Navigator.pop(context);
-                            _deleteFolder(originalIndex);
-                          },
-                        ),
-                      ],
-                    ),
-                  );
-                },
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(3), // 테두리 두께 조절
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: folder.color,  // 폴더 색상 테두리 (파스텔톤)
-                      ),
-                      child: CircleAvatar(
-                        radius: 33,
-                        backgroundColor: const Color(0xFFFFFBF5),  // 내부 배경
-                        backgroundImage: folder.imagePath != null
-                            ? FileImage(File(folder.imagePath!))
-                            : null,
-                        child: folder.imagePath == null
-                            ? Icon(Icons.flight_takeoff, color: folder.color, size: 30) // 기본 여행 아이콘
-                            : null,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      folder.name,
-                      style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    Text(
-                      DateFormat('yy/MM/dd').format(folder.createdAt),
-                      style: const TextStyle(fontSize: 10, color: Colors.grey),
-                    ),
-                  ],
+        body: FolderGrid(
+          folders: folders,
+          filteredFolders: filteredFolders,
+          onTapFolder: (folder) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => FolderDetailScreen(
+                  folderName: folder.name,
+                  imagePath: folder.imagePath,
                 ),
-              );
-            },
-          ),
+              ),
+            );
+          },
+          onLongPressFolder: (originalIndex) {
+            if (folders[originalIndex].name == 'Default') return;
+
+            showModalBottomSheet(
+              backgroundColor: const Color(0xFFFFFBF5),
+              context: context,
+              shape: const RoundedRectangleBorder(
+                borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+              ),
+              builder: (_) => Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  ListTile(
+                    leading: const Icon(Icons.image, color: Color(0xFF8B674C)),
+                    title: const Text('배경 이미지 설정', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+                    onTap: () {
+                      Navigator.pop(context);
+                      _setProfileImage(context, originalIndex);
+                    },
+                  ),
+                  ListTile(
+                    leading: const Icon(Icons.color_lens, color: Color(0xFF8B674C)),
+                    title: const Text('메모리 테두리 변경', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+                    onTap: () {
+                      Navigator.pop(context);
+                      _showColorPicker(context, originalIndex);
+                    },
+                  ),
+                  ListTile(
+                    leading: const Icon(Icons.edit, color: Color(0xFF8B674C)),
+                    title: const Text('메모리 이름 변경', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+                    onTap: () {
+                      Navigator.pop(context);
+                      _renameFolder(context, originalIndex);
+                    },
+                  ),
+                  ListTile(
+                    leading: const Icon(Icons.swap_vert, color: Color(0xFF8B674C)),
+                    title: const Text('배치 변경', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+                    onTap: () {
+                      Navigator.pop(context);
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => FolderReorderScreen(
+                            folders: folders,
+                            onReorder: (newFolders) {
+                              setState(() {
+                                folders = newFolders;
+                              });
+                              _saveFolders();
+                            },
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                  ListTile(
+                    leading: Icon(
+                      folders[originalIndex].isStarred ? Icons.star : Icons.star_border,
+                      color: const Color(0xFF8B674C),
+                    ),
+                    title: Text(
+                      folders[originalIndex].isStarred ? '즐겨찾기 해제' : '즐겨찾기 추가',
+                      style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+                    ),
+                    onTap: () {
+                      Navigator.pop(context);
+                      _toggleStar(originalIndex);
+                    },
+                  ),
+                  ListTile(
+                    leading: const Icon(Icons.delete, color: Colors.redAccent),
+                    title: const Text('삭제', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+                    onTap: () {
+                      Navigator.pop(context);
+                      _deleteFolder(originalIndex);
+                    },
+                  ),
+                ],
+              ),
+            );
+          },
         ),
         floatingActionButton: Column(
           mainAxisSize: MainAxisSize.min,
@@ -455,13 +399,13 @@ class _Tab1ScreenState extends State<Tab1Screen> {
                   BoxShadow(
                     color: Colors.black.withOpacity(0.2),
                     blurRadius: 6,
-                    offset: const Offset(0, 4), // 아래쪽 그림자
+                    offset: const Offset(0, 4),
                   ),
                 ],
               ),
               child: FloatingActionButton(
-                backgroundColor: Colors.transparent, // 색상은 AnimatedContainer에서 처리
-                elevation: 0, // 그림자 겹치지 않게 제거
+                backgroundColor: Colors.transparent,
+                elevation: 0,
                 shape: const CircleBorder(),
                 onPressed: () {
                   setState(() {
