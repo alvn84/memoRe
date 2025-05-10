@@ -29,7 +29,7 @@ class _FolderReorderScreenState extends State<FolderReorderScreen> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.transparent,
-        title: const Text('메모리 배치 변경',style: TextStyle(fontSize: 17),),
+        title: const Text('Reorder Folders',style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),),
       ),
       body: ReorderableListView.builder(
         itemCount: _folders.length,
@@ -52,7 +52,7 @@ class _FolderReorderScreenState extends State<FolderReorderScreen> {
         },
       ),
       floatingActionButton: FloatingActionButton(
-        backgroundColor: const Color(0xFF8B674C),
+        backgroundColor: Color(0xFF8B674C),
         onPressed: () {
           widget.onReorder(_folders); // 변경사항 반영
           Navigator.pop(context);
