@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'reset_password.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class EmailInputScreen extends StatefulWidget {
   const EmailInputScreen({super.key});
@@ -18,6 +20,62 @@ class _EmailInputScreenState extends State<EmailInputScreen> {
   void dispose() {
     _emailController.dispose();
     super.dispose();
+  }
+
+  Future<void> _checkEmailAndNavigate() async {
+    String email = _emailController.text.trim();
+
+    if (email.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please enter your email.')),
+      );
+      return;
+    }
+
+    /*if (!emailRegex.hasMatch(email)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please enter a valid email address.')),
+      );
+      return;
+    }*/
+
+    try {
+      final response = await http.post(
+        Uri.parse(
+            'http://223.194.152.120:8080/api/password/forgot'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'email': email}),
+      );
+
+      if (!mounted) return;
+
+      if (response.statusCode == 200) {
+        // 이메일 존재 → 다음 화면으로 이동
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) =>
+                ResetPasswordScreen(email: email), // ✅ 이메일 넘기기
+          ),
+        );
+      } else if (response.statusCode == 404) {
+        // 이메일 없음
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('No account found with this email.')),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+              content: Text('Something went wrong. Please try again.')),
+        );
+      }
+    } catch (e) {
+      print('에러 발생: $e');
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Network error. Please try again.')),
+      );
+    }
   }
 
   @override
@@ -95,39 +153,7 @@ class _EmailInputScreenState extends State<EmailInputScreen> {
                               Colors.purple[200],
                             ),
                           ),
-                          onPressed: () {
-                            String email = _emailController.text.trim();
-
-                            if (email.isEmpty) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text(
-                                    'Please enter your email.',
-                                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
-                                  ),
-                                ),
-                              );
-                              return;
-                            }
-
-                            if (!emailRegex.hasMatch(email)) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text(
-                                    'Please enter a valid email address.',
-                                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
-                                  ),
-                                ),
-                              );
-                              return;
-                            }
-
-                            // ✨ 이메일 유효성 통과하면 reset_password로 이동
-                            Navigator.pushReplacement(
-                              context,
-                              MaterialPageRoute(builder: (context) => const ResetPasswordScreen()),
-                            );
-                          },
+                          onPressed: _checkEmailAndNavigate,
                           child: const Text('Continue'),
                         ),
                       ),

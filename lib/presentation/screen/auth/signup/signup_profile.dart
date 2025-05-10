@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import 'signup_screen.dart';
 
 class SignUpProfile extends StatefulWidget {
   final VoidCallback onComplete;
+  final SignUpData signUpData; // ✅ 추가
 
-  const SignUpProfile({super.key, required this.onComplete});
+  const SignUpProfile(
+      {super.key, required this.onComplete, required this.signUpData}); // ✅ 수정
 
   @override
   State<SignUpProfile> createState() => _SignUpProfileState();
@@ -31,6 +34,31 @@ class _SignUpProfileState extends State<SignUpProfile> {
         ),
       ),
     );
+  }
+
+  // 서버로 최종 넘겨주는 버튼
+  void _handleComplete() {
+    if (selectedGender == null) {
+      _showSnackBar('Please select your gender.');
+      return;
+    }
+    if (selectedYear == null || selectedMonth == null || selectedDay == null) {
+      _showSnackBar('Please select your full birth date.');
+      return;
+    }
+    if (selectedJob == null) {
+      _showSnackBar('Please select your job.');
+      return;
+    }
+
+    // ✅ 다 통과하면 데이터 저장
+    widget.signUpData.gender = selectedGender!;
+    widget.signUpData.birthDate =
+        '${selectedYear!}-${selectedMonth!.toString().padLeft(2, '0')}-${selectedDay!.toString().padLeft(2, '0')}';
+    widget.signUpData.job = selectedJob!;
+
+    FocusScope.of(context).unfocus();
+    widget.onComplete();
   }
 
   @override
@@ -233,26 +261,7 @@ class _SignUpProfileState extends State<SignUpProfile> {
                   width: 230,
                   height: 40,
                   child: ElevatedButton(
-                    onPressed: () {
-                      if (selectedGender == null) {
-                        _showSnackBar('Please select your gender.');
-                        return;
-                      }
-                      if (selectedYear == null ||
-                          selectedMonth == null ||
-                          selectedDay == null) {
-                        _showSnackBar('Please select your full birth date.');
-                        return;
-                      }
-                      if (selectedJob == null) {
-                        _showSnackBar('Please select your job.');
-                        return;
-                      }
-
-                      // ✅ 다 통과하면
-                      FocusScope.of(context).unfocus();
-                      widget.onComplete();
-                    },
+                    onPressed: _handleComplete,
                     child: const Text(
                       'Complete Sign Up',
                       style: TextStyle(

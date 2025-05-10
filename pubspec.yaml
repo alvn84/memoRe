@@ -43,6 +43,8 @@ dependencies:
   cupertino_icons: ^1.0.8
 
   dropdown_button2: ^2.3.9
+  http: ^1.4.0
+  google_sign_in: ^6.3.0
 
 dev_dependencies:
   flutter_test:

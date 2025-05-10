@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import 'signup_screen.dart';
 
 class SignUpEmail extends StatefulWidget {
   final VoidCallback onNext;
+  final SignUpData signUpData; // ✅ 추가
 
-  const SignUpEmail({super.key, required this.onNext});
+  const SignUpEmail(
+      {super.key, required this.onNext, required this.signUpData});
 
   @override
   State<SignUpEmail> createState() => _SignUpEmailState();
@@ -41,7 +44,8 @@ class _SignUpEmailState extends State<SignUpEmail> {
       return;
     }
 
-    if (!emailRegex.hasMatch(email)) {
+    // 이메일 유효성 검사
+    /*if (!emailRegex.hasMatch(email)) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text(
@@ -51,7 +55,10 @@ class _SignUpEmailState extends State<SignUpEmail> {
         ),
       );
       return;
-    }
+    }*/
+
+    // ✅ 입력한 이메일을 signUpData에 저장
+    widget.signUpData.email = email;
 
     // ✅ 이메일 형식까지 맞으면 통과
     FocusScope.of(context).unfocus();
@@ -81,7 +88,8 @@ class _SignUpEmailState extends State<SignUpEmail> {
                 // ✅ 고쳤다! (자동 키보드 뜨지 않게)
                 autocorrect: false,
                 textInputAction: TextInputAction.done,
-                onSubmitted: (_) => _handleNext(), // ✨ 여기 추가
+                onSubmitted: (_) => _handleNext(),
+                // ✨ 여기 추가
                 style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
@@ -103,39 +111,7 @@ class _SignUpEmailState extends State<SignUpEmail> {
                   width: double.infinity,
                   height: 40,
                   child: ElevatedButton(
-                    onPressed: () {
-                      String email = _emailController.text.trim();
-
-                      if (email.isEmpty) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text(
-                              'Please enter your email',
-                              style: TextStyle(
-                                  fontSize: 14, fontWeight: FontWeight.w600),
-                            ),
-                          ),
-                        );
-                        return;
-                      }
-
-                      if (!emailRegex.hasMatch(email)) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text(
-                              'Please enter a valid email address',
-                              style: TextStyle(
-                                  fontSize: 14, fontWeight: FontWeight.w600),
-                            ),
-                          ),
-                        );
-                        return;
-                      }
-
-                      // ✅ 이메일 형식까지 맞으면 통과
-                      FocusScope.of(context).unfocus();
-                      widget.onNext();
-                    },
+                    onPressed: _handleNext,
                     child: const Text(
                       'Continue',
                       style: TextStyle(

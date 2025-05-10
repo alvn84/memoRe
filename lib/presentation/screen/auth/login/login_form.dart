@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../home/home_screen.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class LoginForm extends StatefulWidget {
   const LoginForm({super.key});
@@ -23,6 +25,48 @@ class _LoginFormState extends State<LoginForm> {
     _emailFocusNode.dispose();
     _passwordFocusNode.dispose();
     super.dispose();
+  }
+
+  Future<void> _handleLogin() async {
+    String email = _emailController.text.trim();
+    String password = _passwordController.text.trim();
+
+    if (email.isEmpty || password.isEmpty) {
+      if (!mounted) return; // ✅ mounted 확인
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please fill in all fields.')),
+      );
+      return;
+    }
+
+    try {
+      final url = Uri.parse('http://223.194.152.120:8080/login');
+      final response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'email': email, 'password': password}),
+      );
+
+      if (!mounted) return; // ✅ await 이후에도 항상 mounted 체크
+      if (response.statusCode == 200) {
+        print('로그인 성공: ${response.body}');
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const HomeScreen()),
+        );
+      } else {
+        print('로그인 실패: ${response.body}');
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Invalid email or password')),
+        );
+      }
+    } catch (e) {
+      if (!mounted) return; // ✅ 예외 처리 후에도 확인
+      print('에러 발생: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('네트워크 오류가 발생했습니다')),
+      );
+    }
   }
 
   @override
@@ -111,70 +155,14 @@ class _LoginFormState extends State<LoginForm> {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Color(0xFFB89B89), // 배경색
                 ),
-                onPressed: () {
-                  String email = _emailController.text.trim();
-                  String password = _passwordController.text;
-
-                  if (email.isEmpty) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text(
-                          'Please enter your email.',
-                          style: TextStyle(
-                              fontSize: 14, fontWeight: FontWeight.w600),
-                        ),
-                      ),
-                    );
-                    return;
-                  }
-                  if (!emailRegex.hasMatch(email)) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text(
-                          'Please enter a valid email address.',
-                          style: TextStyle(
-                              fontSize: 14, fontWeight: FontWeight.w600),
-                        ),
-                      ),
-                    );
-                    return;
-                  }
-                  if (password.isEmpty) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text(
-                          'Please enter your password.',
-                          style: TextStyle(
-                              fontSize: 14, fontWeight: FontWeight.w600),
-                        ),
-                      ),
-                    );
-                    return;
-                  }
-                  if (password.length < 6) {
-                    // ✨ 추가된 부분
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text(
-                          'Password must be at least 6 characters.',
-                          style: TextStyle(
-                              fontSize: 14, fontWeight: FontWeight.w600),
-                        ),
-                      ),
-                    );
-                    return;
-                  }
-
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(builder: (context) => const HomeScreen()),
-                  );
-                },
+                onPressed: _handleLogin,
                 child: const Text(
                   'Sign In',
                   style: TextStyle(
-                    fontSize: 14, // ⭐️ 폰트 크기
-                    fontWeight: FontWeight.w900, // ⭐️ 약간 두껍게 (Montserrat랑 잘 어울림)
+                    fontSize: 14,
+                    // ⭐️ 폰트 크기
+                    fontWeight: FontWeight.w900,
+                    // ⭐️ 약간 두껍게 (Montserrat랑 잘 어울림)
                     color: Color(0xFFFFFBF5), // 글씨 색상 (모카무스 느낌)
                   ),
                 ),
@@ -184,7 +172,7 @@ class _LoginFormState extends State<LoginForm> {
         ),
         const SizedBox(height: 12),
         Center(
-          // skip 버튼 없애려면 여기 이 Center 컴포넌트랑 바로 위 SizedBox 날려버리기
+          // skip 버튼 없애려면 여기 이 Center 컴포넌트랑 바로 위 SizedBox(12) 날려버리기
           child: TextButton(
             onPressed: () {
               Navigator.pushReplacement(

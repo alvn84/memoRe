@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import '../login/login_screen.dart';
 
 class ResetPasswordScreen extends StatefulWidget {
-  const ResetPasswordScreen({super.key});
+  final String email;
+
+  const ResetPasswordScreen({super.key, required this.email});
 
   @override
   State<ResetPasswordScreen> createState() => _ResetPasswordScreenState();
@@ -9,7 +14,8 @@ class ResetPasswordScreen extends StatefulWidget {
 
 class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
   final TextEditingController _passwordController = TextEditingController();
-  final TextEditingController _confirmPasswordController = TextEditingController();
+  final TextEditingController _confirmPasswordController =
+      TextEditingController();
 
   @override
   void dispose() {
@@ -21,6 +27,91 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
   // ✨ 비밀번호 최소 길이 설정 (ex. 8자 이상)
   bool isPasswordValid(String password) {
     return password.length >= 8;
+  }
+
+  Future<void> _handleResetPassword() async {
+    final password = _passwordController.text.trim();
+    final confirmPassword = _confirmPasswordController.text.trim();
+
+    if (password.isEmpty || confirmPassword.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Please fill in all fields.',
+            style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+          ),
+        ),
+      );
+      return;
+    }
+
+    if (password != confirmPassword) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Passwords do not match.',
+            style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+          ),
+        ),
+      );
+      return;
+    }
+
+    /*if (!isPasswordValid(password)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Password must be at least 8 characters long.',
+            style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+          ),
+        ),
+      );
+      return;
+    }*/
+
+    try {
+      final response = await http.post(
+        Uri.parse('http://223.194.152.120:8080/api/password/reset'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'email': widget.email,
+          'newPassword': password,
+          'confirmPassword': confirmPassword,
+        }),
+      );
+
+      if (!mounted) return;
+
+      if (response.statusCode == 200) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Password has been reset!')),
+        );
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (context) => const LoginScreen()),
+          (route) => false,
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed: ${response.body}')),
+        );
+      }
+    } catch (e) {
+      if (!mounted) return;
+      print('에러 발생: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Network error. Please try again.')),
+      );
+    }
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text(
+          'Password has been reset!',
+          style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+        ),
+      ),
+    );
   }
 
   @override
@@ -118,62 +209,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                               Colors.purple[200],
                             ),
                           ),
-                          onPressed: () {
-                            final password = _passwordController.text.trim();
-                            final confirmPassword = _confirmPasswordController.text.trim();
-
-                            // ✅ 1. 비어있는지 체크
-                            if (password.isEmpty || confirmPassword.isEmpty) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text(
-                                    'Please fill in all fields.',
-                                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
-                                  ),
-                                ),
-                              );
-                              return;
-                            }
-
-                            // ✅ 2. 비밀번호 길이 체크
-                            if (!isPasswordValid(password)) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text(
-                                    'Password must be at least 8 characters long.',
-                                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
-                                  ),
-                                ),
-                              );
-                              return;
-                            }
-
-                            // ✅ 3. 비밀번호 일치 여부
-                            if (password != confirmPassword) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text(
-                                    'Passwords do not match.',
-                                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
-                                  ),
-                                ),
-                              );
-                              return;
-                            }
-
-                            // TODO: 비밀번호 재설정 API 호출 처리
-
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text(
-                                  'Password has been reset!',
-                                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
-                                ),
-                              ),
-                            );
-
-                            Navigator.pop(context); // 성공하면 돌아가기
-                          },
+                          onPressed: _handleResetPassword,
                           child: const Text('Reset Password'),
                         ),
                       ),
