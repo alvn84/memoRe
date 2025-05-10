@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:memore/presentation/screen/home/tab1/folder_tile.dart';
 import 'package:memore/presentation/screen/home/tab1/tab1_controller.dart';
+import '../ai/ai_travel_chat_screen.dart';
 import '../folder/folder_model.dart';
 import '../folder/folder_storage.dart';
 import '../folder/folder_reorder_screen.dart';
@@ -237,7 +238,7 @@ class _Tab1ScreenState extends State<Tab1Screen> {
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10),
-                  borderSide: const BorderSide(
+                  borderSide: BorderSide(
                     color: Color(0xFF8B674C),
                     width: 1.2,
                   ),
@@ -249,7 +250,7 @@ class _Tab1ScreenState extends State<Tab1Screen> {
           ),
           actions: [
             IconButton(
-              icon: const Icon(Icons.sort, color: Color(0xFF8B674C)),
+              icon: Icon(Icons.sort, color: Color(0xFF8B674C)),
               onPressed: () {
                 setState(() {
                   final defaultFolder =
@@ -278,6 +279,7 @@ class _Tab1ScreenState extends State<Tab1Screen> {
               ),
             );
           },
+          // 꾹 눌렀을 때
           onLongPressFolder: (originalIndex) {
             if (folders[originalIndex].name == 'Default') return;
 
@@ -291,32 +293,36 @@ class _Tab1ScreenState extends State<Tab1Screen> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   ListTile(
-                    leading: const Icon(Icons.image, color: Color(0xFF8B674C)),
-                    title: const Text('배경 이미지 설정', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+                    leading: Icon(Icons.image, color: Color(0xFF8B674C)),
+                    title: const Text('Set Background Image',
+                        style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
                     onTap: () {
                       Navigator.pop(context);
                       _setProfileImage(context, originalIndex);
                     },
                   ),
                   ListTile(
-                    leading: const Icon(Icons.color_lens, color: Color(0xFF8B674C)),
-                    title: const Text('메모리 테두리 변경', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+                    leading: Icon(Icons.color_lens, color: Color(0xFF8B674C)),
+                    title: const Text('Change Border Color',
+                        style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
                     onTap: () {
                       Navigator.pop(context);
                       _showColorPicker(context, originalIndex);
                     },
                   ),
                   ListTile(
-                    leading: const Icon(Icons.edit, color: Color(0xFF8B674C)),
-                    title: const Text('메모리 이름 변경', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+                    leading: Icon(Icons.edit, color: Color(0xFF8B674C)),
+                    title: const Text('Rename Folder',
+                        style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
                     onTap: () {
                       Navigator.pop(context);
                       _renameFolder(context, originalIndex);
                     },
                   ),
                   ListTile(
-                    leading: const Icon(Icons.swap_vert, color: Color(0xFF8B674C)),
-                    title: const Text('배치 변경', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+                    leading: Icon(Icons.swap_vert, color: Color(0xFF8B674C)),
+                    title: const Text('Reorder Folders',
+                        style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
                     onTap: () {
                       Navigator.pop(context);
                       Navigator.push(
@@ -338,10 +344,12 @@ class _Tab1ScreenState extends State<Tab1Screen> {
                   ListTile(
                     leading: Icon(
                       folders[originalIndex].isStarred ? Icons.star : Icons.star_border,
-                      color: const Color(0xFF8B674C),
+                      color: Color(0xFF8B674C),
                     ),
                     title: Text(
-                      folders[originalIndex].isStarred ? '즐겨찾기 해제' : '즐겨찾기 추가',
+                      folders[originalIndex].isStarred
+                          ? 'Remove from Favorites'
+                          : 'Add to Favorites',
                       style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
                     ),
                     onTap: () {
@@ -351,7 +359,8 @@ class _Tab1ScreenState extends State<Tab1Screen> {
                   ),
                   ListTile(
                     leading: const Icon(Icons.delete, color: Colors.redAccent),
-                    title: const Text('삭제', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+                    title: const Text('Delete',
+                        style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
                     onTap: () {
                       Navigator.pop(context);
                       _deleteFolder(originalIndex);
@@ -365,7 +374,7 @@ class _Tab1ScreenState extends State<Tab1Screen> {
         floatingActionButton: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // 확장 FAB
+            // 확장 FAB: AI 여행지 추천
             AnimatedSlide(
               offset: _isFabExpanded ? const Offset(0, 0) : const Offset(0, 0.3),
               duration: const Duration(milliseconds: 200),
@@ -373,50 +382,84 @@ class _Tab1ScreenState extends State<Tab1Screen> {
               child: AnimatedOpacity(
                 opacity: _isFabExpanded ? 1 : 0,
                 duration: const Duration(milliseconds: 200),
-                child: FloatingActionButton(
-                  heroTag: 'addFolder',
-                  mini: true,
-                  shape: const CircleBorder(),
-                  backgroundColor: const Color(0xFF8B674C),
-                  onPressed: () {
-                    setState(() {
-                      _isFabExpanded = false;
-                    });
-                    _addNewFolder();
-                  },
-                  child: const Icon(Icons.create_new_folder, color: Color(0xFFFFFBF5)),
+                child: Column(
+                  children: [
+                    FloatingActionButton(
+                      heroTag: 'aiTravel',
+                      mini: true,
+                      shape: const CircleBorder(),
+                      backgroundColor: Color(0xFF8B674C),
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const AITravelChatScreen(),
+                          ),
+                        );
+                      },
+                      child: const Icon(Icons.travel_explore, color: Color(0xFFFFFBF5)),
+                    ),
+                    const SizedBox(height: 4),
+                    Text('AI Travel Picks',
+                        style: TextStyle(fontSize: 11, color: Color(0xFF8B674C), fontWeight: FontWeight.bold)),
+                  ],
                 ),
               ),
             ),
             const SizedBox(height: 12),
-            // 메인 FAB
-            AnimatedContainer(
-              duration: const Duration(milliseconds: 300),
-              curve: Curves.easeInOut,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: _isFabExpanded ? const Color(0xFFFDEEDC) : const Color(0xFF8B674C),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.2),
-                    blurRadius: 6,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
-              ),
-              child: FloatingActionButton(
-                backgroundColor: Colors.transparent,
-                elevation: 0,
-                shape: const CircleBorder(),
-                onPressed: () {
-                  setState(() {
-                    _isFabExpanded = !_isFabExpanded;
-                  });
-                },
-                child: Icon(
-                  _isFabExpanded ? Icons.note_add : Icons.add,
-                  color: _isFabExpanded ? const Color(0xFF8B674C) : Colors.white,
+
+            // 확장 FAB: New Folder
+            AnimatedSlide(
+              offset: _isFabExpanded ? const Offset(0, 0) : const Offset(0, 0.3),
+              duration: const Duration(milliseconds: 200),
+              curve: Curves.easeOut,
+              child: AnimatedOpacity(
+                opacity: _isFabExpanded ? 1 : 0,
+                duration: const Duration(milliseconds: 200),
+                child: Column(
+                  children: [
+                    FloatingActionButton(
+                      heroTag: 'addFolder',
+                      mini: true,
+                      shape: const CircleBorder(),
+                      backgroundColor: Color(0xFF8B674C),
+                      onPressed: () {
+                        setState(() {
+                          _isFabExpanded = false;
+                        });
+                        _addNewFolder();
+                      },
+                      child: const Icon(Icons.create_new_folder,
+                          color: Color(0xFFFFFBF5)),
+                    ),
+                    const SizedBox(height: 4),
+                    Text('New Folder',
+                        style: TextStyle(fontSize: 11, color: Color(0xFF8B674C), fontWeight: FontWeight.bold)),
+                  ],
                 ),
+              ),
+            ),
+            const SizedBox(height: 12),
+
+            // 메인 FAB (기본은 +, 열렸을 땐 ✏️으로 동작 = New Memo)
+            FloatingActionButton(
+              heroTag: 'mainFab',
+              backgroundColor:
+              _isFabExpanded ? const Color(0xFFFDEEDC) : Color(0xFF8B674C),
+              shape: const CircleBorder(),
+              onPressed: () {
+                if (_isFabExpanded) {
+                  // 열렸을 때 = New Memo 역할
+                  // TODO: 메모 추가 동작
+                } else {
+                  setState(() {
+                    _isFabExpanded = true;
+                  });
+                }
+              },
+              child: Icon(
+                _isFabExpanded ? Icons.note_add : Icons.add,
+                color: _isFabExpanded ? Color(0xFF8B674C) : Colors.white,
               ),
             ),
           ],

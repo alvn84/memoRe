@@ -32,11 +32,11 @@ class _HomeScreenState extends State<HomeScreen> {
         elevation: 0,  // 그림자 제거 (없애는게 깔끔)
         leading: Builder(
           builder: (context) => IconButton(
-            icon: const Icon(Icons.menu,color: Color(0xFF8B674C)),
+            icon: Icon(Icons.menu,color: Color(0xFF8B674C)),
             onPressed: () => Scaffold.of(context).openDrawer(),
           ),
         ),
-        title: const Text(
+        title: Text(
           'List',  // 여기에 원하는 텍스트 넣기
           style: TextStyle(
             fontSize: 17,  // 글씨 크기
@@ -56,7 +56,7 @@ class _HomeScreenState extends State<HomeScreen> {
           SmoothPageIndicator(
             controller: _pageController,
             count: 2,
-            effect: const WormEffect(
+            effect: WormEffect(
               dotHeight: 8,
               dotWidth: 8,
               spacing: 12,

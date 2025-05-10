@@ -1,6 +1,8 @@
 import 'dart:io';
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_quill/flutter_quill.dart';
 import 'package:intl/intl.dart';
 import '../memo/memo_screen.dart';
 
@@ -22,7 +24,7 @@ class _FolderDetailScreenState extends State<FolderDetailScreen> {
   List<String> noteContents = [];
   final ScrollController _scrollController = ScrollController();
   bool _isScrolled = false;
-  bool _isGridView = true; // ✅ 2열/1열 토글 상태
+  bool _isGridView = true;
 
   @override
   void initState() {
@@ -42,14 +44,25 @@ class _FolderDetailScreenState extends State<FolderDetailScreen> {
     super.dispose();
   }
 
+  List<String> writtenDates = [];
+
   Future<void> _loadNotes() async {
     final prefs = await SharedPreferences.getInstance();
     final notes = prefs.getStringList(widget.folderName) ?? [];
     final uniqueNotes = notes.toSet().toList();
+    writtenDates = prefs.getStringList('${widget.folderName}_writtenDates') ?? [];
+
+    // writtenDates가 notes 길이보다 짧을 수 있으므로 보정
+    while (writtenDates.length < uniqueNotes.length) {
+      writtenDates.add(DateFormat('yyyy.MM.dd').format(DateTime.now()));
+    }
+
     setState(() {
       noteContents = uniqueNotes;
     });
+
     await prefs.setStringList(widget.folderName, uniqueNotes);
+    await prefs.setStringList('${widget.folderName}_writtenDates', writtenDates);
   }
 
   void _addNewNote() async {
@@ -72,20 +85,19 @@ class _FolderDetailScreenState extends State<FolderDetailScreen> {
         slivers: [
           SliverAppBar(
             expandedHeight: 200.0,
-            floating: false,
             pinned: true,
             backgroundColor: const Color(0xFFFFFBF5),
             actions: [
               IconButton(
+                icon: Icon(
+                  _isGridView ? Icons.view_agenda : Icons.grid_view,
+                  color: _isScrolled ? Colors.black : Colors.white,
+                ),
                 onPressed: () {
                   setState(() {
                     _isGridView = !_isGridView;
                   });
                 },
-                icon: Icon(
-                  _isGridView ? Icons.view_agenda : Icons.grid_view,
-                  color: _isScrolled ? Colors.black : Colors.white,
-                ),
               ),
             ],
             flexibleSpace: FlexibleSpaceBar(
@@ -105,19 +117,13 @@ class _FolderDetailScreenState extends State<FolderDetailScreen> {
                   ],
                 ),
               ),
-              centerTitle: false,
               background: Stack(
                 fit: StackFit.expand,
                 children: [
                   widget.imagePath != null
-                      ? Image.file(
-                    File(widget.imagePath!),
-                    fit: BoxFit.cover,
-                  )
-                      : Container(color: const Color(0xFF8B674C)),
-                  Container(
-                    color: Colors.black.withOpacity(0.3),
-                  ),
+                      ? Image.file(File(widget.imagePath!), fit: BoxFit.cover)
+                      : Container(color: Color(0xFF8B674C)),
+                  Container(color: Colors.black.withOpacity(0.3)),
                 ],
               ),
             ),
@@ -135,19 +141,65 @@ class _FolderDetailScreenState extends State<FolderDetailScreen> {
                   itemCount: noteContents.length,
                   gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: _isGridView ? 2 : 1,
-                    crossAxisSpacing: 16.0,
-                    mainAxisSpacing: 16.0,
+                    crossAxisSpacing: 16,
+                    mainAxisSpacing: 16,
                     childAspectRatio: _isGridView ? 1 : 2.5,
                   ),
                   itemBuilder: (context, index) {
                     final fullNote = noteContents[index];
                     final split = fullNote.split('\n');
                     final title = split.first;
-                    final content = split.skip(1).join('\n');
-                    final now = DateTime.now();
-                    final formattedDate = DateFormat('yyyy.MM.dd').format(now); // 날짜 포맷
+                    final deltaString = split.skip(1).join('\n');
+
+
+                    String preview = '';
+                    try {
+                      final deltaJson = jsonDecode(deltaString) as List<dynamic>;
+                      final doc = Document.fromJson(deltaJson);
+                      preview = doc.toPlainText();
+                    } catch (_) {
+                      preview = deltaString;
+                    }
+
+                    final writeDate = (index < writtenDates.length) ? writtenDates[index] : 'Unknown';
 
                     return GestureDetector(
+                      onLongPress: () {
+                        showDialog(
+                          context: context,
+                          builder: (context) => AlertDialog(
+                            backgroundColor: Color(0xFFFFFBF5),
+                            title: const Text('Delete Note', style: TextStyle(fontWeight: FontWeight.bold),),
+                            content: const Text('Are you sure you want to delete this note?'),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.pop(context),
+                                child: const Text('Cancel', style: TextStyle(color: Colors.black),),
+                              ),
+                              TextButton(
+                                onPressed: () async {
+                                  Navigator.pop(context);
+
+                                  final prefs = await SharedPreferences.getInstance();
+                                  final notes = prefs.getStringList(widget.folderName) ?? [];
+                                  final modified = prefs.getStringList('${widget.folderName}_modified') ?? [];
+
+                                  if (index < notes.length) {
+                                    notes.removeAt(index);
+                                    if (index < modified.length) modified.removeAt(index);
+                                    await prefs.setStringList(widget.folderName, notes);
+                                    await prefs.setStringList('${widget.folderName}_modified', modified);
+                                    setState(() {
+                                      noteContents = notes;
+                                    });
+                                  }
+                                },
+                                child: const Text('Delete', style: TextStyle(color: Colors.red)),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
                       onTap: () async {
                         await Navigator.push(
                           context,
@@ -185,14 +237,14 @@ class _FolderDetailScreenState extends State<FolderDetailScreen> {
                               ),
                               const SizedBox(height: 8),
                               Text(
-                                content,
+                                preview,
                                 style: const TextStyle(fontSize: 14, color: Colors.black87),
                                 overflow: TextOverflow.ellipsis,
                                 maxLines: 4,
                               ),
                               const Spacer(),
                               Text(
-                                formattedDate,
+                                writeDate,
                                 style: const TextStyle(fontSize: 12, color: Colors.grey),
                                 textAlign: TextAlign.right,
                               ),
@@ -210,13 +262,9 @@ class _FolderDetailScreenState extends State<FolderDetailScreen> {
       ),
       floatingActionButton: FloatingActionButton(
         shape: const CircleBorder(),
-        backgroundColor: const Color(0xFF8B674C),
-        elevation: 6,
+        backgroundColor: Color(0xFF8B674C),
         onPressed: _addNewNote,
-        child: const Icon(
-          Icons.add,
-          color: Color(0xFFFFFBF5),
-        ),
+        child: const Icon(Icons.add, color: Color(0xFFFFFBF5)),
       ),
     );
   }
