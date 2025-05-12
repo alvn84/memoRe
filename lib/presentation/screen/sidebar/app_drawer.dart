@@ -34,7 +34,7 @@ class AppDrawer extends StatelessWidget {
               },
             ),
             ListTile(
-              leading: const Icon(Icons.group_add, color: Color(0xFF8B674C)),
+              leading: const Icon(Icons.group, color: Color(0xFF8B674C)),
               title: const Text('Friends', style:TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
               onTap: () {
                 Navigator.pop(context);

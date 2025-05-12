@@ -15,11 +15,6 @@ class SettingScreen extends StatelessWidget {
         padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 15.0), // 위아래 + 양옆 padding
         children: [
           const ListTile(
-            leading: Icon(Icons.language),
-            title: Text('언어 설정'),
-          ),
-          const Divider(),
-          const ListTile(
           leading: Icon(Icons.brightness_6),
             title: Text('다크 모드 설정'),
           ),
@@ -29,13 +24,11 @@ class SettingScreen extends StatelessWidget {
             title: Text('알림 설정'),
           ),
           const Divider(),
-
           const ListTile(
             leading: Icon(Icons.lock),
             title: Text('개인정보 및 보안'),
           ),
           const Divider(),
-
           const ListTile(
             leading: Icon(Icons.info),
             title: Text('앱 정보'),
