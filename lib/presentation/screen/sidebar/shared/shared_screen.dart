@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-class FavoriteScreen extends StatelessWidget {
-  const FavoriteScreen({super.key});
+class SharedScreen extends StatelessWidget {
+  const SharedScreen({super.key});
 
   final List<String> folderList = const [
     '여행 메모',
@@ -28,7 +28,7 @@ class FavoriteScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('즐겨찾기'),
+        title: const Text('공유된 메모'),
         backgroundColor: Colors.transparent, // 배경 투명
       ),
       body: ListView(

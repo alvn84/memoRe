@@ -5,6 +5,7 @@ import 'package:memore/presentation/screen/sidebar/favorite/favorite_screen.dart
 import 'package:memore/presentation/screen/sidebar/trash/trash_screen.dart';
 import 'package:memore/presentation/screen/sidebar/friend/friend_screen.dart';
 import 'package:memore/presentation/screen/sidebar/setting/setting_screen.dart';
+import 'package:memore/presentation/screen/sidebar/shared/shared_screen.dart';
 class AppDrawer extends StatelessWidget {
   const AppDrawer({super.key});
 
@@ -37,7 +38,6 @@ class AppDrawer extends StatelessWidget {
               title: const Text('Friends', style:TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
               onTap: () {
                 Navigator.pop(context);
-                // TODO: 친구 추가 화면 이동 (규나 진행중)
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (context) => const FriendScreen()),
@@ -45,10 +45,21 @@ class AppDrawer extends StatelessWidget {
               },
             ),
             ListTile(
+              leading: const Icon(Icons.share, color: Color(0xFF8B674C)),
+              title: const Text('Shared',style:TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const SharedScreen()),
+                );
+              },
+            ),
+            ListTile(
               leading: const Icon(Icons.delete, color: Color(0xFF8B674C)),
               title: const Text('Trash',style:TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
               onTap: () {
-                Navigator.pop(context); // 먼저 드로어 닫고
+                Navigator.pop(context);
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (context) => const TrashScreen()), // TrashScreen으로 이동
