@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../folder/folder_model.dart';
+import '../../folder_feature/folder_model.dart';
 import 'folder_tile.dart';
 
 class FolderGrid extends StatelessWidget {

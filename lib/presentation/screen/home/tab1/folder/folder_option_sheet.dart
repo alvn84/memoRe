@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:memore/presentation/screen/home/folder/folder_model.dart';
+import 'package:memore/presentation/screen/home/folder_feature/folder_model.dart';
 
 class FolderOptionSheet extends StatelessWidget {
   final Folder folder;

@@ -3,14 +3,15 @@ import 'package:image_picker/image_picker.dart';
 import 'package:memore/presentation/screen/home/tab1/tab1_controller.dart';
 
 import '../ai/ai_travel_chat_screen.dart';
-import '../folder/add_folder_dialog.dart';
-import '../folder/folder_detail_screen.dart';
-import '../folder/folder_model.dart';
-import '../folder/folder_reorder_screen.dart';
-import '../folder/folder_storage.dart';
-import 'folder_grid.dart';
-import 'folder_option_sheet.dart';
-import 'tab1_fab.dart';
+import 'floating_action_button/add_folder_dialog.dart';
+import '../folder_feature/folder_detail_screen.dart';
+import '../folder_feature/folder_model.dart';
+import '../folder_feature/folder_reorder_screen.dart';
+import '../folder_feature/folder_storage.dart';
+import 'folder/folder_grid.dart';
+import 'folder/folder_option_sheet.dart';
+import 'floating_action_button/tab1_fab.dart';
+import 'tab1_search_appbar.dart';
 
 class Tab1Screen extends StatefulWidget {
   const Tab1Screen({super.key});
@@ -211,57 +212,23 @@ class _Tab1ScreenState extends State<Tab1Screen> {
         });
       },
       child: Scaffold(
-        appBar: AppBar(
-          backgroundColor: Colors.transparent,
-          title: SizedBox(
-            height: 40,
-            child: TextField(
-              focusNode: _searchFocusNode, // FocusNode 연결
-              onChanged: (value) {
-                setState(() {
-                  _searchQuery = value;
-                });
-              },
-              decoration: InputDecoration(
-                hintText: 'Search',
-                hintStyle: const TextStyle(fontSize: 15, color: Colors.grey),
-                contentPadding:
-                    const EdgeInsets.symmetric(vertical: 1, horizontal: 15),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(20),
-                  borderSide: const BorderSide(
-                    color: Colors.black12, // unfocused 시 색상
-                    width: 0.5,
-                  ),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
-                  borderSide: BorderSide(
-                    color: Color(0xFF8B674C),
-                    width: 1.2,
-                  ),
-                ),
-                filled: true,
-                fillColor: Colors.transparent,
-              ),
-            ),
-          ),
-          actions: [
-            IconButton(
-              icon: Icon(Icons.sort, color: Color(0xFF8B674C)),
-              onPressed: () {
-                setState(() {
-                  final defaultFolder =
-                      folders.firstWhere((folder) => folder.name == 'Default');
-                  final userFolders = folders
-                      .where((folder) => folder.name != 'Default')
-                      .toList();
-                  userFolders.sort((a, b) => a.name.compareTo(b.name));
-                  folders = [defaultFolder, ...userFolders];
-                });
-              },
-            ),
-          ],
+        appBar: Tab1SearchAppBar(
+          searchQuery: _searchQuery,
+          onSearchChanged: (value) {
+            setState(() {
+              _searchQuery = value;
+            });
+          },
+          onSort: () {
+            setState(() {
+              final defaultFolder =
+              folders.firstWhere((f) => f.name == 'Default');
+              final userFolders =
+              folders.where((f) => f.name != 'Default').toList();
+              userFolders.sort((a, b) => a.name.compareTo(b.name));
+              folders = [defaultFolder, ...userFolders];
+            });
+          },
         ),
         body: FolderGrid(
           folders: folders,

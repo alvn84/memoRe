@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../ai/ai_travel_chat_screen.dart';
+import '../../ai/ai_travel_chat_screen.dart';
 
 class Tab1FloatingButtons extends StatelessWidget {
   final bool isFabExpanded;

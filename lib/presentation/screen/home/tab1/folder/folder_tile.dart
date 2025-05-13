@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-import '../folder/folder_model.dart';
+import '../../folder_feature/folder_model.dart';
 
 class FolderTile extends StatelessWidget {
   final Folder folder;

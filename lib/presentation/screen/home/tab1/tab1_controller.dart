@@ -1,5 +1,5 @@
-import '../folder/folder_model.dart';
-import '../folder/folder_storage.dart';
+import '../folder_feature/folder_model.dart';
+import '../folder_feature/folder_storage.dart';
 
 class Tab1Controller {
   // 폴더 불러오기
