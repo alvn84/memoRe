@@ -76,7 +76,6 @@ class _AddFriendScreenState extends State<AddFriendScreen> {
                     keyboardType: TextInputType.emailAddress,
                   ),
                 ),
-                const SizedBox(width: 8),
                 ElevatedButton(
                   onPressed: () => searchUsers(_emailController.text.trim()),
                   style: ElevatedButton.styleFrom(
