@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:memore/presentation/screen/sidebar/friend/friend.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class AddFriendScreen extends StatefulWidget {
   final Function(Friend) onFriendAdded;
@@ -13,38 +15,58 @@ class AddFriendScreen extends StatefulWidget {
 class _AddFriendScreenState extends State<AddFriendScreen> {
   final TextEditingController _emailController = TextEditingController();
 
-  void _handleAdd() {
-    final email = _emailController.text.trim();
+  List<Friend> searchResults = [];
+  bool isLoading = false;
 
-    if (email.isNotEmpty) {
-      final newFriend = Friend(
-        name: email.split('@').first, // 이름 대신 이메일 앞부분 사용
-        email: email,
-        profileImageUrl: 'https://i.pravatar.cc/150?u=$email',
-      );
-      widget.onFriendAdded(newFriend);
-      Navigator.pop(context); // 화면 종료
+  Future<void> searchUsers(String query) async {
+    if (query.isEmpty) {
+      setState(() {
+        searchResults = [];
+      });
+      return;
+    }
+
+    setState(() => isLoading = true);
+
+    final response = await http.get(
+      Uri.parse('https://your-api.com/users/search?query=$query'), // 실제 API 주소로 변경
+    );
+
+    if (response.statusCode == 200) {
+      final List<dynamic> data = jsonDecode(response.body);
+      setState(() {
+        searchResults = data.map((e) => Friend.fromJson(e)).toList();
+        isLoading = false;
+      });
+    } else {
+      setState(() {
+        isLoading = false;
+        searchResults = [];
+      });
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final myEmail = 'qnada0118@gmail.com'; // 🔒 고정 표시될 사용자 이메일
+    final myEmail = 'qnada0118@gmail.com'; // 본인 이메일 (향후 SharedPreferences 등으로 대체 가능)
 
     return Scaffold(
       appBar: AppBar(title: const Text('친구 추가'), backgroundColor: Colors.transparent),
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(18.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+
+            // 🔍 검색 입력창 + 버튼
             Row(
               children: [
                 Expanded(
                   child: TextField(
                     controller: _emailController,
+                    onChanged: (value) => searchUsers(value),
                     decoration: const InputDecoration(
-                      hintText: '이메일',
+                      hintText: '이름 또는 이메일로 검색',
                       prefixIcon: Icon(Icons.alternate_email),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.all(Radius.circular(30)),
@@ -54,22 +76,25 @@ class _AddFriendScreenState extends State<AddFriendScreen> {
                     keyboardType: TextInputType.emailAddress,
                   ),
                 ),
+                const SizedBox(width: 8),
                 ElevatedButton(
-                  onPressed: _handleAdd,
+                  onPressed: () => searchUsers(_emailController.text.trim()),
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.all(10),
-                    elevation: 0, // 🌟 그림자 제거
-                    backgroundColor: Colors.transparent, // 🌟 배경 제거
-                    shadowColor: Colors.transparent,     // 🌟 터치 그림자 제거
+                    elevation: 0,
+                    backgroundColor: Colors.transparent,
+                    shadowColor: Colors.transparent,
                     shape: const CircleBorder(),
                   ),
                   child: const Icon(
                     Icons.search,
-                    size:  24, // 원하는 크기로 조정 (예: 30, 36 등)
-                    color: Colors.black87, // 선택적: 색상 변경
+                    size: 24,
+                    color: Colors.black87,
                   ),                ),
               ],
             ),
+
+            // 👤 내 이메일 표시
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 8.0),
               child: Column(
@@ -88,7 +113,35 @@ class _AddFriendScreenState extends State<AddFriendScreen> {
                 ],
               ),
             ),
+            const SizedBox(height: 16),
 
+            // 🔍 검색 결과 출력
+            Expanded(
+              child: isLoading
+                  ? const Center(child: CircularProgressIndicator())
+                  : searchResults.isEmpty
+                  ? const Center(child: Text('검색 결과가 없습니다.'))
+                  : ListView.builder(
+                itemCount: searchResults.length,
+                itemBuilder: (context, index) {
+                  final friend = searchResults[index];
+                  return ListTile(
+                    leading: CircleAvatar(
+                      backgroundImage: NetworkImage(friend.profileImageUrl),
+                    ),
+                    title: Text(friend.name),
+                    subtitle: Text(friend.email),
+                    trailing: IconButton(
+                      icon: const Icon(Icons.person_add, color: Colors.blue),
+                      onPressed: () {
+                        widget.onFriendAdded(friend);
+                        Navigator.pop(context);
+                      },
+                    ),
+                  );
+                },
+              ),
+            ),
           ],
         ),
       ),

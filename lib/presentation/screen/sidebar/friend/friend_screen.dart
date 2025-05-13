@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:memore/presentation/screen/sidebar/friend/friend.dart';
 import 'package:memore/presentation/screen/sidebar/friend/add_friend_screen.dart';
-
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class FriendScreen extends StatefulWidget {
   const FriendScreen({Key? key}) : super(key: key);
@@ -10,23 +11,29 @@ class FriendScreen extends StatefulWidget {
   State<FriendScreen> createState() => _FriendScreenState();
 }
 class _FriendScreenState extends State<FriendScreen> {
-  final List<Friend> dummyFriends = [
-    Friend(
-      name: '박규나',
-      email: 'qnada0118@gmail.com',
-      profileImageUrl: 'https://i.pravatar.cc/150?img=1',
-    ),
-    Friend(
-      name: '백준호',
-      email: 'jeff070@naver.com',
-      profileImageUrl: 'https://i.pravatar.cc/150?img=2',
-    ),
-  ];
+  List<Friend> friends = [];
+
+  @override
+  void initState() {
+    super.initState();
+    fetchFriendsFromServer();
+  }
+
+  Future<void> fetchFriendsFromServer() async {
+    final response = await http.get(Uri.parse('https://your-api.com/friends'));
+
+    if (response.statusCode == 200) {
+      final List<dynamic> data = jsonDecode(response.body);
+      setState(() {
+        friends = data.map((e) => Friend.fromJson(e)).toList();
+      });
+    }
+  }
   String searchText = '';
 
   @override
   Widget build(BuildContext context) {
-    final searchResult = dummyFriends.where((friend) =>
+    final searchResult = friends.where((friend) =>
     friend.name.contains(searchText) || friend.email.contains(searchText)).toList();
 
     return Scaffold(
@@ -68,7 +75,7 @@ class _FriendScreenState extends State<FriendScreen> {
                         builder: (context) => AddFriendScreen(
                           onFriendAdded: (newFriend) {
                             setState(() {
-                              dummyFriends.add(newFriend);
+                              friends.add(newFriend);
                             });
                           },
                         ),
@@ -81,47 +88,62 @@ class _FriendScreenState extends State<FriendScreen> {
           ),
           Expanded(
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              padding: const EdgeInsets.symmetric(horizontal: 25.0),
               child: ListView.separated(
-                itemCount: dummyFriends.length,
+                itemCount: friends.length,
                 separatorBuilder: (context, index) => const Divider(),
                 itemBuilder: (context, index) {
-                  final friend = dummyFriends[index];
-                  return ListTile(
-                    leading: CircleAvatar(
-                      backgroundImage: NetworkImage(friend.profileImageUrl),
-                    ),
-                    title: Text(friend.name),
-                    subtitle: Text(friend.email),
-                    trailing: IconButton(
-                      icon: const Icon(Icons.close, color: Colors.redAccent),
-                      tooltip: '삭제',
-                      onPressed: () {
-                        showDialog(
-                          context: context,
-                          builder: (BuildContext context) {
-                            return AlertDialog(
-                              title: const Text('삭제'),
-                              content: Text('${friend.name}님을 삭제하시겠습니까?'),
-                              actions: [
-                                TextButton(
-                                  onPressed: () => Navigator.of(context).pop(),
-                                  child: const Text('취소'),
-                                ),
-                                TextButton(
-                                  onPressed: () {
-                                    setState(() {
-                                      dummyFriends.removeAt(index);
-                                    });
-                                    Navigator.of(context).pop(); // 다이얼로그 닫기
-                                  },
-                                  child: const Text('삭제', style: TextStyle(color: Colors.red)),
-                                ),
-                              ],
+                  final friend = friends[index];
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8.0),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        CircleAvatar(
+                          backgroundImage: NetworkImage(friend.profileImageUrl),
+                        ),
+                        const SizedBox(width: 15),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(friend.name, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
+                              const SizedBox(height: 2),
+                              Text(friend.email, style: const TextStyle(color: Colors.grey)),
+                            ],
+                          ),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.close, color: Colors.redAccent),
+                          tooltip: '삭제',
+                          onPressed: () {
+                            showDialog(
+                              context: context,
+                              builder: (BuildContext context) {
+                                return AlertDialog(
+                                  title: const Text('삭제'),
+                                  content: Text('${friend.name}님을 삭제하시겠습니까?'),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () => Navigator.of(context).pop(),
+                                      child: const Text('취소'),
+                                    ),
+                                    TextButton(
+                                      onPressed: () {
+                                        setState(() {
+                                          friends.removeAt(index);
+                                        });
+                                        Navigator.of(context).pop();
+                                      },
+                                      child: const Text('삭제', style: TextStyle(color: Colors.red)),
+                                    ),
+                                  ],
+                                );
+                              },
                             );
                           },
-                        );
-                      },
+                        ),
+                      ],
                     ),
                   );
                 },
