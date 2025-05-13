@@ -1,9 +1,9 @@
 import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+
 import '../folder/folder_model.dart';
-import '../folder/folder_detail_screen.dart';
-import '../folder/folder_reorder_screen.dart';
 
 class FolderTile extends StatelessWidget {
   final Folder folder;

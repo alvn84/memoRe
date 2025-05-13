@@ -1,7 +1,9 @@
-import 'package:flutter/material.dart';
-import 'reset_password.dart';
-import 'package:http/http.dart' as http;
 import 'dart:convert';
+
+import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+
+import 'reset_password.dart';
 
 class EmailInputScreen extends StatefulWidget {
   const EmailInputScreen({super.key});
