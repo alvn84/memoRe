@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import 'folder_model.dart';
 
 class FolderReorderScreen extends StatefulWidget {
@@ -29,7 +30,10 @@ class _FolderReorderScreenState extends State<FolderReorderScreen> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.transparent,
-        title: const Text('Reorder Folders',style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),),
+        title: const Text(
+          'Reorder Folders',
+          style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
+        ),
       ),
       body: ReorderableListView.builder(
         itemCount: _folders.length,

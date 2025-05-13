@@ -3,14 +3,14 @@ import 'package:image_picker/image_picker.dart';
 import 'package:memore/presentation/screen/home/tab1/tab1_controller.dart';
 
 import '../ai/ai_travel_chat_screen.dart';
-import 'floating_action_button/add_folder_dialog.dart';
-import '../folder_feature/folder_detail_screen.dart';
 import '../folder_feature/folder_model.dart';
 import '../folder_feature/folder_reorder_screen.dart';
+import '../folder_feature/folder_screen.dart';
 import '../folder_feature/folder_storage.dart';
+import 'floating_action_button/add_folder_dialog.dart';
+import 'floating_action_button/tab1_fab.dart';
 import 'folder/folder_grid.dart';
 import 'folder/folder_option_sheet.dart';
-import 'floating_action_button/tab1_fab.dart';
 import 'tab1_search_appbar.dart';
 
 class Tab1Screen extends StatefulWidget {
@@ -222,9 +222,9 @@ class _Tab1ScreenState extends State<Tab1Screen> {
           onSort: () {
             setState(() {
               final defaultFolder =
-              folders.firstWhere((f) => f.name == 'Default');
+                  folders.firstWhere((f) => f.name == 'Default');
               final userFolders =
-              folders.where((f) => f.name != 'Default').toList();
+                  folders.where((f) => f.name != 'Default').toList();
               userFolders.sort((a, b) => a.name.compareTo(b.name));
               folders = [defaultFolder, ...userFolders];
             });
@@ -257,7 +257,8 @@ class _Tab1ScreenState extends State<Tab1Screen> {
               builder: (_) => FolderOptionSheet(
                 folder: folders[originalIndex],
                 index: originalIndex,
-                onSetProfileImage: () => _setProfileImage(context, originalIndex),
+                onSetProfileImage: () =>
+                    _setProfileImage(context, originalIndex),
                 onChangeColor: () => _showColorPicker(context, originalIndex),
                 onRename: () => _renameFolder(context, originalIndex),
                 onReorder: () {

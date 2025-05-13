@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 
 class AITravelChatScreen extends StatefulWidget {
@@ -19,7 +18,10 @@ class _AITravelChatScreenState extends State<AITravelChatScreen> {
     setState(() {
       _messages.add({'role': 'user', 'text': text});
       // 이후 llama 응답을 여기에 추가하는 로직이 들어갈 예정
-      _messages.add({'role': 'ai', 'text': 'AI is thinking about the best travel destination...'});
+      _messages.add({
+        'role': 'ai',
+        'text': 'AI is thinking about the best travel destination...'
+      });
     });
 
     _controller.clear();
@@ -29,9 +31,10 @@ class _AITravelChatScreenState extends State<AITravelChatScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('AI Travel Chatbot',
-          style: TextStyle(
-            color: Colors.black),),
+        title: const Text(
+          'AI Travel Chatbot',
+          style: TextStyle(color: Colors.black),
+        ),
         backgroundColor: const Color(0xFFFFFBF5),
         foregroundColor: Colors.white,
       ),
@@ -45,11 +48,13 @@ class _AITravelChatScreenState extends State<AITravelChatScreen> {
                 final message = _messages[index];
                 final isUser = message['role'] == 'user';
                 return Align(
-                  alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
+                  alignment:
+                      isUser ? Alignment.centerRight : Alignment.centerLeft,
                   child: Container(
                     margin: const EdgeInsets.symmetric(vertical: 4),
                     padding: const EdgeInsets.all(12),
-                    constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.7),
+                    constraints: BoxConstraints(
+                        maxWidth: MediaQuery.of(context).size.width * 0.7),
                     decoration: BoxDecoration(
                       color: isUser ? Color(0xFF8B674C) : Colors.grey[300],
                       borderRadius: BorderRadius.circular(12),
@@ -77,7 +82,8 @@ class _AITravelChatScreenState extends State<AITravelChatScreen> {
                       hintText: 'Ask me about a travel destination...',
                       filled: true,
                       fillColor: Colors.white,
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                      contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 10),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(24),
                         borderSide: BorderSide.none,

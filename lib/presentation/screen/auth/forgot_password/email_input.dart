@@ -43,8 +43,7 @@ class _EmailInputScreenState extends State<EmailInputScreen> {
 
     try {
       final response = await http.post(
-        Uri.parse(
-            'http://223.194.152.120:8080/api/password/forgot'),
+        Uri.parse('http://223.194.152.120:8080/api/password/forgot'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({'email': email}),
       );

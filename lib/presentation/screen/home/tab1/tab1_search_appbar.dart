@@ -23,14 +23,16 @@ class Tab1SearchAppBar extends StatelessWidget implements PreferredSizeWidget {
           decoration: InputDecoration(
             hintText: 'Search',
             hintStyle: const TextStyle(fontSize: 15, color: Colors.grey),
-            contentPadding: const EdgeInsets.symmetric(vertical: 1, horizontal: 15),
+            contentPadding:
+                const EdgeInsets.symmetric(vertical: 1, horizontal: 15),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(20),
               borderSide: const BorderSide(color: Colors.black12, width: 0.5),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(10),
-              borderSide: const BorderSide(color: Color(0xFF8B674C), width: 1.2),
+              borderSide:
+                  const BorderSide(color: Color(0xFF8B674C), width: 1.2),
             ),
             filled: true,
             fillColor: Colors.transparent,

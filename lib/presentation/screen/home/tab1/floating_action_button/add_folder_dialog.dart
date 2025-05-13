@@ -2,11 +2,14 @@ import 'package:flutter/material.dart';
 
 Future<String?> showAddFolderDialog(BuildContext context) {
   String folderName = '';
-  
+
   return showDialog<String>(
     context: context,
     builder: (context) => AlertDialog(
-      title: const Text('Make New Memo:Re',style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),),
+      title: const Text(
+        'Make New Memo:Re',
+        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+      ),
       backgroundColor: Color(0xFFFFFBF5),
       content: TextField(
         autofocus: true,
@@ -24,7 +27,11 @@ Future<String?> showAddFolderDialog(BuildContext context) {
               Navigator.of(context).pop(folderName.trim());
             }
           },
-          child: Text('Confirm',style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF8B674C)),),
+          child: Text(
+            'Confirm',
+            style: TextStyle(
+                fontWeight: FontWeight.bold, color: Color(0xFF8B674C)),
+          ),
         ),
       ],
     ),

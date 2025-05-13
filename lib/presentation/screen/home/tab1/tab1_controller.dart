@@ -41,7 +41,8 @@ class Tab1Controller {
   }
 
   // 이름 변경
-  static List<Folder> renameFolder(List<Folder> folders, int index, String newName) {
+  static List<Folder> renameFolder(
+      List<Folder> folders, int index, String newName) {
     final folder = folders[index];
     final updated = Folder(
       name: newName.trim(),
@@ -57,7 +58,8 @@ class Tab1Controller {
   }
 
   // 이미지 변경
-  static List<Folder> setProfileImage(List<Folder> folders, int index, String imagePath) {
+  static List<Folder> setProfileImage(
+      List<Folder> folders, int index, String imagePath) {
     final folder = folders[index];
     final updated = Folder(
       name: folder.name,
