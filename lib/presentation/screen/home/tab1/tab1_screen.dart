@@ -9,6 +9,8 @@ import '../folder/folder_model.dart';
 import '../folder/folder_reorder_screen.dart';
 import '../folder/folder_storage.dart';
 import 'folder_grid.dart';
+import 'folder_option_sheet.dart';
+import 'tab1_fab.dart';
 
 class Tab1Screen extends StatefulWidget {
   const Tab1Screen({super.key});
@@ -285,180 +287,53 @@ class _Tab1ScreenState extends State<Tab1Screen> {
               shape: const RoundedRectangleBorder(
                 borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
               ),
-              builder: (_) => Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  ListTile(
-                    leading: Icon(Icons.image, color: Color(0xFF8B674C)),
-                    title: const Text('Set Background Image',
-                        style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
-                    onTap: () {
-                      Navigator.pop(context);
-                      _setProfileImage(context, originalIndex);
-                    },
-                  ),
-                  ListTile(
-                    leading: Icon(Icons.color_lens, color: Color(0xFF8B674C)),
-                    title: const Text('Change Border Color',
-                        style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
-                    onTap: () {
-                      Navigator.pop(context);
-                      _showColorPicker(context, originalIndex);
-                    },
-                  ),
-                  ListTile(
-                    leading: Icon(Icons.edit, color: Color(0xFF8B674C)),
-                    title: const Text('Rename Folder',
-                        style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
-                    onTap: () {
-                      Navigator.pop(context);
-                      _renameFolder(context, originalIndex);
-                    },
-                  ),
-                  ListTile(
-                    leading: Icon(Icons.swap_vert, color: Color(0xFF8B674C)),
-                    title: const Text('Reorder Folders',
-                        style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
-                    onTap: () {
-                      Navigator.pop(context);
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => FolderReorderScreen(
-                            folders: folders,
-                            onReorder: (newFolders) {
-                              setState(() {
-                                folders = newFolders;
-                              });
-                              _saveFolders();
-                            },
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                  ListTile(
-                    leading: Icon(
-                      folders[originalIndex].isStarred ? Icons.star : Icons.star_border,
-                      color: Color(0xFF8B674C),
+              builder: (_) => FolderOptionSheet(
+                folder: folders[originalIndex],
+                index: originalIndex,
+                onSetProfileImage: () => _setProfileImage(context, originalIndex),
+                onChangeColor: () => _showColorPicker(context, originalIndex),
+                onRename: () => _renameFolder(context, originalIndex),
+                onReorder: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => FolderReorderScreen(
+                        folders: folders,
+                        onReorder: (newFolders) {
+                          setState(() {
+                            folders = newFolders;
+                          });
+                          _saveFolders();
+                        },
+                      ),
                     ),
-                    title: Text(
-                      folders[originalIndex].isStarred
-                          ? 'Remove from Favorites'
-                          : 'Add to Favorites',
-                      style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
-                    ),
-                    onTap: () {
-                      Navigator.pop(context);
-                      _toggleStar(originalIndex);
-                    },
-                  ),
-                  ListTile(
-                    leading: const Icon(Icons.delete, color: Colors.redAccent),
-                    title: const Text('Delete',
-                        style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
-                    onTap: () {
-                      Navigator.pop(context);
-                      _deleteFolder(originalIndex);
-                    },
-                  ),
-                ],
+                  );
+                },
+                onToggleStar: () => _toggleStar(originalIndex),
+                onDelete: () => _deleteFolder(originalIndex),
               ),
             );
           },
         ),
-        floatingActionButton: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // 확장 FAB: AI 여행지 추천
-            AnimatedSlide(
-              offset: _isFabExpanded ? const Offset(0, 0) : const Offset(0, 0.3),
-              duration: const Duration(milliseconds: 200),
-              curve: Curves.easeOut,
-              child: AnimatedOpacity(
-                opacity: _isFabExpanded ? 1 : 0,
-                duration: const Duration(milliseconds: 200),
-                child: Column(
-                  children: [
-                    FloatingActionButton(
-                      heroTag: 'aiTravel',
-                      mini: true,
-                      shape: const CircleBorder(),
-                      backgroundColor: Color(0xFF8B674C),
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => const AITravelChatScreen(),
-                          ),
-                        );
-                      },
-                      child: const Icon(Icons.travel_explore, color: Color(0xFFFFFBF5)),
-                    ),
-                    const SizedBox(height: 4),
-                    Text('AI Travel Picks',
-                        style: TextStyle(fontSize: 11, color: Color(0xFF8B674C), fontWeight: FontWeight.bold)),
-                  ],
-                ),
-              ),
-            ),
-            const SizedBox(height: 12),
-
-            // 확장 FAB: New Folder
-            AnimatedSlide(
-              offset: _isFabExpanded ? const Offset(0, 0) : const Offset(0, 0.3),
-              duration: const Duration(milliseconds: 200),
-              curve: Curves.easeOut,
-              child: AnimatedOpacity(
-                opacity: _isFabExpanded ? 1 : 0,
-                duration: const Duration(milliseconds: 200),
-                child: Column(
-                  children: [
-                    FloatingActionButton(
-                      heroTag: 'addFolder',
-                      mini: true,
-                      shape: const CircleBorder(),
-                      backgroundColor: Color(0xFF8B674C),
-                      onPressed: () {
-                        setState(() {
-                          _isFabExpanded = false;
-                        });
-                        _addNewFolder();
-                      },
-                      child: const Icon(Icons.create_new_folder,
-                          color: Color(0xFFFFFBF5)),
-                    ),
-                    const SizedBox(height: 4),
-                    Text('New Folder',
-                        style: TextStyle(fontSize: 11, color: Color(0xFF8B674C), fontWeight: FontWeight.bold)),
-                  ],
-                ),
-              ),
-            ),
-            const SizedBox(height: 12),
-
-            // 메인 FAB (기본은 +, 열렸을 땐 ✏️으로 동작 = New Memo)
-            FloatingActionButton(
-              heroTag: 'mainFab',
-              backgroundColor:
-              _isFabExpanded ? const Color(0xFFFDEEDC) : Color(0xFF8B674C),
-              shape: const CircleBorder(),
-              onPressed: () {
-                if (_isFabExpanded) {
-                  // 열렸을 때 = New Memo 역할
-                  // TODO: 메모 추가 동작
-                } else {
-                  setState(() {
-                    _isFabExpanded = true;
-                  });
-                }
-              },
-              child: Icon(
-                _isFabExpanded ? Icons.note_add : Icons.add,
-                color: _isFabExpanded ? Color(0xFF8B674C) : Colors.white,
-              ),
-            ),
-          ],
+        floatingActionButton: Tab1FloatingButtons(
+          isFabExpanded: _isFabExpanded,
+          onNavigateToAi: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const AITravelChatScreen()),
+            );
+          },
+          onAddFolder: () {
+            setState(() {
+              _isFabExpanded = false;
+            });
+            _addNewFolder();
+          },
+          onToggle: () {
+            setState(() {
+              _isFabExpanded = !_isFabExpanded;
+            });
+          },
         ),
       ),
     );
