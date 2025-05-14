@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../home/home_screen.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import '../token_storage.dart';
 
 class LoginForm extends StatefulWidget {
   const LoginForm({super.key});
@@ -50,6 +51,13 @@ class _LoginFormState extends State<LoginForm> {
       if (!mounted) return; // ✅ await 이후에도 항상 mounted 체크
       if (response.statusCode == 200) {
         print('로그인 성공: ${response.body}');
+
+        final responseData = jsonDecode(response.body);
+        final token = responseData['token'];
+
+        await TokenStorage.saveToken(token);
+        print('✅ 저장된 토큰: $token');
+
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => const HomeScreen()),

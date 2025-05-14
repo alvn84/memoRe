@@ -1,16 +1,14 @@
 import '../folder_feature/folder_model.dart';
-import '../folder_feature/folder_storage.dart';
+import 'folder/folder_storage.dart';
 
 class Tab1Controller {
   // 폴더 불러오기
   static Future<List<Folder>> loadFolders() async {
-    return await FolderStorage.loadFolders();
+    final folders = await FolderStorage.loadFolders();
+    print('✅ 서버에서 받은 폴더: $folders');
+    return folders;
   }
 
-  // 폴더 저장
-  static Future<void> saveFolders(List<Folder> folders) async {
-    await FolderStorage.saveFolders(folders);
-  }
 
   // 폴더 추가
   static List<Folder> addFolder(List<Folder> folders, Folder folder) {
@@ -18,10 +16,18 @@ class Tab1Controller {
   }
 
   // 폴더 삭제
-  static List<Folder> deleteFolder(List<Folder> folders, int index) {
-    final newList = [...folders];
-    newList.removeAt(index);
-    return newList;
+  static Future<List<Folder>> deleteFolder(
+      List<Folder> folders, int index) async {
+    final folder = folders[index];
+
+    try {
+      await FolderStorage.deleteFolder(folder.id!); // 서버에 삭제 요청
+      final newList = [...folders]..removeAt(index); // UI 목록에서도 제거
+      return newList;
+    } catch (e) {
+      print('❌ 폴더 삭제 실패: $e');
+      return folders; // 실패 시 기존 목록 유지
+    }
   }
 
   // 즐겨찾기 토글

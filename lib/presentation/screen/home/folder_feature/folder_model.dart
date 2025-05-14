@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 class Folder {
+  final int? id;
   final String name;
   final Color color;
   final IconData icon;
@@ -9,6 +10,7 @@ class Folder {
   final String? imagePath; // 프로필 이미지 경로 추가
 
   Folder({
+    this.id,
     required this.name,
     required this.color,
     required this.icon,
@@ -19,6 +21,7 @@ class Folder {
 
   Map<String, dynamic> toJson() {
     return {
+      'id': id,
       'name': name,
       'color': color.value,
       'icon': icon.codePoint,
@@ -30,11 +33,12 @@ class Folder {
 
   factory Folder.fromJson(Map<String, dynamic> json) {
     return Folder(
-      name: json['name'],
-      color: Color(json['color']),
-      icon: IconData(json['icon'], fontFamily: 'MaterialIcons'),
+      id: json['id'],
+      name: json['name'] ?? '',
+      color: Color((json['color'] ?? 0xFFFFE082)), // 기본 노랑색
+      icon: IconData((json['icon'] ?? Icons.folder.codePoint), fontFamily: 'MaterialIcons'),
       isStarred: json['isStarred'] ?? false,
-      createdAt: DateTime.parse(json['createdAt']),
+      createdAt: DateTime.tryParse(json['createdAt'] ?? '') ?? DateTime.now(),
       imagePath: json['imagePath'],
     );
   }

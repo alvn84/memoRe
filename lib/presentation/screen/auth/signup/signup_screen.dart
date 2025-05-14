@@ -42,7 +42,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
   Future<void> _submitSignUp() async {
     print('🔥 [디버깅] 회원가입 데이터: ${_signUpData.toJson()}');
     try {
-      final url = Uri.parse('http://223.194.135.221:8080/user');
+      final url = Uri.parse('http://192.168.219.103:8080/user');
       final response = await http.post(
         url,
         headers: {'Content-Type': 'application/json'},
