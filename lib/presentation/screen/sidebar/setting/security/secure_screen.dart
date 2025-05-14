@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:memore/presentation/screen/sidebar/setting/security/lock_setting_screen.dart';
 
 class PrivacySecurityScreen extends StatelessWidget {
   const PrivacySecurityScreen({super.key});
@@ -58,6 +59,10 @@ class PrivacySecurityScreen extends StatelessWidget {
             title: const Text('앱 잠금 설정 (PIN/지문)'),
             onTap: () {
               // TODO: 앱 잠금 설정 화면으로 이동
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const LockSettingScreen()),
+              );
             },
           ),
           const Divider(height: 30),
