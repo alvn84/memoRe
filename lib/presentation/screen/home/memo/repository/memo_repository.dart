@@ -1,66 +1,42 @@
-// memo_repository.dart (정리 후)
-
 import 'dart:convert';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
 import '../model/memo.dart';
 
+const String baseUrl = 'https://your-ngrok-url.ngrok-free.app'; // 실제 주소로 변경
+
 class MemoRepository {
+  // 전체 메모 조회 (폴더 기준)
+  Future<List<Memo>> getMemos(String storagePath) async {
+    final response = await http.get(
+      Uri.parse('$baseUrl/memo/list?storagePath=$storagePath'),
+    );
 
-  
-  Future<List<Memo>> getMemos(String folderKey) async {
-    final prefs = await SharedPreferences.getInstance();
-    final rawNotes = prefs.getStringList(folderKey) ?? [];
-    final writtenDates = prefs.getStringList('${folderKey}_writtenDates') ?? [];
-    final modifiedDates = prefs.getStringList('${folderKey}_modified') ?? [];
-
-    return List.generate(rawNotes.length, (i) {
-      final parts = rawNotes[i].split('\n');
-      final title = parts.first;
-      final contentJson = parts.skip(1).join('\n');
-      return Memo(
-        title: title,
-        contentJson: contentJson,
-        writtenDate: writtenDates.length > i ? writtenDates[i] : '',
-        modifiedDate: modifiedDates.length > i ? modifiedDates[i] : '',
-      );
-    });
-  }
-
-  Future<void> saveMemo(String folderKey, Memo memo, {int? index}) async {
-    final prefs = await SharedPreferences.getInstance();
-    final notes = prefs.getStringList(folderKey) ?? [];
-    final modifiedDates = prefs.getStringList('${folderKey}_modified') ?? [];
-    final writtenDates = prefs.getStringList('${folderKey}_writtenDates') ?? [];
-
-    final content = '${memo.title}\n${memo.contentJson}';
-
-    if (index != null && index < notes.length) {
-      notes[index] = content;
-      modifiedDates[index] = memo.modifiedDate;
-      writtenDates[index] = memo.writtenDate;
+    if (response.statusCode == 200) {
+      final List<dynamic> data = jsonDecode(response.body);
+      return data.map((json) => Memo.fromJson(json)).toList();
     } else {
-      notes.add(content);
-      modifiedDates.add(memo.modifiedDate);
-      writtenDates.add(memo.writtenDate);
+      print('❌ 서버 응답 에러: ${response.statusCode} ${response.body}');
+      throw Exception('메모 불러오기 실패');
     }
-
-    await prefs.setStringList(folderKey, notes);
-    await prefs.setStringList('${folderKey}_modified', modifiedDates);
-    await prefs.setStringList('${folderKey}_writtenDates', writtenDates);
   }
 
-  Future<void> deleteMemo(String folderKey, int index) async {
-    final prefs = await SharedPreferences.getInstance();
-    final notes = prefs.getStringList(folderKey) ?? [];
-    final modifiedDates = prefs.getStringList('${folderKey}_modified') ?? [];
-    final writtenDates = prefs.getStringList('${folderKey}_writtenDates') ?? [];
+  // 메모 저장
+  Future<bool> saveMemo(Memo memo) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/memo/save'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode(memo.toJson()),
+    );
+    return response.statusCode == 200;
+  }
 
-    if (index < notes.length) notes.removeAt(index);
-    if (index < modifiedDates.length) modifiedDates.removeAt(index);
-    if (index < writtenDates.length) writtenDates.removeAt(index);
-
-    await prefs.setStringList(folderKey, notes);
-    await prefs.setStringList('${folderKey}_modified', modifiedDates);
-    await prefs.setStringList('${folderKey}_writtenDates', writtenDates);
+  // 메모 삭제
+  Future<bool> deleteMemo(String id) async {
+    final response = await http.delete(
+      Uri.parse('$baseUrl/memo/delete'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'id': id}),
+    );
+    return response.statusCode == 200;
   }
 }

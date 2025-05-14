@@ -1,25 +1,18 @@
-// 리팩토링된 note_edit_screen.dart (MemoRepository 사용 기반)
-
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart';
-import 'package:flutter_quill/extensions.dart';
-import 'package:intl/intl.dart';
-import '../repository/memo_repository.dart';
 import '../model/memo.dart';
+import '../repository/memo_repository.dart';
 
 class NoteEditScreen extends StatefulWidget {
   final Memo? initialMemo;
-  final int? noteIndex;
-  final String folderKey;
+  final String storagePath;
   final VoidCallback onNoteSaved;
 
   const NoteEditScreen({
     super.key,
-    required this.folderKey,
+    required this.storagePath,
     required this.onNoteSaved,
     this.initialMemo,
-    this.noteIndex,
   });
 
   @override
@@ -27,66 +20,50 @@ class NoteEditScreen extends StatefulWidget {
 }
 
 class _NoteEditScreenState extends State<NoteEditScreen> {
-  late QuillController _controller;
   final TextEditingController _titleController = TextEditingController();
-  DateTime? _selectedDate;
+  late QuillController _quillController;
   final _repo = MemoRepository();
 
   @override
   void initState() {
     super.initState();
+
     if (widget.initialMemo != null) {
       _titleController.text = widget.initialMemo!.title;
-      _selectedDate = DateFormat('yyyy.MM.dd').parse(widget.initialMemo!.writtenDate);
-
-      try {
-        final deltaJson = jsonDecode(widget.initialMemo!.contentJson);
-        final doc = Document.fromJson(deltaJson);
-        _controller = QuillController(
-          document: doc,
-          selection: const TextSelection.collapsed(offset: 0),
-        );
-      } catch (_) {
-        _controller = QuillController.basic();
-      }
+      _quillController = QuillController(
+        document: Document()..insert(0, widget.initialMemo!.content),
+        selection: const TextSelection.collapsed(offset: 0),
+      );
     } else {
-      _controller = QuillController.basic();
-      _selectedDate = DateTime.now();
-    }
-  }
-
-  void _pickDate() async {
-    final picked = await showDatePicker(
-      context: context,
-      initialDate: _selectedDate ?? DateTime.now(),
-      firstDate: DateTime(2000),
-      lastDate: DateTime(2100),
-    );
-    if (picked != null) {
-      setState(() {
-        _selectedDate = picked;
-      });
+      _quillController = QuillController.basic();
     }
   }
 
   Future<void> _saveMemo() async {
     final title = _titleController.text.trim();
-    final deltaJson = jsonEncode(_controller.document.toDelta().toJson());
-    final now = DateFormat('yyyy.MM.dd').format(DateTime.now());
-    final written = DateFormat('yyyy.MM.dd').format(_selectedDate ?? DateTime.now());
+    final plainText = _quillController.document.toPlainText().trim();
 
-    if (title.isEmpty && _controller.document.length <= 1) return;
+    if (title.isEmpty && plainText.isEmpty) return;
 
-    final memo = Memo(
+    final newMemo = Memo(
+      id: widget.initialMemo?.id ?? '',
+      // 수정: id 유지
       title: title,
-      contentJson: deltaJson,
-      writtenDate: written,
-      modifiedDate: now,
+      content: plainText,
+      imageUrl: '',
+      // 아직 이미지 업로드 미구현
+      storagePath: widget.storagePath,
     );
 
-    await _repo.saveMemo(widget.folderKey, memo, index: widget.noteIndex);
-    widget.onNoteSaved();
-    Navigator.pop(context);
+    final success = await _repo.saveMemo(newMemo);
+    if (success) {
+      widget.onNoteSaved();
+      Navigator.pop(context);
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('메모 저장 실패')),
+      );
+    }
   }
 
   @override
@@ -94,14 +71,7 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFFFFFBF5),
       appBar: AppBar(
-        title: InkWell(
-          onTap: _pickDate,
-          child: Text(
-            DateFormat('yyyy.MM.dd').format(_selectedDate ?? DateTime.now()),
-            style: const TextStyle(color: Color(0xFF8B674C)),
-          ),
-        ),
-        centerTitle: true,
+        title: const Text('메모 작성'),
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: const BackButton(color: Color(0xFF8B674C)),
@@ -115,64 +85,25 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
       body: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 6),
+            padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8),
             child: TextField(
               controller: _titleController,
               style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               decoration: const InputDecoration(
-                hintText: 'Title',
+                hintText: '제목을 입력하세요',
                 border: InputBorder.none,
               ),
             ),
           ),
+          const Divider(height: 1),
           Expanded(
-            child: Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(12),
-                color: Colors.white,
-              ),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12),
               child: QuillEditor.basic(
                 configurations: QuillEditorConfigurations(
-                  controller: _controller,
+                  controller: _quillController,
                   sharedConfigurations:
-                  const QuillSharedConfigurations(locale: Locale('en')),
-                ),
-              ),
-            ),
-          ),
-          const Divider(height: 1),
-          Padding(
-            padding: const EdgeInsets.only(bottom: 16),
-            child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: QuillToolbar.simple(
-                configurations: QuillSimpleToolbarConfigurations(
-                  controller: _controller,
-                  sharedConfigurations:
-                  const QuillSharedConfigurations(locale: Locale('en')),
-                  showBackgroundColorButton: false,
-                  showCodeBlock: false,
-                  showInlineCode: false,
-                  showQuote: false,
-                  showDirection: false,
-                  showDividers: false,
-                  showClearFormat: false,
-                  showUndo: true,
-                  showRedo: true,
-                  showListCheck: true,
-                  showColorButton: false,
-                  showListNumbers: true,
-                  showListBullets: false,
-                  showSubscript: false,
-                  showSuperscript: false,
-                  showUnderLineButton: false,
-                  showClipboardCopy: false,
-                  showClipboardCut: false,
-                  showClipboardPaste: false,
-                  showCenterAlignment: false,
-                  showItalicButton: false,
-                  showIndent: false,
-                  showFontFamily: false,
+                      const QuillSharedConfigurations(locale: Locale('ko')),
                 ),
               ),
             ),

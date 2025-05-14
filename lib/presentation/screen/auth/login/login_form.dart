@@ -40,7 +40,7 @@ class _LoginFormState extends State<LoginForm> {
     }
 
     try {
-      final url = Uri.parse('http://223.194.152.120:8080/login');
+      final url = Uri.parse('http://192.168.219.103:8080/login');
       final response = await http.post(
         url,
         headers: {'Content-Type': 'application/json'},
