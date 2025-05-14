@@ -5,8 +5,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../memo/screen/note_edit_screen.dart';
+import '../memo/model/memo.dart';
 
-import '../memo/memo_screen.dart';
+import '../memo/screen/memo_screen.dart';
 
 class FolderDetailScreen extends StatefulWidget {
   final String folderName;
@@ -75,7 +77,7 @@ class _FolderDetailScreenState extends State<FolderDetailScreen> {
       MaterialPageRoute(
         builder: (context) => NoteEditScreen(
           folderKey: widget.folderName,
-          onNoteSaved: (_) => _loadNotes(),
+          onNoteSaved: _loadNotes,
         ),
       ),
     );
@@ -230,9 +232,14 @@ class _FolderDetailScreenState extends State<FolderDetailScreen> {
                                 MaterialPageRoute(
                                   builder: (_) => NoteEditScreen(
                                     folderKey: widget.folderName,
-                                    initialContent: fullNote,
                                     noteIndex: index,
-                                    onNoteSaved: (_) => _loadNotes(),
+                                    initialMemo: Memo( // ✨ 여기가 핵심
+                                      title: title,
+                                      contentJson: deltaString,
+                                      writtenDate: writeDate,
+                                      modifiedDate: writeDate, // 수정일도 우선 작성일과 같게 넣어줘
+                                    ),
+                                    onNoteSaved: _loadNotes,
                                   ),
                                 ),
                               );
