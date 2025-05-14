@@ -1,4 +1,4 @@
-import 'dart:convert'; // 🔧 delta 저장/복원용
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 import 'package:flutter_quill/extensions.dart';
@@ -26,6 +26,8 @@ class NoteEditScreen extends StatefulWidget {
 class _NoteEditScreenState extends State<NoteEditScreen> {
   late QuillController _controller;
   final TextEditingController _titleController = TextEditingController();
+  DateTime? _selectedDate;
+  String _selectedEmoji = '📝'; // 기본 이모지
 
   @override
   void initState() {
@@ -35,17 +37,16 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
       final parts = widget.initialContent!.split('\n');
       final title = parts.first;
       _titleController.text = title;
-      String preview = '';
 
       try {
         final deltaString = parts.skip(1).join('\n');
         final deltaJson = jsonDecode(deltaString) as List<dynamic>;
-        final doc = Document.fromJson(deltaJson); // ✅ Delta.fromJson() 대신
+        final doc = Document.fromJson(deltaJson);
         _controller = QuillController(
           document: doc,
           selection: const TextSelection.collapsed(offset: 0),
         );
-      } catch (e) {
+      } catch (_) {
         final content = parts.skip(1).join('\n');
         final doc = Document()..insert(0, content);
         _controller = QuillController(
@@ -57,8 +58,6 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
       _controller = QuillController.basic();
     }
   }
-
-  DateTime? _selectedDate;
 
   String _formattedDate() {
     final date = _selectedDate ?? DateTime.now();
@@ -86,7 +85,7 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
   }
 
   Future<void> _autoSaveNote() async {
-    final title = _titleController.text.trim();
+    final title = '$_selectedEmoji ${_titleController.text.trim()}';
     final deltaJson = _controller.document.toDelta().toJson();
     final fullNote = '$title\n${jsonEncode(deltaJson)}';
     final dateString = DateFormat('yyyy.MM.dd').format(_selectedDate ?? DateTime.now());
@@ -117,13 +116,10 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
 
   void _summarizeNoteAI() async {
     final plainText = _controller.document.toPlainText();
-
-    // 예시 요약 (로컬 처리 or 향후 OpenAI 연동)
     final summary = plainText.length > 100
         ? '${plainText.substring(0, 100)}...'
         : plainText;
 
-    // 요약 결과를 Dialog로 표시
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -139,25 +135,58 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
     );
   }
 
+  Future<void> _pickEmoji() async {
+    final emoji = await showModalBottomSheet<String>(
+      context: context,
+      builder: (context) {
+        final emojis = ['✈️', '📌', '📅', '🗂', '🏝️'];
+        return GridView.builder(
+          padding: const EdgeInsets.all(16),
+          itemCount: emojis.length,
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 5,
+            mainAxisSpacing: 12,
+            crossAxisSpacing: 12,
+          ),
+          itemBuilder: (_, index) {
+            return GestureDetector(
+              onTap: () => Navigator.pop(context, emojis[index]),
+              child: Center(
+                child: Text(emojis[index], style: const TextStyle(fontSize: 28)),
+              ),
+            );
+          },
+        );
+      },
+    );
+
+    if (emoji != null) {
+      setState(() {
+        _selectedEmoji = emoji;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFFFFBF5),
+      backgroundColor: Colors.white,
+      resizeToAvoidBottomInset: true,
       appBar: AppBar(
         title: InkWell(
           onTap: _pickDate,
           child: Text(
             _formattedDate(),
-            style: TextStyle(color: Color(0xFF8B674C)),
+            style: const TextStyle(color: Color(0xFF8B674C)),
           ),
         ),
         centerTitle: true,
-        backgroundColor: Colors.transparent,
+        backgroundColor: Color(0xFFFFFBF5),
         elevation: 0,
-        leading: BackButton(color: Color(0xFF8B674C)),
+        leading: const BackButton(color: Color(0xFF8B674C)),
         actions: [
           IconButton(
-            icon: Icon(Icons.check, color: Color(0xFF8B674C)),
+            icon: const Icon(Icons.check, color: Color(0xFF8B674C)),
             tooltip: 'Save',
             onPressed: () {
               _autoSaveNote();
@@ -168,40 +197,60 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
       ),
       body: Column(
         children: [
-          // 제목 입력
+          // 제목 입력 (배경 및 여백 추가)
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 6),
-            child: TextField(
-              controller: _titleController,
-              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-              decoration: const InputDecoration(
-                hintText: 'Title',
-                border: InputBorder.none,
+            padding: const EdgeInsets.symmetric(vertical: 10),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Row(
+                children: [
+                  GestureDetector(
+                    onTap: _pickEmoji,
+                    child: Text(
+                      _selectedEmoji,
+                      style: const TextStyle(fontSize: 24),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: TextField(
+                      controller: _titleController,
+                      style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                      decoration: const InputDecoration(
+                        hintText: 'Title',
+                        hintStyle: TextStyle(color: Colors.black26),
+                        border: InputBorder.none,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+    ),
+
+          // 본문
+          Expanded(
+            child: Container(
+              margin: const EdgeInsets.symmetric(horizontal: 15),
+              decoration: BoxDecoration(
+                color: Colors.white,
+              ),
+              child: QuillEditor.basic(
+                configurations: QuillEditorConfigurations(
+                  controller: _controller,
+                  sharedConfigurations: const QuillSharedConfigurations(locale: Locale('en')),
+                ),
               ),
             ),
           ),
 
-          // 본문
-          Expanded(
-              child: Container(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(12),
-                  color: Colors.white,
-
-                ),
-                child: QuillEditor.basic(
-                  configurations: QuillEditorConfigurations(
-                    controller: _controller,
-                    sharedConfigurations: const QuillSharedConfigurations(locale: Locale('en')),
-                  ),
-                ),
-              ),
-            ),
-
-
-
-          // 툴바 (간소화)
           const Divider(height: 1),
+
+          // 툴바는 하단 고정 (올라가지 않음)
           Padding(
             padding: const EdgeInsets.only(bottom: 16),
             child: SingleChildScrollView(
@@ -219,7 +268,7 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
                   showClearFormat: false,
                   showUndo: true,
                   showRedo: true,
-                  showListCheck: true, // ✅ 체크리스트 지원
+                  showListCheck: true,
                   showColorButton: false,
                   showListNumbers: true,
                   showListBullets: false,
@@ -233,7 +282,8 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
                   showItalicButton: false,
                   showIndent: false,
                   showFontFamily: false,
-
+                  showFontSize: false,
+                  showHeaderStyle: false,
                 ),
               ),
             ),
@@ -244,9 +294,9 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
         padding: const EdgeInsets.only(bottom: 40),
         child: FloatingActionButton(
           onPressed: _summarizeNoteAI,
-          backgroundColor: Color(0xFF8B674C),
+          backgroundColor: const Color(0xFF8B674C),
           child: const Icon(Icons.smart_toy, color: Colors.white),
-          shape: const CircleBorder(), // 둥근 테두리 유지
+          shape: const CircleBorder(),
         ),
       ),
     );

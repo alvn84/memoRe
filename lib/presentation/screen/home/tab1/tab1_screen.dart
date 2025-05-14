@@ -7,6 +7,7 @@ import '../folder/folder_storage.dart';
 import '../folder/folder_reorder_screen.dart';
 import '../folder/add_folder_dialog.dart';
 import '../folder/folder_detail_screen.dart';
+import '../memo/memo_screen.dart';
 import 'package:intl/intl.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
@@ -449,8 +450,19 @@ class _Tab1ScreenState extends State<Tab1Screen> {
               shape: const CircleBorder(),
               onPressed: () {
                 if (_isFabExpanded) {
-                  // 열렸을 때 = New Memo 역할
-                  // TODO: 메모 추가 동작
+                  // ✅ 열렸을 때: 메모 작성 화면으로 이동
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => NoteEditScreen(
+                        onNoteSaved: (note) {
+                          // 저장 후 화면에서 돌아온 뒤 필요한 작업 (예: 새로고침 등)
+                          // setState() 등 사용 가능
+                        },
+                        folderKey: 'default', // ✅ 자동으로 default 폴더에 저장
+                      ),
+                    ),
+                  );
                 } else {
                   setState(() {
                     _isFabExpanded = true;

@@ -31,7 +31,8 @@ class _AITravelChatScreenState extends State<AITravelChatScreen> {
       appBar: AppBar(
         title: const Text('AI Travel Chatbot',
           style: TextStyle(
-            color: Colors.black),),
+            color: Colors.black, fontWeight: FontWeight.bold),),
+        leading: BackButton(color: Colors.black,),
         backgroundColor: const Color(0xFFFFFBF5),
         foregroundColor: Colors.white,
       ),
@@ -52,7 +53,7 @@ class _AITravelChatScreenState extends State<AITravelChatScreen> {
                     constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.7),
                     decoration: BoxDecoration(
                       color: isUser ? Color(0xFF8B674C) : Colors.grey[300],
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(23),
                     ),
                     child: Text(
                       message['text'] ?? '',
@@ -75,6 +76,7 @@ class _AITravelChatScreenState extends State<AITravelChatScreen> {
                     onSubmitted: (_) => _sendMessage(),
                     decoration: InputDecoration(
                       hintText: 'Ask me about a travel destination...',
+                      hintStyle: const TextStyle(fontSize: 13,),
                       filled: true,
                       fillColor: Colors.white,
                       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
