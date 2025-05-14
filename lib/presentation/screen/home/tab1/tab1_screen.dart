@@ -201,7 +201,7 @@ class _Tab1ScreenState extends State<Tab1Screen> {
   Widget build(BuildContext context) {
     final filteredFolders = folders
         .where((folder) =>
-            folder.name.toLowerCase().contains(_searchQuery.toLowerCase()))
+        folder.name.toLowerCase().contains(_searchQuery.toLowerCase()))
         .toList();
 
     return GestureDetector(
@@ -222,9 +222,9 @@ class _Tab1ScreenState extends State<Tab1Screen> {
           onSort: () {
             setState(() {
               final defaultFolder =
-                  folders.firstWhere((f) => f.name == 'Default');
+              folders.firstWhere((f) => f.name == 'Default');
               final userFolders =
-                  folders.where((f) => f.name != 'Default').toList();
+              folders.where((f) => f.name != 'Default').toList();
               userFolders.sort((a, b) => a.name.compareTo(b.name));
               folders = [defaultFolder, ...userFolders];
             });
