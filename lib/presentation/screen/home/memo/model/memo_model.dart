@@ -1,12 +1,12 @@
 class Memo {
-  final String id; // ← 서버에서 부여한 고유 식별자
+  final int? id; // ← 서버에서 부여한 고유 식별자
   final String title;
   final String content;
   final String imageUrl;
   final String storagePath;
 
   Memo({
-    required this.id,
+    this.id,
     required this.title,
     required this.content,
     required this.imageUrl,
@@ -30,7 +30,7 @@ class Memo {
       };
 
   Memo copyWith({
-    String? id,
+    int? id,
     String? title,
     String? content,
     String? imageUrl,

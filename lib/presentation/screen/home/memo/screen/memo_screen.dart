@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../model/memo.dart';
+import '../model/memo_model.dart';
 import '../repository/memo_repository.dart';
 import 'note_edit_screen.dart';
 

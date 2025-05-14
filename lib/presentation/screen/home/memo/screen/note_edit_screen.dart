@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart';
-import '../model/memo.dart';
+import '../model/memo_model.dart';
 import '../repository/memo_repository.dart';
 
 class NoteEditScreen extends StatefulWidget {
@@ -39,27 +39,24 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
     }
   }
 
-  Future<void> _saveMemo() async {
+  Future<void> saveMemo() async {
     final title = _titleController.text.trim();
     final plainText = _quillController.document.toPlainText().trim();
 
     if (title.isEmpty && plainText.isEmpty) return;
 
-    final newMemo = Memo(
-      id: widget.initialMemo?.id ?? '',
-      // 수정: id 유지
+    final memo = Memo(
       title: title,
       content: plainText,
-      imageUrl: '',
-      // 아직 이미지 업로드 미구현
+      imageUrl: '', // 이미지 기능은 나중에
       storagePath: widget.storagePath,
     );
 
-    final success = await _repo.saveMemo(newMemo);
-    if (success) {
-      widget.onNoteSaved();
+    try {
+      await _repo.saveMemo(memo); // 서버 저장 로직
+      widget.onNoteSaved(); // 목록 갱신 콜백
       Navigator.pop(context);
-    } else {
+    } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('메모 저장 실패')),
       );
@@ -78,7 +75,7 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
         actions: [
           IconButton(
             icon: const Icon(Icons.check, color: Color(0xFF8B674C)),
-            onPressed: _saveMemo,
+            onPressed: saveMemo,
           ),
         ],
       ),

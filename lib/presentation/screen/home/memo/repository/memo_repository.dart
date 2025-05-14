@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import '../model/memo.dart';
+import '../model/memo_model.dart';
+import '../../../auth/token_storage.dart';
 
 const String baseUrl = 'https://your-ngrok-url.ngrok-free.app'; // 실제 주소로 변경
 
@@ -21,13 +22,20 @@ class MemoRepository {
   }
 
   // 메모 저장
-  Future<bool> saveMemo(Memo memo) async {
+  Future<void> saveMemo(Memo memo) async {
+    final token = await TokenStorage.getToken();
     final response = await http.post(
-      Uri.parse('$baseUrl/memo/save'),
-      headers: {'Content-Type': 'application/json'},
+      Uri.parse('http://192.168.219.103:8080/api/memos'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
       body: jsonEncode(memo.toJson()),
     );
-    return response.statusCode == 200;
+
+    if (response.statusCode != 200) {
+      throw Exception('메모 저장 실패');
+    }
   }
 
   // 메모 삭제

@@ -4,7 +4,7 @@ import 'package:memore/presentation/screen/home/tab1/tab1_controller.dart';
 
 import '../ai/ai_travel_chat_screen.dart';
 import '../folder_feature/folder_model.dart';
-import '../folder_feature/folder_reorder_screen.dart';
+import '../folder_feature/folder_reorder.dart';
 import '../folder_feature/folder_screen.dart';
 import 'folder/folder_storage.dart';
 import 'floating_action_button/add_folder_dialog.dart';
@@ -281,7 +281,7 @@ class _Tab1ScreenState extends State<Tab1Screen> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (_) => FolderReorderScreen(
+                      builder: (_) => FolderReorder(
                         folders: folders,
                         onReorder: (newFolders) {
                           setState(() {

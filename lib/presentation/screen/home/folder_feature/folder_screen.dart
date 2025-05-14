@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import '../memo/model/memo.dart';
+import '../memo/model/memo_model.dart';
 import '../memo/repository/memo_repository.dart';
 import '../memo/screen/note_edit_screen.dart';
 
@@ -178,7 +178,7 @@ class _FolderDetailScreenState extends State<FolderDetailScreen> {
                                 TextButton(
                                   onPressed: () {
                                     Navigator.pop(context);
-                                    _deleteMemo(memo.id);
+                                    //_deleteMemo(memo.id);
                                   },
                                   child: const Text('삭제',
                                       style: TextStyle(color: Colors.red)),
