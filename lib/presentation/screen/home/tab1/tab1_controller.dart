@@ -1,3 +1,4 @@
+// - - - - - - - - - - - - - - - Tab1에서의 상태 관리 코드 - - - - - - - - - - - - - - -
 import '../folder_feature/folder_model.dart';
 import '../folder_feature/folder_storage.dart';
 

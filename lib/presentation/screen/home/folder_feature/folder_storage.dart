@@ -1,3 +1,4 @@
+// - - - - - - - - - - - - - - - 폴더 상태 관리 코드 - - - - - - - - - - - - - - -
 import 'dart:convert';
 import 'dart:ui';
 import 'package:flutter/material.dart';

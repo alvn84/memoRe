@@ -50,6 +50,7 @@ class _FolderDetailScreenState extends State<FolderDetailScreen> {
 
   List<String> writtenDates = [];
 
+  // ------------------------------ 수정 필요(API 요청으로)
   Future<void> _loadNotes() async {
     final prefs = await SharedPreferences.getInstance();
     final notes = prefs.getStringList(widget.folderName) ?? [];
@@ -172,7 +173,7 @@ class _FolderDetailScreenState extends State<FolderDetailScreen> {
                               : 'Unknown';
 
                           return GestureDetector(
-                            onLongPress: () {
+                            onLongPress: () { // --------------- 수정필요
                               showDialog(
                                 context: context,
                                 builder: (context) => AlertDialog(
@@ -226,7 +227,7 @@ class _FolderDetailScreenState extends State<FolderDetailScreen> {
                                 ),
                               );
                             },
-                            onTap: () async {
+                            onTap: () async { // ------------------- id 넘겨야함
                               await Navigator.push(
                                 context,
                                 MaterialPageRoute(

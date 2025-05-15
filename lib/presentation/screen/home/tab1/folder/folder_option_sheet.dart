@@ -1,3 +1,4 @@
+// - - - - - - - - - - - - - - - 폴더 꾹 눌렀을 때 하단에서 뜨는 수정 관리 바- - - - - - - - - - - - - - -
 import 'package:flutter/material.dart';
 import 'package:memore/presentation/screen/home/folder_feature/folder_model.dart';
 

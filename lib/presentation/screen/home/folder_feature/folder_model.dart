@@ -1,3 +1,4 @@
+// - - - - - - - - - - - - - - - 폴더 데이터 모델 - - - - - - - - - - - - - - -
 import 'package:flutter/material.dart';
 
 class Folder {

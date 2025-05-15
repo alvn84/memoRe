@@ -1,3 +1,4 @@
+// - - - - - - - - - - - - - - - Tab1에서 폴더 리스트를 GridView 형식으로 보여주는 위젯 - - - - - - - - - - - - - - -
 import 'package:flutter/material.dart';
 
 import '../../folder_feature/folder_model.dart';

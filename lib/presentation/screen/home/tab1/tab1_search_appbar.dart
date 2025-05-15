@@ -1,3 +1,4 @@
+// - - - - - - - - - - - - - - - Tab1 검색 앱 바 - - - - - - - - - - - - - - -
 import 'package:flutter/material.dart';
 
 class Tab1SearchAppBar extends StatelessWidget implements PreferredSizeWidget {
