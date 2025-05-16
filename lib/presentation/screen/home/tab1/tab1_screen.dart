@@ -5,9 +5,9 @@ import 'package:memore/presentation/screen/home/tab1/tab1_controller.dart';
 
 import '../ai/ai_travel_chat_screen.dart';
 import '../folder_feature/folder_model.dart';
-import '../folder_feature/folder_reorder_screen.dart';
+import '../folder_feature/folder_reorder.dart';
 import '../folder_feature/folder_screen.dart';
-import '../folder_feature/folder_storage.dart';
+import 'folder/folder_storage.dart';
 import 'floating_action_button/add_folder_dialog.dart';
 import 'floating_action_button/tab1_fab.dart';
 import 'folder/folder_grid.dart';
@@ -47,33 +47,53 @@ class _Tab1ScreenState extends State<Tab1Screen> {
     setState(() {});
   }
 
-  Future<void> _saveFolders() async {
-    await FolderStorage.saveFolders(folders);
+
+
+  Future<void> _saveFolder(Folder folder) async {
+    try {
+      await FolderStorage.saveFolder(folder); // 서버에 저장
+      folders.add(folder); // UI 목록에도 반영
+      setState(() {}); // 새로고침
+    } catch (e) {
+      print('❌ 폴더 저장 중 오류 발생: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('폴더 저장에 실패했습니다.')),
+      );
+    }
   }
 
   Future<void> _addNewFolder() async {
     final folderName = await showAddFolderDialog(context);
     if (folderName != null && folderName.isNotEmpty) {
-      setState(() {
-        folders.add(
-          Folder(
-            name: folderName,
-            color: Color(0xFFFFE082),
-            icon: Icons.folder,
-            createdAt: DateTime.now(),
-          ),
-        );
-      });
-      _saveFolders();
+      final folder = Folder(
+        name: folderName,
+        color: const Color(0xFFFFE082),
+        icon: Icons.folder,
+        createdAt: DateTime.now(),
+      );
+
+      await _saveFolder(folder); // 1. 서버에 먼저 저장
+      await _loadFolders(); // 2. 서버에서 목록 다시 불러오기
+      setState(() {}); // 3. UI 갱신
     }
   }
 
   // 폴더 삭제 함수
-  void _deleteFolder(int index) {
-    setState(() {
-      folders.removeAt(index);
-    });
-    _saveFolders();
+  Future<void> _deleteFolder(int index) async {
+    final folder = folders[index];
+
+    try {
+      await FolderStorage.deleteFolder(folder.id); // 서버에 삭제 요청
+
+      setState(() {
+        folders.removeAt(index); // UI에서도 제거
+      });
+    } catch (e) {
+      print('❌ 폴더 삭제 중 오류 발생: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('폴더 삭제에 실패했습니다.')),
+      );
+    }
   }
 
   // 즐겨찾기 등록 함수
@@ -89,7 +109,6 @@ class _Tab1ScreenState extends State<Tab1Screen> {
         imagePath: folders[index].imagePath, // ⭐️ 프로필 이미지 유지
       );
     });
-    _saveFolders();
   }
 
   // 폴더 색상 변경 함수
@@ -119,7 +138,6 @@ class _Tab1ScreenState extends State<Tab1Screen> {
                     imagePath: folders[index].imagePath, // ⭐️ 프로필 이미지 유지
                   );
                 });
-                _saveFolders();
                 Navigator.pop(context);
               },
               child: CircleAvatar(
@@ -167,7 +185,6 @@ class _Tab1ScreenState extends State<Tab1Screen> {
                     createdAt: folders[index].createdAt,
                   );
                 });
-                _saveFolders();
                 Navigator.pop(context);
               }
             },
@@ -194,7 +211,6 @@ class _Tab1ScreenState extends State<Tab1Screen> {
           imagePath: pickedFile.path,
         );
       });
-      _saveFolders();
     }
   }
 
@@ -202,7 +218,7 @@ class _Tab1ScreenState extends State<Tab1Screen> {
   Widget build(BuildContext context) {
     final filteredFolders = folders
         .where((folder) =>
-        folder.name.toLowerCase().contains(_searchQuery.toLowerCase()))
+            folder.name.toLowerCase().contains(_searchQuery.toLowerCase()))
         .toList();
 
     return GestureDetector(
@@ -223,9 +239,9 @@ class _Tab1ScreenState extends State<Tab1Screen> {
           onSort: () {
             setState(() {
               final defaultFolder =
-              folders.firstWhere((f) => f.name == 'Default');
+                  folders.firstWhere((f) => f.name == 'Default');
               final userFolders =
-              folders.where((f) => f.name != 'Default').toList();
+                  folders.where((f) => f.name != 'Default').toList();
               userFolders.sort((a, b) => a.name.compareTo(b.name));
               folders = [defaultFolder, ...userFolders];
             });
@@ -266,13 +282,12 @@ class _Tab1ScreenState extends State<Tab1Screen> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (_) => FolderReorderScreen(
+                      builder: (_) => FolderReorder(
                         folders: folders,
                         onReorder: (newFolders) {
                           setState(() {
                             folders = newFolders;
                           });
-                          _saveFolders();
                         },
                       ),
                     ),

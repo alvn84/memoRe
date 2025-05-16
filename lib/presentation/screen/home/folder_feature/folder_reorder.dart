@@ -3,21 +3,21 @@ import 'package:flutter/material.dart';
 
 import 'folder_model.dart';
 
-class FolderReorderScreen extends StatefulWidget {
+class FolderReorder extends StatefulWidget {
   final List<Folder> folders;
   final Function(List<Folder>) onReorder;
 
-  const FolderReorderScreen({
+  const FolderReorder({
     super.key,
     required this.folders,
     required this.onReorder,
   });
 
   @override
-  State<FolderReorderScreen> createState() => _FolderReorderScreenState();
+  State<FolderReorder> createState() => _FolderReorderState();
 }
 
-class _FolderReorderScreenState extends State<FolderReorderScreen> {
+class _FolderReorderState extends State<FolderReorder> {
   late List<Folder> _folders;
 
   @override

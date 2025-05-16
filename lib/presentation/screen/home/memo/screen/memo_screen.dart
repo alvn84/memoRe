@@ -1,15 +1,12 @@
-// 리팩토링된 memo_screen.dart 예시 (repository 사용 기반)
-
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
+import '../model/memo_model.dart';
 import '../repository/memo_repository.dart';
-import '../model/memo.dart';
 import 'note_edit_screen.dart';
 
 class MemoScreen extends StatefulWidget {
-  final String folderKey;
+  final String storagePath;
 
-  const MemoScreen({super.key, required this.folderKey});
+  const MemoScreen({super.key, required this.storagePath});
 
   @override
   State<MemoScreen> createState() => _MemoScreenState();
@@ -22,23 +19,26 @@ class _MemoScreenState extends State<MemoScreen> {
   @override
   void initState() {
     super.initState();
-    _memoFuture = _repo.getMemos(widget.folderKey);
+    _loadMemos();
   }
 
-  void _refresh() {
+  void _loadMemos() {
+    _memoFuture = _repo.getMemos(widget.storagePath);
+  }
+
+  Future<void> _refresh() async {
     setState(() {
-      _memoFuture = _repo.getMemos(widget.folderKey);
+      _loadMemos();
     });
   }
 
-  void _navigateToEdit({Memo? existingMemo, int? index}) async {
+  void _navigateToEdit({Memo? memo}) async {
     await Navigator.push(
       context,
       MaterialPageRoute(
         builder: (_) => NoteEditScreen(
-          folderKey: widget.folderKey,
-          noteIndex: index,
-          initialMemo: existingMemo,
+          initialMemo: memo,
+          storagePath: widget.storagePath,
           onNoteSaved: _refresh,
         ),
       ),
@@ -71,9 +71,13 @@ class _MemoScreenState extends State<MemoScreen> {
               final memo = memos[index];
               return ListTile(
                 title: Text(memo.title),
-                subtitle: Text('작성일: ${memo.writtenDate}\n수정일: ${memo.modifiedDate}'),
-                isThreeLine: true,
-                onTap: () => _navigateToEdit(existingMemo: memo, index: index),
+                subtitle: Text(
+                  memo.content.length > 50
+                      ? '${memo.content.substring(0, 50)}...'
+                      : memo.content,
+                ),
+                trailing: Text(memo.storagePath), // 혹은 날짜 정보로 교체 가능
+                onTap: () => _navigateToEdit(memo: memo),
               );
             },
           );
