@@ -4,9 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import '../../folder_feature/folder_model.dart';
 import '../../../auth/token_storage.dart';
+import '../../../auth/api_config.dart';
 
-const String baseUrl =
-    'http://192.168.219.103:8080/api/folders'; // 실제 서버 주소로 변경
 
 class FolderStorage {
   // 폴더 전체 조회
@@ -14,7 +13,7 @@ class FolderStorage {
     final token = await TokenStorage.getToken(); // 🔐 로그인 토큰 불러오기
 
     final response = await http.get(
-      Uri.parse('http://192.168.219.103:8080/api/folders'),
+      Uri.parse('$baseUrl/api/folders'),
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
@@ -57,7 +56,7 @@ class FolderStorage {
 
     final token = await TokenStorage.getToken(); // 👉 로그인 후 받은 토큰
     final response = await http.post(
-      Uri.parse('http://192.168.219.103:8080/api/folders'),
+      Uri.parse('$baseUrl/api/folders'),
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token', // ✅ 여기에 추가
@@ -80,7 +79,7 @@ class FolderStorage {
 
     final token = await TokenStorage.getToken();
     final response = await http.delete(
-      Uri.parse('http://192.168.219.103:8080/api/folders/$id'),
+      Uri.parse('$baseUrl/api/folders/$id'),
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
