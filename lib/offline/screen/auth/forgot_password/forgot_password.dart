@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-
 import 'email_input.dart'; // ✨ email 입력 화면 가져오기
 
 class ForgotPasswordScreen extends StatelessWidget {

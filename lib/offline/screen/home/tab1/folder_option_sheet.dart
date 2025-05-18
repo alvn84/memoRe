@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:io';
-import 'package:memore/presentation/screen/home/folder/folder_model.dart';
-import 'package:memore/presentation/screen/home/folder/folder_reorder_screen.dart';
+import '../../home/folder/folder_model.dart';
+import '../../home/folder/folder_reorder_screen.dart';
 
 class FolderOptionSheet extends StatelessWidget {
   final Folder folder;

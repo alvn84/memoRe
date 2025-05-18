@@ -1,8 +1,6 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-
+import 'dart:convert';
 import '../login/login_screen.dart';
 
 class ResetPasswordScreen extends StatefulWidget {
@@ -73,7 +71,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
 
     try {
       final response = await http.post(
-        Uri.parse('http://223.194.135.221:8080/api/password/reset'),
+        Uri.parse('http://223.194.152.120:8080/api/password/reset'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
           'email': widget.email,

@@ -1,0 +1,45 @@
+import 'package:flutter/material.dart';
+
+class Folder {
+  final int? id;
+  final String name;
+  final Color color;
+  final IconData icon;
+  final bool isStarred;
+  final DateTime createdAt;
+  final String? imagePath; // 프로필 이미지 경로 추가
+
+  Folder({
+    this.id,
+    required this.name,
+    required this.color,
+    required this.icon,
+    this.isStarred = false,
+    required this.createdAt,
+    this.imagePath, // nullable 처리
+  });
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'name': name,
+      'color': color.value,
+      'icon': icon.codePoint,
+      'isStarred': isStarred,
+      'createdAt': createdAt.toIso8601String(),
+      'imagePath': imagePath,
+    };
+  }
+
+  factory Folder.fromJson(Map<String, dynamic> json) {
+    return Folder(
+      id: json['id'],
+      name: json['name'] ?? '',
+      color: Color((json['color'] ?? 0xFFFFE082)), // 기본 노랑색
+      icon: IconData((json['icon'] ?? Icons.folder.codePoint), fontFamily: 'MaterialIcons'),
+      isStarred: json['isStarred'] ?? false,
+      createdAt: DateTime.tryParse(json['createdAt'] ?? '') ?? DateTime.now(),
+      imagePath: json['imagePath'],
+    );
+  }
+}

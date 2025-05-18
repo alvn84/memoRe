@@ -26,13 +26,16 @@ const TextStyle forgotPasswordStyle = TextStyle(
   color: Color(0xFF8B674C),
   fontFamily: 'Montserrat',
   fontWeight: FontWeight.w800,
+
 );
 
 const TextStyle signUpLinkStyle = TextStyle(
     fontSize: 14,
     fontFamily: 'Montserrat',
     fontWeight: FontWeight.w800,
-    color: Color(0xFF8B674C));
+    color: Color(0xFF8B674C)
+
+);
 
 class _LoginScreenState extends State<LoginScreen> {
   Key _formKey = UniqueKey(); // ⭐️ 키를 매번 새로 주기
@@ -62,10 +65,11 @@ class _LoginScreenState extends State<LoginScreen> {
                   children: [
                     const SizedBox(height: 70),
                     Center(
-                      child: Image.asset(
+                      child:
+                      Image.asset(
                         'assets/images/logo.png',
-                        height: 60, // 로고 크기 조절
-                        fit: BoxFit.contain, // 비율 유지하면서 꽉 차게
+                        height: 60,  // 로고 크기 조절
+                        fit: BoxFit.contain,  // 비율 유지하면서 꽉 차게
                       ),
                     ),
                     const SizedBox(height: 24),
