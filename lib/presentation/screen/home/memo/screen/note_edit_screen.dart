@@ -5,14 +5,16 @@ import '../repository/memo_repository.dart';
 
 class NoteEditScreen extends StatefulWidget {
   final Memo? initialMemo;
-  final int folderId; // ✅ folderId로 수정
+  final int? folderId; // ✅ folderId로 수정
   final VoidCallback onNoteSaved;
+  final bool isQuickMemo; // ← ✅ 이걸 추가
 
   const NoteEditScreen({
     super.key,
-    required this.folderId,
+    this.folderId,
     required this.onNoteSaved,
     this.initialMemo,
+    this.isQuickMemo = false, // 기본값은 일반 메모
   });
 
   @override
@@ -45,20 +47,25 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
 
     if (title.isEmpty && plainText.isEmpty) return;
 
-    // ✅ id 포함 여부로 신규/수정 판단
     final memo = Memo(
-      id: widget.initialMemo?.id, // <- 수정 시 id 포함
+      id: widget.initialMemo?.id,
       title: title,
       content: plainText,
       imageUrl: '',
-      folderId: widget.folderId,
+      folderId: widget.folderId, // 퀵메모면 서버가 무시함
     );
 
     try {
       if (widget.initialMemo != null) {
-        await _repo.updateMemo(memo); // ✅ 수정
+        // ✅ 수정
+        await _repo.updateMemo(memo);
       } else {
-        await _repo.saveMemo(memo); // ✅ 새로 저장
+        // ✅ 새 메모: 일반 / 퀵메모 분기
+        if (widget.isQuickMemo) {
+          await _repo.saveQuickMemo(memo);
+        } else {
+          await _repo.saveMemo(memo);
+        }
       }
 
       widget.onNoteSaved();
@@ -107,7 +114,7 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
                 configurations: QuillEditorConfigurations(
                   controller: _quillController,
                   sharedConfigurations:
-                  const QuillSharedConfigurations(locale: Locale('ko')),
+                      const QuillSharedConfigurations(locale: Locale('ko')),
                 ),
               ),
             ),

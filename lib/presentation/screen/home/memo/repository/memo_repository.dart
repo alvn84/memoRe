@@ -44,6 +44,24 @@ class MemoRepository {
     }
   }
 
+  Future<void> saveQuickMemo(Memo memo) async {
+    final token = await TokenStorage.getToken();
+    final response = await http.post(
+      Uri.parse('$baseUrl/api/memos/quick'), // ✅ userId를 URL에 안 붙임
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+      body: jsonEncode(memo.toJson()),
+    );
+
+    if (response.statusCode != 200) {
+      print('✅ 저장할 퀵메모 데이터: ${jsonEncode(memo.toJson())}');
+      print('❌ 퀵메모 저장 실패: ${response.statusCode} ${response.body}');
+      throw Exception('퀵메모 저장 실패');
+    }
+  }
+
   // 메모 수정
   Future<void> updateMemo(Memo memo) async {
     final token = await TokenStorage.getToken();

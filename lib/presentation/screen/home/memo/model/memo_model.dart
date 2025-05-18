@@ -3,14 +3,14 @@ class Memo {
   final String title;
   final String content;
   final String imageUrl;
-  final int folderId; // ✅ 서버 연동용 folderId (정수)
+  final int? folderId; // ✅ 서버 연동용 folderId (정수)
 
   Memo({
     this.id,
     required this.title,
     required this.content,
     required this.imageUrl,
-    required this.folderId, // ✅ 변경됨
+    this.folderId, // ✅ 변경됨
   });
 
   factory Memo.fromJson(Map<String, dynamic> json) => Memo(

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../../memo/screen/memo_screen.dart';
+import '../../memo/screen/note_edit_screen.dart';
 
 class Tab1FloatingButtons extends StatelessWidget {
   final bool isFabExpanded;
@@ -87,7 +89,23 @@ class Tab1FloatingButtons extends StatelessWidget {
           backgroundColor:
               isFabExpanded ? const Color(0xFFFDEEDC) : const Color(0xFF8B674C),
           shape: const CircleBorder(),
-          onPressed: onToggle,
+          onPressed: () {
+            if (!isFabExpanded) {
+              // 첫 클릭 시 FAB 확장만 함
+              onToggle();
+            } else {
+              // 두 번째 클릭 시 퀵메모 작성 화면으로 이동
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => NoteEditScreen(
+                    isQuickMemo: true, // ✅ 퀵메모 모드
+                    onNoteSaved: () {}, // 필요 시 콜백 정의
+                  ),
+                ),
+              );
+            }
+          },
           child: Icon(
             isFabExpanded ? Icons.note_add : Icons.add,
             color: isFabExpanded ? const Color(0xFF8B674C) : Colors.white,
