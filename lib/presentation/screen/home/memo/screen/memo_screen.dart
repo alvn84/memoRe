@@ -4,9 +4,9 @@ import '../repository/memo_repository.dart';
 import 'note_edit_screen.dart';
 
 class MemoScreen extends StatefulWidget {
-  final String storagePath;
+  final int folderId;
 
-  const MemoScreen({super.key, required this.storagePath});
+  const MemoScreen({super.key, required this.folderId});
 
   @override
   State<MemoScreen> createState() => _MemoScreenState();
@@ -23,7 +23,7 @@ class _MemoScreenState extends State<MemoScreen> {
   }
 
   void _loadMemos() {
-    _memoFuture = _repo.getMemos(widget.storagePath);
+    _memoFuture = _repo.getMemos(widget.folderId);
   }
 
   Future<void> _refresh() async {
@@ -38,7 +38,7 @@ class _MemoScreenState extends State<MemoScreen> {
       MaterialPageRoute(
         builder: (_) => NoteEditScreen(
           initialMemo: memo,
-          storagePath: widget.storagePath,
+          folderId: widget.folderId,
           onNoteSaved: _refresh,
         ),
       ),
@@ -76,7 +76,7 @@ class _MemoScreenState extends State<MemoScreen> {
                       ? '${memo.content.substring(0, 50)}...'
                       : memo.content,
                 ),
-                trailing: Text(memo.storagePath), // 혹은 날짜 정보로 교체 가능
+                trailing: Text('ID: ${memo.folderId}'),
                 onTap: () => _navigateToEdit(memo: memo),
               );
             },

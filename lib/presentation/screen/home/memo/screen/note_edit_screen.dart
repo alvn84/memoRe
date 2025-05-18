@@ -5,12 +5,12 @@ import '../repository/memo_repository.dart';
 
 class NoteEditScreen extends StatefulWidget {
   final Memo? initialMemo;
-  final String storagePath;
+  final int folderId; // ✅ folderId로 수정
   final VoidCallback onNoteSaved;
 
   const NoteEditScreen({
     super.key,
-    required this.storagePath,
+    required this.folderId,
     required this.onNoteSaved,
     this.initialMemo,
   });
@@ -45,16 +45,23 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
 
     if (title.isEmpty && plainText.isEmpty) return;
 
+    // ✅ id 포함 여부로 신규/수정 판단
     final memo = Memo(
+      id: widget.initialMemo?.id, // <- 수정 시 id 포함
       title: title,
       content: plainText,
-      imageUrl: '', // 이미지 기능은 나중에
-      storagePath: widget.storagePath,
+      imageUrl: '',
+      folderId: widget.folderId,
     );
 
     try {
-      await _repo.saveMemo(memo); // 서버 저장 로직
-      widget.onNoteSaved(); // 목록 갱신 콜백
+      if (widget.initialMemo != null) {
+        await _repo.updateMemo(memo); // ✅ 수정
+      } else {
+        await _repo.saveMemo(memo); // ✅ 새로 저장
+      }
+
+      widget.onNoteSaved();
       Navigator.pop(context);
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -100,7 +107,7 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
                 configurations: QuillEditorConfigurations(
                   controller: _quillController,
                   sharedConfigurations:
-                      const QuillSharedConfigurations(locale: Locale('ko')),
+                  const QuillSharedConfigurations(locale: Locale('ko')),
                 ),
               ),
             ),
