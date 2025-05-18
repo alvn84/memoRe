@@ -3,7 +3,7 @@ import 'signup_email.dart';
 import 'signup_password.dart';
 import 'signup_profile.dart';
 import '../login/login_screen.dart';
-
+import '../api_config.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
@@ -42,7 +42,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
   Future<void> _submitSignUp() async {
     print('🔥 [디버깅] 회원가입 데이터: ${_signUpData.toJson()}');
     try {
-      final url = Uri.parse('http://223.194.152.120:8080/user');
+      final url = Uri.parse('$baseUrl/user');
       final response = await http.post(
         url,
         headers: {'Content-Type': 'application/json'},
