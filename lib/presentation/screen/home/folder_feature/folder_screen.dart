@@ -7,11 +7,13 @@ import '../memo/repository/memo_repository.dart';
 import '../memo/screen/note_edit_screen.dart';
 
 class FolderDetailScreen extends StatefulWidget {
+  final int? folderId;
   final String folderName;
   final String? imagePath;
 
   const FolderDetailScreen({
     super.key,
+    required this.folderId,
     required this.folderName,
     this.imagePath,
   });
@@ -40,7 +42,7 @@ class _FolderDetailScreenState extends State<FolderDetailScreen> {
   }
 
   void _loadMemos() {
-    _memosFuture = _repo.getMemos(widget.folderName);
+    _memosFuture = _repo.getMemos(widget.folderId!);
   }
 
   Future<void> _refresh() async {
@@ -54,14 +56,14 @@ class _FolderDetailScreenState extends State<FolderDetailScreen> {
       context,
       MaterialPageRoute(
         builder: (_) => NoteEditScreen(
-          storagePath: widget.folderName,
+          folderId: widget.folderId!,
           onNoteSaved: _refresh,
         ),
       ),
     );
   }
 
-  Future<void> _deleteMemo(String id) async {
+  Future<void> _deleteMemo(int id) async {
     await _repo.deleteMemo(id);
     _refresh();
   }
@@ -104,12 +106,12 @@ class _FolderDetailScreenState extends State<FolderDetailScreen> {
                   shadows: _isScrolled
                       ? []
                       : const [
-                          Shadow(
-                            offset: Offset(1.0, 1.0),
-                            blurRadius: 3.0,
-                            color: Colors.black54,
-                          ),
-                        ],
+                    Shadow(
+                      offset: Offset(1.0, 1.0),
+                      blurRadius: 3.0,
+                      color: Colors.black54,
+                    ),
+                  ],
                 ),
               ),
               background: Stack(
@@ -131,7 +133,7 @@ class _FolderDetailScreenState extends State<FolderDetailScreen> {
                     child: Center(child: CircularProgressIndicator()));
               } else if (snapshot.hasError) {
                 return SliverToBoxAdapter(
-                    child: Center(child: Text('에러: \${snapshot.error}')));
+                    child: Center(child: Text('에러: ${snapshot.error}')));
               } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
                 return const SliverToBoxAdapter(
                     child: Center(child: Text('작성된 메모가 없습니다.')));
@@ -149,7 +151,7 @@ class _FolderDetailScreenState extends State<FolderDetailScreen> {
                     childAspectRatio: _isGridView ? 1 : 2.5,
                   ),
                   delegate: SliverChildBuilderDelegate(
-                    (context, index) {
+                        (context, index) {
                       final memo = memos[index];
                       return GestureDetector(
                         onTap: () async {
@@ -157,7 +159,7 @@ class _FolderDetailScreenState extends State<FolderDetailScreen> {
                             context,
                             MaterialPageRoute(
                               builder: (_) => NoteEditScreen(
-                                storagePath: memo.storagePath,
+                                folderId: widget.folderId!,
                                 initialMemo: memo,
                                 onNoteSaved: _refresh,
                               ),
@@ -178,7 +180,7 @@ class _FolderDetailScreenState extends State<FolderDetailScreen> {
                                 TextButton(
                                   onPressed: () {
                                     Navigator.pop(context);
-                                    //_deleteMemo(memo.id);
+                                    _deleteMemo(memo.id!);
                                   },
                                   child: const Text('삭제',
                                       style: TextStyle(color: Colors.red)),

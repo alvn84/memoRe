@@ -254,6 +254,7 @@ class _Tab1ScreenState extends State<Tab1Screen> {
               context,
               MaterialPageRoute(
                 builder: (_) => FolderDetailScreen(
+                  folderId: folder.id!,              // ✅ 추가
                   folderName: folder.name,
                   imagePath: folder.imagePath,
                 ),

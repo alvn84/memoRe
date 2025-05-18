@@ -1,32 +1,31 @@
 class Memo {
-  final int? id; // ← 서버에서 부여한 고유 식별자
+  final int? id; // 서버에서 부여한 고유 식별자
   final String title;
   final String content;
   final String imageUrl;
-  final String storagePath;
+  final int folderId; // ✅ 서버 연동용 folderId (정수)
 
   Memo({
     this.id,
     required this.title,
     required this.content,
     required this.imageUrl,
-    required this.storagePath,
+    required this.folderId, // ✅ 변경됨
   });
 
   factory Memo.fromJson(Map<String, dynamic> json) => Memo(
-        id: json['id'] ?? '',
+        id: json['id'],
         title: json['title'] ?? '',
         content: json['content'] ?? '',
         imageUrl: json['imageUrl'] ?? '',
-        storagePath: json['storagePath'] ?? '',
+        folderId: json['folderId'] ?? 0, // 서버 응답에 따라 조정
       );
 
   Map<String, dynamic> toJson() => {
-        // id는 생성 시 서버가 자동 생성하므로 보낼 필요 없을 수 있음
         'title': title,
         'content': content,
         'imageUrl': imageUrl,
-        'storagePath': storagePath,
+        'folderId': folderId, // ✅ 반드시 포함
       };
 
   Memo copyWith({
@@ -34,14 +33,14 @@ class Memo {
     String? title,
     String? content,
     String? imageUrl,
-    String? storagePath,
+    int? folderId, // ✅ 함께 복사 가능
   }) {
     return Memo(
       id: id ?? this.id,
       title: title ?? this.title,
       content: content ?? this.content,
       imageUrl: imageUrl ?? this.imageUrl,
-      storagePath: storagePath ?? this.storagePath,
+      folderId: folderId ?? this.folderId,
     );
   }
 }
