@@ -43,6 +43,33 @@ class _Tab1ScreenState extends State<Tab1Screen> {
     _loadFolders();
   }
 
+
+  void _handleMainFabPressed() {
+    if (!_isFabExpanded) {
+      setState(() {
+        _isFabExpanded = true;
+        _fabPressedOnce = true;
+      });
+    } else {
+      // 두 번째 눌렀을 때 → 메모 작성 진입
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => NoteEditScreen(
+            isQuickMemo: true,
+            onNoteSaved: _loadFolders,
+          ),
+        ),
+      );
+
+      // FAB 닫기
+      setState(() {
+        _isFabExpanded = false;
+        _fabPressedOnce = false;
+      });
+    }
+  }
+
   Future<void> _loadFolders() async {
     folders = await Tab1Controller.loadFolders();
     setState(() {});
@@ -333,6 +360,7 @@ class _Tab1ScreenState extends State<Tab1Screen> {
               }
             });
           },
+          onMainFabPressed: _handleMainFabPressed, // ✅ 추가
         ),
       ),
     );

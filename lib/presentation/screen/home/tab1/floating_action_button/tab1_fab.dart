@@ -2,14 +2,16 @@ import 'package:flutter/material.dart';
 import '../../memo/screen/memo_screen.dart';
 import '../../memo/screen/note_edit_screen.dart';
 
-class Tab1FloatingButtons extends StatelessWidget {
+class Tab1FloatingButtons extends StatefulWidget {
   final bool isFabExpanded;
+  final VoidCallback onMainFabPressed;
   final VoidCallback onToggle;
   final VoidCallback onAddFolder;
   final VoidCallback onNavigateToAi;
 
   const Tab1FloatingButtons({
     super.key,
+    required this.onMainFabPressed,
     required this.isFabExpanded,
     required this.onToggle,
     required this.onAddFolder,
@@ -17,17 +19,22 @@ class Tab1FloatingButtons extends StatelessWidget {
   });
 
   @override
+  State<Tab1FloatingButtons> createState() => _Tab1FloatingButtonsState();
+}
+
+class _Tab1FloatingButtonsState extends State<Tab1FloatingButtons> {
+  @override
   Widget build(BuildContext context) {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
         // AI Travel Picks
         AnimatedSlide(
-          offset: isFabExpanded ? Offset.zero : const Offset(0, 0.3),
+          offset: widget.isFabExpanded ? Offset.zero : const Offset(0, 0.3),
           duration: const Duration(milliseconds: 200),
           curve: Curves.easeOut,
           child: AnimatedOpacity(
-            opacity: isFabExpanded ? 1 : 0,
+            opacity: widget.isFabExpanded ? 1 : 0,
             duration: const Duration(milliseconds: 200),
             child: Column(
               children: [
@@ -36,7 +43,7 @@ class Tab1FloatingButtons extends StatelessWidget {
                   mini: true,
                   shape: const CircleBorder(),
                   backgroundColor: const Color(0xFF8B674C),
-                  onPressed: onNavigateToAi,
+                  onPressed: widget.onNavigateToAi,
                   child: const Icon(Icons.travel_explore,
                       color: Color(0xFFFFFBF5)),
                 ),
@@ -54,11 +61,11 @@ class Tab1FloatingButtons extends StatelessWidget {
 
         // New Folder
         AnimatedSlide(
-          offset: isFabExpanded ? Offset.zero : const Offset(0, 0.3),
+          offset: widget.isFabExpanded ? Offset.zero : const Offset(0, 0.3),
           duration: const Duration(milliseconds: 200),
           curve: Curves.easeOut,
           child: AnimatedOpacity(
-            opacity: isFabExpanded ? 1 : 0,
+            opacity: widget.isFabExpanded ? 1 : 0,
             duration: const Duration(milliseconds: 200),
             child: Column(
               children: [
@@ -67,7 +74,7 @@ class Tab1FloatingButtons extends StatelessWidget {
                   mini: true,
                   shape: const CircleBorder(),
                   backgroundColor: const Color(0xFF8B674C),
-                  onPressed: onAddFolder,
+                  onPressed: widget.onAddFolder,
                   child: const Icon(Icons.create_new_folder,
                       color: Color(0xFFFFFBF5)),
                 ),
@@ -86,29 +93,15 @@ class Tab1FloatingButtons extends StatelessWidget {
         // Main FAB
         FloatingActionButton(
           heroTag: 'mainFab',
-          backgroundColor:
-              isFabExpanded ? const Color(0xFFFDEEDC) : const Color(0xFF8B674C),
+          backgroundColor: widget.isFabExpanded
+              ? const Color(0xFFFDEEDC)
+              : const Color(0xFF8B674C),
           shape: const CircleBorder(),
-          onPressed: () {
-            if (!isFabExpanded) {
-              // 첫 클릭 시 FAB 확장만 함
-              onToggle();
-            } else {
-              // 두 번째 클릭 시 퀵메모 작성 화면으로 이동
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => NoteEditScreen(
-                    isQuickMemo: true, // ✅ 퀵메모 모드
-                    onNoteSaved: () {}, // 필요 시 콜백 정의
-                  ),
-                ),
-              );
-            }
-          },
+          onPressed: widget.onMainFabPressed, // ← 이걸로 변경
           child: Icon(
-            isFabExpanded ? Icons.note_add : Icons.add,
-            color: isFabExpanded ? const Color(0xFF8B674C) : Colors.white,
+            widget.isFabExpanded ? Icons.note_add : Icons.add,
+            color:
+                widget.isFabExpanded ? const Color(0xFF8B674C) : Colors.white,
           ),
         ),
       ],
