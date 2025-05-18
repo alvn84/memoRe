@@ -1,10 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:memore/offline/screen/home/home_screen.dart';
 import '../../home/home_screen.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import '../token_storage.dart';
-import '../api_config.dart';
 
 class LoginForm extends StatefulWidget {
   const LoginForm({super.key});
@@ -43,7 +40,7 @@ class _LoginFormState extends State<LoginForm> {
     }
 
     try {
-      final url = Uri.parse('$baseUrl/login');
+      final url = Uri.parse('http://223.194.152.120:8080/login');
       final response = await http.post(
         url,
         headers: {'Content-Type': 'application/json'},
@@ -53,16 +50,9 @@ class _LoginFormState extends State<LoginForm> {
       if (!mounted) return; // ✅ await 이후에도 항상 mounted 체크
       if (response.statusCode == 200) {
         print('로그인 성공: ${response.body}');
-
-        final responseData = jsonDecode(response.body);
-        final token = responseData['token'];
-
-        await TokenStorage.saveToken(token);
-        print('✅ 저장된 토큰: $token');
-
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => const HomeScreen()),
+          MaterialPageRoute(builder: (context) => const OfflineScreen()),
         );
       } else {
         print('로그인 실패: ${response.body}');
@@ -191,7 +181,7 @@ class _LoginFormState extends State<LoginForm> {
               );
             },
             child: const Text(
-              '로그인 없이 사용',
+              'Skip (테스트용)',
               style: TextStyle(
                 fontSize: 14,
                 color: Colors.grey, // ✅ 메인 포인트 컬러도 아님. 그냥 조용하게 회색.
