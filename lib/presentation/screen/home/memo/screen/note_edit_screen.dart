@@ -1,18 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart';
+import '../../../auth/token_storage.dart';
 import '../model/memo_model.dart';
 import '../repository/memo_repository.dart';
+import '../../../auth/api_config.dart';
+import '../../../auth/token_storage.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class NoteEditScreen extends StatefulWidget {
   final Memo? initialMemo;
-  final int folderId; // ✅ folderId로 수정
+  final int? folderId; // ✅ folderId로 수정
   final VoidCallback onNoteSaved;
+  final bool isQuickMemo; // ← ✅ 이걸 추가
 
   const NoteEditScreen({
     super.key,
-    required this.folderId,
+    this.folderId,
     required this.onNoteSaved,
     this.initialMemo,
+    this.isQuickMemo = false, // 기본값은 일반 메모
   });
 
   @override
@@ -45,20 +52,25 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
 
     if (title.isEmpty && plainText.isEmpty) return;
 
-    // ✅ id 포함 여부로 신규/수정 판단
     final memo = Memo(
-      id: widget.initialMemo?.id, // <- 수정 시 id 포함
+      id: widget.initialMemo?.id,
       title: title,
       content: plainText,
       imageUrl: '',
-      folderId: widget.folderId,
+      folderId: widget.folderId, // 퀵메모면 서버가 무시함
     );
 
     try {
       if (widget.initialMemo != null) {
-        await _repo.updateMemo(memo); // ✅ 수정
+        // ✅ 수정
+        await _repo.updateMemo(memo);
       } else {
-        await _repo.saveMemo(memo); // ✅ 새로 저장
+        // ✅ 새 메모: 일반 / 퀵메모 분기
+        if (widget.isQuickMemo) {
+          await _repo.saveQuickMemo(memo);
+        } else {
+          await _repo.saveMemo(memo);
+        }
       }
 
       widget.onNoteSaved();
@@ -67,6 +79,27 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('메모 저장 실패')),
       );
+    }
+  }
+
+  Future<String> summarizeText(String title, String content) async {
+    final combined = '$title\n$content';
+    final token = await TokenStorage.getToken();
+
+    final response = await http.post(
+      Uri.parse('$baseUrl/api/summarize'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+      body: jsonEncode({'text': combined}),
+    );
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      return data['summary'] ?? '요약 결과 없음';
+    } else {
+      return '요약 실패: ${response.statusCode}';
     }
   }
 
@@ -80,6 +113,32 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
         elevation: 0,
         leading: const BackButton(color: Color(0xFF8B674C)),
         actions: [
+          // ✅ 새로 추가한 버튼 (예: 별 버튼)
+          IconButton(
+            icon: const Icon(Icons.star_border, color: Color(0xFF8B674C)),
+            onPressed: () async {
+              final summary = await summarizeText(
+                _titleController.text,
+                _quillController.document.toPlainText(),
+              );
+
+              if (!context.mounted) return;
+
+              showDialog(
+                context: context,
+                builder: (_) => AlertDialog(
+                  title: const Text('요약 결과'),
+                  content: Text(summary),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: const Text('닫기'),
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
           IconButton(
             icon: const Icon(Icons.check, color: Color(0xFF8B674C)),
             onPressed: saveMemo,
@@ -107,7 +166,7 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
                 configurations: QuillEditorConfigurations(
                   controller: _quillController,
                   sharedConfigurations:
-                  const QuillSharedConfigurations(locale: Locale('ko')),
+                      const QuillSharedConfigurations(locale: Locale('ko')),
                 ),
               ),
             ),

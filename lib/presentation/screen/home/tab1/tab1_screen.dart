@@ -13,6 +13,7 @@ import 'floating_action_button/tab1_fab.dart';
 import 'folder/folder_grid.dart';
 import 'folder/folder_option_sheet.dart';
 import 'tab1_search_appbar.dart';
+import '../memo/screen/note_edit_screen.dart';
 
 class Tab1Screen extends StatefulWidget {
   const Tab1Screen({super.key});
@@ -25,6 +26,7 @@ class _Tab1ScreenState extends State<Tab1Screen> {
   List<Folder> folders = [];
   String _searchQuery = '';
   bool _isFabExpanded = false;
+  bool _fabPressedOnce = false; // ✅ 최초 클릭 여부 추적
   final FocusNode _searchFocusNode = FocusNode(); // FocusNode 추가
   final List<Color> pastelColors = [
     Color(0xFFFFC1CC), // 연핑크
@@ -42,12 +44,37 @@ class _Tab1ScreenState extends State<Tab1Screen> {
     _loadFolders();
   }
 
+
+  void _handleMainFabPressed() {
+    if (!_isFabExpanded) {
+      setState(() {
+        _isFabExpanded = true;
+        _fabPressedOnce = true;
+      });
+    } else {
+      // 두 번째 눌렀을 때 → 메모 작성 진입
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => NoteEditScreen(
+            isQuickMemo: true,
+            onNoteSaved: _loadFolders,
+          ),
+        ),
+      );
+
+      // FAB 닫기
+      setState(() {
+        _isFabExpanded = false;
+        _fabPressedOnce = false;
+      });
+    }
+  }
+
   Future<void> _loadFolders() async {
     folders = await Tab1Controller.loadFolders();
     setState(() {});
   }
-
-
 
   Future<void> _saveFolder(Folder folder) async {
     try {
@@ -255,7 +282,7 @@ class _Tab1ScreenState extends State<Tab1Screen> {
               context,
               MaterialPageRoute(
                 builder: (_) => FolderDetailScreen(
-                  folderId: folder.id!,              // ✅ 추가
+                  folderId: folder.id!, // ✅ 추가
                   folderName: folder.name,
                   imagePath: folder.imagePath,
                 ),
@@ -316,9 +343,25 @@ class _Tab1ScreenState extends State<Tab1Screen> {
           },
           onToggle: () {
             setState(() {
-              _isFabExpanded = !_isFabExpanded;
+              if (_isFabExpanded && _fabPressedOnce) {
+                // ✅ 두 번째 누름 → 메모 작성 화면으로 이동
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => NoteEditScreen(
+                      folderId: 3, // default 폴더 ID
+                      onNoteSaved: _loadFolders,
+                    ),
+                  ),
+                );
+              } else {
+                // ✅ 첫 번째 누름 → FAB 확장만
+                _isFabExpanded = true;
+                _fabPressedOnce = true;
+              }
             });
           },
+          onMainFabPressed: _handleMainFabPressed, // ✅ 추가
         ),
       ),
     );
