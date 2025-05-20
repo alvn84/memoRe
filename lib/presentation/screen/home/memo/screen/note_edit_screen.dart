@@ -7,6 +7,7 @@ import '../../../auth/api_config.dart';
 import '../../../auth/token_storage.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:flutter/services.dart';
 
 class NoteEditScreen extends StatefulWidget {
   final Memo? initialMemo;
@@ -103,6 +104,22 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
     }
   }
 
+  Future<String> previewMemoText(String title, String content) async {
+    return content;
+  }
+
+  static const MethodChannel _channel = MethodChannel('genie_channel');
+
+  static Future<String> runGenie(String prompt) async {
+    try {
+      final String result =
+          await _channel.invokeMethod('runGenie', {'prompt': prompt});
+      return result;
+    } on PlatformException catch (e) {
+      return 'Genie 실행 오류: ${e.message}';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -117,6 +134,12 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
           IconButton(
             icon: const Icon(Icons.star_border, color: Color(0xFF8B674C)),
             onPressed: () async {
+              // 그대로 출력
+              final preview = await previewMemoText(
+                _titleController.text,
+                _quillController.document.toPlainText(),
+              );
+              // 서버 통신하여 출력
               final summary = await summarizeText(
                 _titleController.text,
                 _quillController.document.toPlainText(),
@@ -128,7 +151,7 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
                 context: context,
                 builder: (_) => AlertDialog(
                   title: const Text('요약 결과'),
-                  content: Text(summary),
+                  content: Text(preview),
                   actions: [
                     TextButton(
                       onPressed: () => Navigator.pop(context),
