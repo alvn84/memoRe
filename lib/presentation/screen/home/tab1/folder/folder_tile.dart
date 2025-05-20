@@ -34,7 +34,7 @@ class FolderTile extends StatelessWidget {
             ),
             child: CircleAvatar(
               radius: 33,
-              backgroundColor: const Color(0xFFFFFBF5),
+              backgroundColor: const Color(0xFFFAFAFA),
               backgroundImage: folder.imagePath != null
                   ? FileImage(File(folder.imagePath!))
                   : null,

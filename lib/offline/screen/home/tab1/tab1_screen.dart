@@ -7,6 +7,7 @@ import '../folder/folder_storage.dart';
 import '../folder/folder_reorder_screen.dart';
 import '../folder/add_folder_dialog.dart';
 import '../folder/folder_detail_screen.dart';
+import '../memo/memo_screen.dart';
 import 'package:intl/intl.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
@@ -25,6 +26,7 @@ class _Tab1ScreenState extends State<Tab1Screen> {
   List<Folder> folders = [];
   String _searchQuery = '';
   bool _isFabExpanded = false;
+  bool _fabPressedOnce = false;
   final FocusNode _searchFocusNode = FocusNode(); // FocusNode 추가
   final List<Color> pastelColors = [
     Color(0xFFFFC1CC), // 연핑크
@@ -95,7 +97,7 @@ class _Tab1ScreenState extends State<Tab1Screen> {
   // 폴더 색상 변경 함수
   void _showColorPicker(BuildContext context, int index) {
     showModalBottomSheet(
-      backgroundColor: Color(0xFFFFFBF5),
+      backgroundColor: Color(0xFFFAFAFA),
       context: context,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
@@ -216,41 +218,36 @@ class _Tab1ScreenState extends State<Tab1Screen> {
         appBar: AppBar(
           backgroundColor: Colors.transparent,
           title: SizedBox(
-            height: 40,
+            height: 43,
             child: TextField(
-              focusNode: _searchFocusNode, // FocusNode 연결
+              focusNode: _searchFocusNode,
               onChanged: (value) {
                 setState(() {
                   _searchQuery = value;
                 });
               },
               decoration: InputDecoration(
-                hintText: 'Search',
+                prefixIcon: const Icon(Icons.search, color: Color(0xFF6495ED)),
+                hintText: 'Search folders...',
                 hintStyle: const TextStyle(fontSize: 15, color: Colors.grey),
-                contentPadding:
-                    const EdgeInsets.symmetric(vertical: 1, horizontal: 15),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(20),
-                  borderSide: const BorderSide(
-                    color: Colors.black12, // unfocused 시 색상
-                    width: 0.5,
-                  ),
+                filled: true,
+                fillColor: Color(0xFFF1F4F8), // 연한 회색 배경
+                contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 16),
+                isDense: true,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(30),
+                  borderSide: BorderSide.none,
                 ),
                 focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
-                  borderSide: BorderSide(
-                    color: Color(0xFF8B674C),
-                    width: 1.2,
-                  ),
+                  borderRadius: BorderRadius.circular(30),
+                  borderSide: const BorderSide(color: Color(0xFF6495ED), width: 1.5),
                 ),
-                filled: true,
-                fillColor: Colors.transparent,
               ),
             ),
           ),
           actions: [
             IconButton(
-              icon: Icon(Icons.sort, color: Color(0xFF8B674C)),
+              icon: Icon(Icons.sort, color: Colors.black87),
               onPressed: () {
                 setState(() {
                   final defaultFolder =
@@ -284,7 +281,7 @@ class _Tab1ScreenState extends State<Tab1Screen> {
             if (folders[originalIndex].name == 'Default') return;
 
             showModalBottomSheet(
-              backgroundColor: const Color(0xFFFFFBF5),
+              backgroundColor: const Color(0xFFFAFAFA),
               context: context,
               shape: const RoundedRectangleBorder(
                 borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
@@ -293,36 +290,40 @@ class _Tab1ScreenState extends State<Tab1Screen> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   ListTile(
-                    leading: Icon(Icons.image, color: Color(0xFF8B674C)),
+                    leading: Icon(Icons.image, color: Color(0xFF6495ED)),
                     title: const Text('Set Background Image',
-                        style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+                        style: TextStyle(
+                            fontSize: 14, fontWeight: FontWeight.w600)),
                     onTap: () {
                       Navigator.pop(context);
                       _setProfileImage(context, originalIndex);
                     },
                   ),
-                  ListTile(
-                    leading: Icon(Icons.color_lens, color: Color(0xFF8B674C)),
+                  /*ListTile( 테두리 색상 변경 삭제 됨
+                    leading: Icon(Icons.color_lens, color: Color(0xFF6495ED)),
                     title: const Text('Change Border Color',
-                        style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+                        style: TextStyle(
+                            fontSize: 14, fontWeight: FontWeight.w600)),
                     onTap: () {
                       Navigator.pop(context);
                       _showColorPicker(context, originalIndex);
                     },
-                  ),
+                  ),*/
                   ListTile(
-                    leading: Icon(Icons.edit, color: Color(0xFF8B674C)),
+                    leading: Icon(Icons.edit, color: Color(0xFF6495ED)),
                     title: const Text('Rename Folder',
-                        style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+                        style: TextStyle(
+                            fontSize: 14, fontWeight: FontWeight.w600)),
                     onTap: () {
                       Navigator.pop(context);
                       _renameFolder(context, originalIndex);
                     },
                   ),
                   ListTile(
-                    leading: Icon(Icons.swap_vert, color: Color(0xFF8B674C)),
+                    leading: Icon(Icons.swap_vert, color: Color(0xFF6495ED)),
                     title: const Text('Reorder Folders',
-                        style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+                        style: TextStyle(
+                            fontSize: 14, fontWeight: FontWeight.w600)),
                     onTap: () {
                       Navigator.pop(context);
                       Navigator.push(
@@ -343,14 +344,17 @@ class _Tab1ScreenState extends State<Tab1Screen> {
                   ),
                   ListTile(
                     leading: Icon(
-                      folders[originalIndex].isStarred ? Icons.star : Icons.star_border,
-                      color: Color(0xFF8B674C),
+                      folders[originalIndex].isStarred
+                          ? Icons.star
+                          : Icons.star_border,
+                      color: Color(0xFF6495ED),
                     ),
                     title: Text(
                       folders[originalIndex].isStarred
                           ? 'Remove from Favorites'
                           : 'Add to Favorites',
-                      style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+                      style: const TextStyle(
+                          fontSize: 14, fontWeight: FontWeight.w600),
                     ),
                     onTap: () {
                       Navigator.pop(context);
@@ -360,7 +364,8 @@ class _Tab1ScreenState extends State<Tab1Screen> {
                   ListTile(
                     leading: const Icon(Icons.delete, color: Colors.redAccent),
                     title: const Text('Delete',
-                        style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+                        style: TextStyle(
+                            fontSize: 14, fontWeight: FontWeight.w600)),
                     onTap: () {
                       Navigator.pop(context);
                       _deleteFolder(originalIndex);
@@ -376,7 +381,8 @@ class _Tab1ScreenState extends State<Tab1Screen> {
           children: [
             // 확장 FAB: AI 여행지 추천
             AnimatedSlide(
-              offset: _isFabExpanded ? const Offset(0, 0) : const Offset(0, 0.3),
+              offset:
+                  _isFabExpanded ? const Offset(0, 0) : const Offset(0, 0.3),
               duration: const Duration(milliseconds: 200),
               curve: Curves.easeOut,
               child: AnimatedOpacity(
@@ -388,7 +394,7 @@ class _Tab1ScreenState extends State<Tab1Screen> {
                       heroTag: 'aiTravel',
                       mini: true,
                       shape: const CircleBorder(),
-                      backgroundColor: Color(0xFF8B674C),
+                      backgroundColor: Color(0xFF6495ED),
                       onPressed: () {
                         Navigator.push(
                           context,
@@ -397,11 +403,21 @@ class _Tab1ScreenState extends State<Tab1Screen> {
                           ),
                         );
                       },
-                      child: const Icon(Icons.travel_explore, color: Color(0xFFFFFBF5)),
+                      child: const Icon(Icons.travel_explore,
+                          color: Color(0xFFFAFAFA)),
                     ),
                     const SizedBox(height: 4),
                     Text('AI Travel Picks',
-                        style: TextStyle(fontSize: 11, color: Color(0xFF8B674C), fontWeight: FontWeight.bold)),
+                        style: TextStyle(
+                            fontSize: 12,
+                            shadows: [
+                              Shadow(
+                                offset: Offset(1.0, 1.0),
+                                blurRadius: 3.0,
+                                color: Colors.black54,
+                              ),],
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold)),
                   ],
                 ),
               ),
@@ -410,7 +426,8 @@ class _Tab1ScreenState extends State<Tab1Screen> {
 
             // 확장 FAB: New Folder
             AnimatedSlide(
-              offset: _isFabExpanded ? const Offset(0, 0) : const Offset(0, 0.3),
+              offset:
+                  _isFabExpanded ? const Offset(0, 0) : const Offset(0, 0.3),
               duration: const Duration(milliseconds: 200),
               curve: Curves.easeOut,
               child: AnimatedOpacity(
@@ -422,7 +439,7 @@ class _Tab1ScreenState extends State<Tab1Screen> {
                       heroTag: 'addFolder',
                       mini: true,
                       shape: const CircleBorder(),
-                      backgroundColor: Color(0xFF8B674C),
+                      backgroundColor: Color(0xFF6495ED),
                       onPressed: () {
                         setState(() {
                           _isFabExpanded = false;
@@ -430,11 +447,20 @@ class _Tab1ScreenState extends State<Tab1Screen> {
                         _addNewFolder();
                       },
                       child: const Icon(Icons.create_new_folder,
-                          color: Color(0xFFFFFBF5)),
+                          color: Color(0xFFFAFAFA)),
                     ),
                     const SizedBox(height: 4),
                     Text('New Folder',
-                        style: TextStyle(fontSize: 11, color: Color(0xFF8B674C), fontWeight: FontWeight.bold)),
+                        style: TextStyle(
+                            fontSize: 12,
+                            shadows: [
+                              Shadow(
+                              offset: Offset(1.0, 1.0),
+                              blurRadius: 3.0,
+                              color: Colors.black54,
+                            ),],
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold)),
                   ],
                 ),
               ),
@@ -445,21 +471,36 @@ class _Tab1ScreenState extends State<Tab1Screen> {
             FloatingActionButton(
               heroTag: 'mainFab',
               backgroundColor:
-              _isFabExpanded ? const Color(0xFFFDEEDC) : Color(0xFF8B674C),
+                  _isFabExpanded ? const Color(0xFFFAFAFA) : Color(0xFF6495ED),
               shape: const CircleBorder(),
               onPressed: () {
                 if (_isFabExpanded) {
-                  // 열렸을 때 = New Memo 역할
-                  // TODO: 메모 추가 동작
+                  // ✅ 열렸을 때 → 메모 작성 화면으로 바로 이동
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => NoteEditScreen(
+                        folderKey: 'Default', // ✅ Default 폴더 키로 저장
+                        onNoteSaved: (String _) => _loadFolders(),
+                      ),
+                    ),
+                  );
+
+                  // FAB 상태 초기화
+                  setState(() {
+                    _isFabExpanded = false;
+                    _fabPressedOnce = false;
+                  });
                 } else {
                   setState(() {
                     _isFabExpanded = true;
+                    _fabPressedOnce = true;
                   });
                 }
               },
               child: Icon(
                 _isFabExpanded ? Icons.note_add : Icons.add,
-                color: _isFabExpanded ? Color(0xFF8B674C) : Colors.white,
+                color: _isFabExpanded ? Color(0xFF6495ED) : Colors.white,
               ),
             ),
           ],

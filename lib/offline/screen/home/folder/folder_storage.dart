@@ -34,6 +34,7 @@ class FolderStorage {
         0,
         Folder(
           name: 'Default',
+          imagePath: 'assets/images/plane_image.png',
           color: const Color(0xFFCFCFCF),
           icon: Icons.folder,
           createdAt: DateTime.now(),

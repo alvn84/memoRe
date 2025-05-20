@@ -141,7 +141,7 @@ class _Tab1ScreenState extends State<Tab1Screen> {
   // 폴더 색상 변경 함수
   void _showColorPicker(BuildContext context, int index) {
     showModalBottomSheet(
-      backgroundColor: Color(0xFFFFFBF5),
+      backgroundColor: Color(0xFFFAFAFA),
       context: context,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
@@ -294,7 +294,7 @@ class _Tab1ScreenState extends State<Tab1Screen> {
             if (folders[originalIndex].name == 'Default') return;
 
             showModalBottomSheet(
-              backgroundColor: const Color(0xFFFFFBF5),
+              backgroundColor: const Color(0xFFFAFAFA),
               context: context,
               shape: const RoundedRectangleBorder(
                 borderRadius: BorderRadius.vertical(top: Radius.circular(20)),

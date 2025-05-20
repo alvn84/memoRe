@@ -83,7 +83,7 @@ class _FolderDetailScreenState extends State<FolderDetailScreen> {
           SliverAppBar(
             expandedHeight: 200.0,
             pinned: true,
-            backgroundColor: const Color(0xFFFFFBF5),
+            backgroundColor: const Color(0xFFFAFAFA),
             actions: [
               IconButton(
                 icon: Icon(
@@ -119,7 +119,7 @@ class _FolderDetailScreenState extends State<FolderDetailScreen> {
                 children: [
                   widget.imagePath != null
                       ? Image.file(File(widget.imagePath!), fit: BoxFit.cover)
-                      : Container(color: Color(0xFF8B674C)),
+                      : Container(color: Color(0xFF6495ED)),
                   Container(color: Colors.black.withOpacity(0.3)),
                 ],
               ),
@@ -228,7 +228,7 @@ class _FolderDetailScreenState extends State<FolderDetailScreen> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _addNewNote,
-        backgroundColor: const Color(0xFF8B674C),
+        backgroundColor: const Color(0xFF6495ED),
         child: const Icon(Icons.add),
       ),
     );

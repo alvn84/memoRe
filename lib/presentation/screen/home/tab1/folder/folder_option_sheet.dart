@@ -30,7 +30,7 @@ class FolderOptionSheet extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         ListTile(
-          leading: Icon(Icons.image, color: Color(0xFF8B674C)),
+          leading: Icon(Icons.image, color: Color(0xFF6495ED)),
           title: const Text('배경 이미지 설정', style: _style),
           onTap: () {
             Navigator.pop(context);
@@ -38,7 +38,7 @@ class FolderOptionSheet extends StatelessWidget {
           },
         ),
         ListTile(
-          leading: Icon(Icons.color_lens, color: Color(0xFF8B674C)),
+          leading: Icon(Icons.color_lens, color: Color(0xFF6495ED)),
           title: const Text('메모리 테두리 변경', style: _style),
           onTap: () {
             Navigator.pop(context);
@@ -46,7 +46,7 @@ class FolderOptionSheet extends StatelessWidget {
           },
         ),
         ListTile(
-          leading: Icon(Icons.edit, color: Color(0xFF8B674C)),
+          leading: Icon(Icons.edit, color: Color(0xFF6495ED)),
           title: const Text('메모리 이름 변경', style: _style),
           onTap: () {
             Navigator.pop(context);
@@ -54,7 +54,7 @@ class FolderOptionSheet extends StatelessWidget {
           },
         ),
         ListTile(
-          leading: Icon(Icons.swap_vert, color: Color(0xFF8B674C)),
+          leading: Icon(Icons.swap_vert, color: Color(0xFF6495ED)),
           title: const Text('배치 변경', style: _style),
           onTap: () {
             Navigator.pop(context);
@@ -64,7 +64,7 @@ class FolderOptionSheet extends StatelessWidget {
         ListTile(
           leading: Icon(
             folder.isStarred ? Icons.star : Icons.star_border,
-            color: Color(0xFF8B674C),
+            color: Color(0xFF6495ED),
           ),
           title: Text(
             folder.isStarred ? '즐겨찾기 해제' : '즐겨찾기 추가',

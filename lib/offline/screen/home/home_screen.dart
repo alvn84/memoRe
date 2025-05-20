@@ -32,7 +32,7 @@ class _OfflineScreenState extends State<OfflineScreen> {
         elevation: 0,  // 그림자 제거 (없애는게 깔끔)
         leading: Builder(
           builder: (context) => IconButton(
-            icon: Icon(Icons.menu,color: Color(0xFF8B674C)),
+            icon: Icon(Icons.menu,color: Colors.black87),
             onPressed: () => Scaffold.of(context).openDrawer(),
           ),
         ),
@@ -41,7 +41,7 @@ class _OfflineScreenState extends State<OfflineScreen> {
           style: TextStyle(
             fontSize: 17,  // 글씨 크기
             fontWeight: FontWeight.bold,
-            color: Color(0xFF8B674C),  // 글씨 색상
+            color: Colors.black87,  // 글씨 색상
           ),
         ),
         centerTitle: true,
@@ -60,7 +60,7 @@ class _OfflineScreenState extends State<OfflineScreen> {
               dotHeight: 8,
               dotWidth: 8,
               spacing: 12,
-              activeDotColor: Color(0xFF8B674C),
+              activeDotColor: Color(0xFF6495ED),
             ),
           ),
           const SizedBox(height: 15),

@@ -51,7 +51,7 @@ class FavoriteScreen extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           ...memoList.map((memo) => ListTile(
-            leading: const Icon(Icons.note, color: Color(0xFF8B674C)),
+            leading: const Icon(Icons.note, color: Color(0xFF6495ED)),
             title: Text(memo['title']!),
             subtitle: Text('${memo['date']}'),
           )),

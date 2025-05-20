@@ -35,7 +35,7 @@ class _AITravelChatScreenState extends State<AITravelChatScreen> {
           style: TextStyle(
             color: Colors.black, fontWeight: FontWeight.bold),),
         leading: BackButton(color: Colors.black,),
-        backgroundColor: const Color(0xFFFFFBF5),
+        backgroundColor: const Color(0xFFFAFAFA),
         foregroundColor: Colors.white,
       ),
       body: Column(
@@ -56,7 +56,7 @@ class _AITravelChatScreenState extends State<AITravelChatScreen> {
                     constraints: BoxConstraints(
                         maxWidth: MediaQuery.of(context).size.width * 0.7),
                     decoration: BoxDecoration(
-                      color: isUser ? Color(0xFF8B674C) : Colors.grey[300],
+                      color: isUser ? Color(0xFF6495ED) : Colors.grey[300],
                       borderRadius: BorderRadius.circular(23),
                     ),
                     child: Text(
@@ -94,7 +94,7 @@ class _AITravelChatScreenState extends State<AITravelChatScreen> {
                 ),
                 const SizedBox(width: 8),
                 IconButton(
-                  icon: Icon(Icons.send, color: Color(0xFF8B674C)),
+                  icon: Icon(Icons.send, color: Color(0xFF6495ED)),
                   onPressed: _sendMessage,
                 ),
               ],

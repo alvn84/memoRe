@@ -7,7 +7,7 @@ Future<String?> showAddFolderDialog(BuildContext context) {
     context: context,
     builder: (context) => AlertDialog(
       title: const Text('Make New Memo:Re',style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),),
-      backgroundColor: Color(0xFFFFFBF5),
+      backgroundColor: Color(0xFFFAFAFA),
       content: TextField(
         autofocus: true,
         decoration: const InputDecoration(hintText: '메모리 이름 입력'),
@@ -24,7 +24,7 @@ Future<String?> showAddFolderDialog(BuildContext context) {
               Navigator.of(context).pop(folderName.trim());
             }
           },
-          child: Text('Confirm',style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF8B674C)),),
+          child: Text('Confirm',style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF6495ED)),),
         ),
       ],
     ),

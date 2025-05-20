@@ -13,7 +13,7 @@ class AppDrawer extends StatelessWidget {
     return SizedBox(
       width: MediaQuery.of(context).size.width * 0.8,  // 화면의 70% 너비
       child: Drawer(
-        backgroundColor: Color(0xFFFFFEFA),
+        backgroundColor: Color(0xFFFAFAFA),
         child: Column(
           // ✅ ListView -> Column 변경
           children: [
@@ -22,7 +22,7 @@ class AppDrawer extends StatelessWidget {
             ),
             // 메뉴 리스트
             ListTile(
-              leading: const Icon(Icons.star, color: Color(0xFF8B674C)),
+              leading: const Icon(Icons.star, color: Color(0xFF6495ED)),
               title: const Text('Favorites',style:TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
               onTap: () {
                 Navigator.pop(context); // 드로어 닫고
@@ -33,7 +33,7 @@ class AppDrawer extends StatelessWidget {
               },
             ),
             ListTile(
-              leading: const Icon(Icons.group_add, color: Color(0xFF8B674C)),
+              leading: const Icon(Icons.group_add, color: Color(0xFF6495ED)),
               title: const Text('Friends', style:TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
               onTap: () {
                 Navigator.pop(context);
@@ -45,7 +45,7 @@ class AppDrawer extends StatelessWidget {
               },
             ),
             ListTile(
-              leading: const Icon(Icons.delete, color: Color(0xFF8B674C)),
+              leading: const Icon(Icons.delete, color: Color(0xFF6495ED)),
               title: const Text('Trash',style:TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
               onTap: () {
                 Navigator.pop(context); // 먼저 드로어 닫고
@@ -56,7 +56,7 @@ class AppDrawer extends StatelessWidget {
               },
             ),
             ListTile(
-              leading: const Icon(Icons.settings, color: Color(0xFF8B674C)),
+              leading: const Icon(Icons.settings, color: Color(0xFF6495ED)),
               title: const Text('Settings',style:TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
               onTap: () {
                 Navigator.pop(context);

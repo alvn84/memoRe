@@ -6,10 +6,12 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:intl/intl.dart';
 
 class NoteEditScreen extends StatefulWidget {
+  // 메모 저장 콜백, 기존 내용, 메모 인덱스, 폴더 키
   final Function(String) onNoteSaved;
   final String? initialContent;
   final int? noteIndex;
   final String? folderKey;
+  final String? initialDate; // 예: '2025.05.20'
 
   const NoteEditScreen({
     super.key,
@@ -17,6 +19,7 @@ class NoteEditScreen extends StatefulWidget {
     this.initialContent,
     this.noteIndex,
     this.folderKey,
+    this.initialDate,
   });
 
   @override
@@ -26,21 +29,22 @@ class NoteEditScreen extends StatefulWidget {
 class _NoteEditScreenState extends State<NoteEditScreen> {
   late QuillController _controller;
   final TextEditingController _titleController = TextEditingController();
+  DateTime? _selectedDate;
 
   @override
   void initState() {
     super.initState();
 
+    // ✅ 기존 메모 로딩 또는 새 문서 생성
     if (widget.initialContent != null) {
       final parts = widget.initialContent!.split('\n');
       final title = parts.first;
       _titleController.text = title;
-      String preview = '';
 
       try {
         final deltaString = parts.skip(1).join('\n');
         final deltaJson = jsonDecode(deltaString) as List<dynamic>;
-        final doc = Document.fromJson(deltaJson); // ✅ Delta.fromJson() 대신
+        final doc = Document.fromJson(deltaJson);
         _controller = QuillController(
           document: doc,
           selection: const TextSelection.collapsed(offset: 0),
@@ -56,15 +60,20 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
     } else {
       _controller = QuillController.basic();
     }
+    if (widget.initialDate != null) {
+      _selectedDate = DateFormat('yyyy.MM.dd').parse(widget.initialDate!);
+    } else {
+      _selectedDate = DateTime.now();
+    }
   }
 
-  DateTime? _selectedDate;
-
+  // ✅ 선택된 날짜를 "yyyy.MM.dd" 형식으로 반환
   String _formattedDate() {
     final date = _selectedDate ?? DateTime.now();
     return DateFormat('yyyy.MM.dd').format(date);
   }
 
+  // ✅ 날짜 선택 다이얼로그 열기
   void _pickDate() async {
     final picked = await showDatePicker(
       context: context,
@@ -77,14 +86,17 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
         _selectedDate = picked;
       });
     }
+    await _autoSaveNote();
+    print('선택된 날짜: $_selectedDate');
   }
 
   @override
   void dispose() {
-    _autoSaveNote();
+    _autoSaveNote(); // ✅ 화면 닫을 때 자동 저장
     super.dispose();
   }
 
+  // ✅ 메모 자동 저장 함수 (SharedPreferences에 저장)
   Future<void> _autoSaveNote() async {
     final title = _titleController.text.trim();
     final deltaJson = _controller.document.toDelta().toJson();
@@ -98,10 +110,12 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
       final writtenDates = prefs.getStringList('${widget.folderKey!}_writtenDates') ?? [];
 
       if (widget.noteIndex != null && widget.noteIndex! < notes.length) {
+        // 수정 모드: 인덱스에 덮어쓰기
         notes[widget.noteIndex!] = fullNote;
         modifiedDates[widget.noteIndex!] = DateFormat('yyyy.MM.dd').format(DateTime.now());
         writtenDates[widget.noteIndex!] = dateString;
       } else {
+        // 새 메모 추가
         notes.add(fullNote);
         modifiedDates.add(DateFormat('yyyy.MM.dd').format(DateTime.now()));
         writtenDates.add(dateString);
@@ -115,24 +129,32 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
     widget.onNoteSaved(fullNote);
   }
 
+
+  // ✅ 메모 내용을 요약해서 다이얼로그로 보여주는 기능 (AI 요약 자리)
   void _summarizeNoteAI() async {
     final plainText = _controller.document.toPlainText();
-
-    // 예시 요약 (로컬 처리 or 향후 OpenAI 연동)
     final summary = plainText.length > 100
         ? '${plainText.substring(0, 100)}...'
         : plainText;
 
-    // 요약 결과를 Dialog로 표시
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('AI 요약 결과'),
-        content: Text(summary.isNotEmpty ? summary : '요약할 내용이 없습니다.'),
+        backgroundColor: const Color(0xFFFAFAFA),
+        title: const Text('AI Summary', style: TextStyle(fontWeight: FontWeight.bold)),
+        content: Text('New York City, also known as “The Big Apple,” is a vibrant global hub for finance, arts, and culture. \n\nFamous for landmarks like the Statue of Liberty, Times Square, and Central Park, it consists of five boroughs: Manhattan, Brooklyn, Queens, The Bronx, and Staten Island. \n\nKnown for its diversity, energy, and iconic attractions, NYC is often called “the city that never sleeps.”'),
+        //Text(summary.isNotEmpty ? summary : 'No content to summarize.'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('확인'),
+            child: const Text(
+              'Add to Memo',
+              style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF6495ED)),
+            ),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Confirm', style: TextStyle(color: Colors.black)),
           ),
         ],
       ),
@@ -142,52 +164,70 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFFFFBF5),
+      backgroundColor: Colors.white,
+
+      // ✅ 상단 앱바 - 날짜 선택 및 저장, Undo/Redo
       appBar: AppBar(
         title: InkWell(
           onTap: _pickDate,
           child: Text(
             _formattedDate(),
-            style: TextStyle(color: Color(0xFF8B674C)),
+            style: const TextStyle(color: Colors.black87, fontWeight: FontWeight.bold),
           ),
         ),
         centerTitle: true,
         backgroundColor: Colors.transparent,
         elevation: 0,
-        leading: BackButton(color: Color(0xFF8B674C)),
+        leading: const BackButton(color: Colors.black87),
         actions: [
           IconButton(
-            icon: Icon(Icons.check, color: Color(0xFF8B674C)),
+            icon: const Icon(Icons.undo, color: Colors.black87),
+            tooltip: 'Undo',
+            onPressed: () => _controller.undo(),
+          ),
+          IconButton(
+            icon: const Icon(Icons.redo, color: Colors.black87),
+            tooltip: 'Redo',
+            onPressed: () => _controller.redo(),
+          ),
+          /* IconButton(
+            icon: const Icon(Icons.check, color: Color(0xFF6495ED)),
             tooltip: 'Save',
             onPressed: () {
               _autoSaveNote();
               Navigator.pop(context);
             },
-          ),
+          ), */
         ],
       ),
+
+      // ✅ 본문 UI 구성
       body: Column(
         children: [
-          // 제목 입력
+          // 제목 입력란
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 6),
+            padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 0),
             child: TextField(
               controller: _titleController,
-              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              style: const TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
               decoration: const InputDecoration(
                 hintText: 'Title',
+                hintStyle: TextStyle(color: Colors.black26,),
                 border: InputBorder.none,
+                filled: true,
+                fillColor: Colors.white,
               ),
             ),
           ),
 
-          // 본문
+          // 본문 에디터
           Expanded(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Container(
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(12),
                   color: Colors.white,
-
                 ),
                 child: QuillEditor.basic(
                   configurations: QuillEditorConfigurations(
@@ -197,56 +237,70 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
                 ),
               ),
             ),
+          ),
 
-
-
-          // 툴바 (간소화)
-          const Divider(height: 1),
+          // 하단 툴바
           Padding(
-            padding: const EdgeInsets.only(bottom: 16),
+            padding: const EdgeInsets.only(bottom: 20),
             child: SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               child: QuillToolbar.simple(
                 configurations: QuillSimpleToolbarConfigurations(
+                  buttonOptions: QuillSimpleToolbarButtonOptions(
+                    base: QuillToolbarBaseButtonOptions(
+                      iconSize: 18,
+                    )
+                  ),
                   controller: _controller,
                   sharedConfigurations: const QuillSharedConfigurations(locale: Locale('en')),
-                  showBackgroundColorButton: false,
-                  showCodeBlock: false,
-                  showInlineCode: false,
-                  showQuote: false,
-                  showDirection: false,
-                  showDividers: false,
-                  showClearFormat: false,
-                  showUndo: true,
-                  showRedo: true,
-                  showListCheck: true, // ✅ 체크리스트 지원
-                  showColorButton: false,
+                  showListCheck: true,
                   showListNumbers: true,
-                  showListBullets: false,
+                  showSearchButton: true,
+                  showListBullets: true,
+                  // 나머지 버튼은 다 숨김
+                  showLink: false,
+                  showStrikeThrough: false,
+                  showDividers: false,
+                  showHeaderStyle: false,
+                  showBackgroundColorButton: false,
+                  showInlineCode: false,
+                  showUndo: false,
+                  showRedo: false,
+                  showColorButton: false,
+                  showItalicButton: false,
+                  showFontFamily: false,
+                  showFontSize: false,
                   showSubscript: false,
                   showSuperscript: false,
                   showUnderLineButton: false,
+                  showCenterAlignment: false,
+                  showIndent: false,
+                  showCodeBlock: false,
+                  showQuote: false,
+                  showDirection: false,
+                  showClearFormat: false,
                   showClipboardCopy: false,
                   showClipboardCut: false,
                   showClipboardPaste: false,
-                  showCenterAlignment: false,
-                  showItalicButton: false,
-                  showIndent: false,
-                  showFontFamily: false,
-
                 ),
               ),
             ),
           ),
         ],
       ),
+
+      // ✅ 우측 하단 요약 버튼 (AI)
       floatingActionButton: Padding(
         padding: const EdgeInsets.only(bottom: 40),
         child: FloatingActionButton(
           onPressed: _summarizeNoteAI,
-          backgroundColor: Color(0xFF8B674C),
-          child: const Icon(Icons.smart_toy, color: Colors.white),
-          shape: const CircleBorder(), // 둥근 테두리 유지
+          backgroundColor: const Color(0xFFFAFAFA),
+          shape: const CircleBorder(),
+          child: Image.asset(
+            'assets/icons/meta_icon.png',
+            width: 28,
+            height: 28,
+          ),
         ),
       ),
     );

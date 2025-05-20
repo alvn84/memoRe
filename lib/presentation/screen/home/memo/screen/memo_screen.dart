@@ -50,7 +50,7 @@ class _MemoScreenState extends State<MemoScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('메모 목록'),
-        backgroundColor: const Color(0xFF8B674C),
+        backgroundColor: const Color(0xFF6495ED),
       ),
       body: FutureBuilder<List<Memo>>(
         future: _memoFuture,
@@ -84,7 +84,7 @@ class _MemoScreenState extends State<MemoScreen> {
         },
       ),
       floatingActionButton: FloatingActionButton(
-        backgroundColor: const Color(0xFF8B674C),
+        backgroundColor: const Color(0xFF6495ED),
         child: const Icon(Icons.add),
         onPressed: () => _navigateToEdit(),
       ),
