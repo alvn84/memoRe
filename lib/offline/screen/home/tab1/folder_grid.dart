@@ -27,10 +27,10 @@ class FolderGrid extends StatelessWidget {
       child: GridView.builder(
         itemCount: filteredFolders.length,
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 3,
+          crossAxisCount: 2,
           crossAxisSpacing: 12.0,
-          mainAxisSpacing: 20.0,
-          childAspectRatio: 0.8,
+          mainAxisSpacing: 12.0,
+          childAspectRatio: 0.95,
         ),
         itemBuilder: (context, index) {
           final folder = filteredFolders[index];

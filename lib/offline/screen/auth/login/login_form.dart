@@ -163,7 +163,7 @@ class _LoginFormState extends State<LoginForm> {
                     // ⭐️ 폰트 크기
                     fontWeight: FontWeight.w900,
                     // ⭐️ 약간 두껍게 (Montserrat랑 잘 어울림)
-                    color: Color(0xFFFFFBF5), // 글씨 색상 (모카무스 느낌)
+                    color: Color(0xFFFAFAFA), // 글씨 색상 (모카무스 느낌)
                   ),
                 ),
               ),

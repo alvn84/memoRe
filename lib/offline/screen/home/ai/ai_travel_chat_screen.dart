@@ -32,7 +32,7 @@ class _AITravelChatScreenState extends State<AITravelChatScreen> {
         title: const Text('AI Travel Chatbot',
           style: TextStyle(
             color: Colors.black),),
-        backgroundColor: const Color(0xFFFFFBF5),
+        backgroundColor: const Color(0xFFFAFAFA),
         foregroundColor: Colors.white,
       ),
       body: Column(
@@ -51,7 +51,7 @@ class _AITravelChatScreenState extends State<AITravelChatScreen> {
                     padding: const EdgeInsets.all(12),
                     constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.7),
                     decoration: BoxDecoration(
-                      color: isUser ? Color(0xFF8B674C) : Colors.grey[300],
+                      color: isUser ? Color(0xFF6495ED) : Colors.grey[300],
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Text(
@@ -87,7 +87,7 @@ class _AITravelChatScreenState extends State<AITravelChatScreen> {
                 ),
                 const SizedBox(width: 8),
                 IconButton(
-                  icon: Icon(Icons.send, color: Color(0xFF8B674C)),
+                  icon: Icon(Icons.send, color: Color(0xFF6495ED)),
                   onPressed: _sendMessage,
                 ),
               ],

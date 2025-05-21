@@ -28,7 +28,7 @@ class _Tab2ScreenState extends State<Tab2Screen> {
             pinned: true,
             expandedHeight: 320,
             flexibleSpace: Container(
-              color: Color(0xFFFFFBF5), // 예: 연베이지톤 배경색
+              color: Color(0xFFFAFAFA), // 예: 연베이지톤 배경색
               child: FlexibleSpaceBar(
                 background: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16.0),

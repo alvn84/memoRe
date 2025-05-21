@@ -1,3 +1,4 @@
+// - - - - - - - - - - - - - - - Tab1 검색 앱 바 - - - - - - - - - - - - - - -
 import 'package:flutter/material.dart';
 
 class Tab1SearchAppBar extends StatelessWidget implements PreferredSizeWidget {
@@ -32,7 +33,7 @@ class Tab1SearchAppBar extends StatelessWidget implements PreferredSizeWidget {
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(10),
               borderSide:
-                  const BorderSide(color: Color(0xFF8B674C), width: 1.2),
+                  const BorderSide(color: Color(0xFF6495ED), width: 1.2),
             ),
             filled: true,
             fillColor: Colors.transparent,
@@ -41,7 +42,7 @@ class Tab1SearchAppBar extends StatelessWidget implements PreferredSizeWidget {
       ),
       actions: [
         IconButton(
-          icon: const Icon(Icons.sort, color: Color(0xFF8B674C)),
+          icon: const Icon(Icons.sort, color: Color(0xFF6495ED)),
           onPressed: onSort,
         ),
       ],

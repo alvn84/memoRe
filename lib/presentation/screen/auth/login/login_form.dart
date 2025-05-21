@@ -173,7 +173,7 @@ class _LoginFormState extends State<LoginForm> {
                     // ⭐️ 폰트 크기
                     fontWeight: FontWeight.w900,
                     // ⭐️ 약간 두껍게 (Montserrat랑 잘 어울림)
-                    color: Color(0xFFFFFBF5), // 글씨 색상 (모카무스 느낌)
+                    color: Color(0xFFFAFAFA), // 글씨 색상 (모카무스 느낌)
                   ),
                 ),
               ),
@@ -183,7 +183,10 @@ class _LoginFormState extends State<LoginForm> {
         const SizedBox(height: 12),
         Center(
           // skip 버튼 없애려면 여기 이 Center 컴포넌트랑 바로 위 SizedBox(12) 날려버리기
-          child: TextButton(
+          child: ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Color(0xFFFAFAFA), // 배경색
+            ),
             onPressed: () {
               Navigator.pushReplacement(
                 context,
@@ -193,8 +196,8 @@ class _LoginFormState extends State<LoginForm> {
             child: const Text(
               '로그인 없이 사용',
               style: TextStyle(
-                fontSize: 14,
-                color: Colors.grey, // ✅ 메인 포인트 컬러도 아님. 그냥 조용하게 회색.
+                fontSize: 15,
+                color: Color(0xFFB89B89), // ✅ 메인 포인트 컬러도 아님. 그냥 조용하게 회색.
               ),
             ),
           ),

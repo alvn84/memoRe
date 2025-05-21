@@ -1,3 +1,4 @@
+// - - - - - - - - - - - - - - - Tab1에서 개별 폴더 디자인 - - - - - - - - - - - - - - -
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -33,7 +34,7 @@ class FolderTile extends StatelessWidget {
             ),
             child: CircleAvatar(
               radius: 33,
-              backgroundColor: const Color(0xFFFFFBF5),
+              backgroundColor: const Color(0xFFFAFAFA),
               backgroundImage: folder.imagePath != null
                   ? FileImage(File(folder.imagePath!))
                   : null,

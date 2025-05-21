@@ -123,16 +123,16 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFFFFBF5),
+      backgroundColor: const Color(0xFFFAFAFA),
       appBar: AppBar(
         title: const Text('메모 작성'),
         backgroundColor: Colors.transparent,
         elevation: 0,
-        leading: const BackButton(color: Color(0xFF8B674C)),
+        leading: const BackButton(color: Color(0xFF6495ED)),
         actions: [
           // ✅ 새로 추가한 버튼 (예: 별 버튼)
           IconButton(
-            icon: const Icon(Icons.star_border, color: Color(0xFF8B674C)),
+            icon: const Icon(Icons.star_border, color: Color(0xFF6495ED)),
             onPressed: () async {
               // 그대로 출력
               final preview = await previewMemoText(
@@ -163,7 +163,7 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
             },
           ),
           IconButton(
-            icon: const Icon(Icons.check, color: Color(0xFF8B674C)),
+            icon: const Icon(Icons.check, color: Color(0xFF6495ED)),
             onPressed: saveMemo,
           ),
         ],

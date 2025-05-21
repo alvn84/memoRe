@@ -1,3 +1,4 @@
+// - - - - - - - - - - - - - - - 폴더 배치 재정렬 - - - - - - - - - - - - - - -
 import 'package:flutter/material.dart';
 
 import 'folder_model.dart';
@@ -56,7 +57,7 @@ class _FolderReorderState extends State<FolderReorder> {
         },
       ),
       floatingActionButton: FloatingActionButton(
-        backgroundColor: Color(0xFF8B674C),
+        backgroundColor: Color(0xFF6495ED),
         onPressed: () {
           widget.onReorder(_folders); // 변경사항 반영
           Navigator.pop(context);

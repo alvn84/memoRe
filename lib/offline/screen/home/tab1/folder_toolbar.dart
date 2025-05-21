@@ -29,9 +29,9 @@ class FolderToolbar extends StatelessWidget {
               heroTag: 'addFolder',
               mini: true,
               shape: const CircleBorder(),
-              backgroundColor: Color(0xFF8B674C),
+              backgroundColor: Color(0xFF6495ED),
               onPressed: onAddFolder,
-              child: const Icon(Icons.create_new_folder, color: Color(0xFFFFFBF5)),
+              child: const Icon(Icons.create_new_folder, color: Color(0xFFFAFAFA)),
             ),
           ),
         ),
@@ -43,7 +43,7 @@ class FolderToolbar extends StatelessWidget {
           curve: Curves.easeInOut,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            color: isFabExpanded ? const Color(0xFFFDEEDC) : Color(0xFF8B674C),
+            color: isFabExpanded ? const Color(0xFFFDEEDC) : Color(0xFF6495ED),
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withOpacity(0.2),
@@ -59,7 +59,7 @@ class FolderToolbar extends StatelessWidget {
             onPressed: onToggle,
             child: Icon(
               isFabExpanded ? Icons.note_add : Icons.add,
-              color: isFabExpanded ? Color(0xFF8B674C) : Colors.white,
+              color: isFabExpanded ? Color(0xFF6495ED) : Colors.white,
             ),
           ),
         ),

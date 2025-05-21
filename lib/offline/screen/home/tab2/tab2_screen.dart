@@ -1,5 +1,25 @@
+// ✅ 수정된 Tab2Screen 전체 코드 (정확한 메모 수정 반영)
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:intl/intl.dart';
+import 'package:flutter_quill/flutter_quill.dart';
+import '../memo/memo_screen.dart';
+
+class MemoEntry {
+  final String folderKey;
+  final int index;
+  final String content;
+  final String date;
+
+  MemoEntry({
+    required this.folderKey,
+    required this.index,
+    required this.content,
+    required this.date,
+  });
+}
 
 class Tab2Screen extends StatefulWidget {
   const Tab2Screen({super.key});
@@ -11,11 +31,96 @@ class Tab2Screen extends StatefulWidget {
 class _Tab2ScreenState extends State<Tab2Screen> {
   DateTime? _selectedDay;
   DateTime _focusedDay = DateTime.now();
+  List<MemoEntry> _allNotes = [];
+  List<MemoEntry> _filteredNotes = [];
+  Set<DateTime> memoDates = {};
+  String _searchQuery = '';
+  bool _sortNewestFirst = true;
 
   @override
   void initState() {
     super.initState();
     _selectedDay = _focusedDay;
+    _onDateSelected(_selectedDay!, _focusedDay);
+  }
+
+  Future<List<MemoEntry>> _loadMemosForDate(DateTime date) async {
+    final prefs = await SharedPreferences.getInstance();
+    List<MemoEntry> result = [];
+    final newMemoDates = <DateTime>{};
+
+    for (String folderKey in prefs.getKeys()) {
+      if (!folderKey.endsWith('_writtenDates')) continue;
+      final notesKey = folderKey.replaceAll('_writtenDates', '');
+      final notes = prefs.getStringList(notesKey) ?? [];
+      final dates = prefs.getStringList(folderKey) ?? [];
+
+      for (int i = 0; i < notes.length; i++) {
+        final parsedDate = DateFormat('yyyy.MM.dd').parse(dates[i]);
+        final normalized = DateTime(parsedDate.year, parsedDate.month, parsedDate.day);
+        newMemoDates.add(normalized);
+
+        if (dates[i] == DateFormat('yyyy.MM.dd').format(date)) {
+          result.add(MemoEntry(
+            folderKey: notesKey,
+            index: i,
+            content: notes[i],
+            date: dates[i],
+          ));
+        }
+      }
+    }
+
+    setState(() {
+      memoDates = newMemoDates;
+    });
+
+    return result;
+  }
+
+  void _onDateSelected(DateTime selectedDay, DateTime focusedDay) async {
+    setState(() {
+      _selectedDay = selectedDay;
+      _focusedDay = focusedDay;
+    });
+
+    final memos = await _loadMemosForDate(selectedDay);
+    setState(() {
+      _allNotes = memos;
+      _applySearchAndSort();
+    });
+  }
+
+  void _applySearchAndSort() {
+    List<MemoEntry> filtered = _allNotes.where((entry) {
+      return entry.content.toLowerCase().contains(_searchQuery.toLowerCase());
+    }).toList();
+
+    if (_sortNewestFirst) {
+      filtered = filtered.reversed.toList();
+    }
+
+    _filteredNotes = filtered;
+  }
+
+  void _onSearchChanged(String value) {
+    setState(() {
+      _searchQuery = value;
+      _applySearchAndSort();
+    });
+  }
+
+  void _toggleSortOrder() {
+    setState(() {
+      _sortNewestFirst = !_sortNewestFirst;
+      _applySearchAndSort();
+    });
+  }
+
+  void _reload() {
+    if (_selectedDay != null) {
+      _onDateSelected(_selectedDay!, _focusedDay);
+    }
   }
 
   @override
@@ -25,120 +130,79 @@ class _Tab2ScreenState extends State<Tab2Screen> {
         slivers: [
           SliverAppBar(
             pinned: true,
-            expandedHeight: 320,
+            expandedHeight: 360,
             flexibleSpace: Container(
-              color: Color(0xFFFFFBF5), // 예: 연베이지톤 배경색
+              color: const Color(0xFFFAFAFA),
               child: FlexibleSpaceBar(
                 background: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                  child: TableCalendar(
-                    availableCalendarFormats: const {
-                      CalendarFormat.month: 'Month',
-                    },
-                    rowHeight: 40,
-                    firstDay: DateTime.utc(2020, 1, 1),
-                    lastDay: DateTime.utc(2030, 12, 31),
-                    focusedDay: _focusedDay,
-                    selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
-                    onDaySelected: (selectedDay, focusedDay) {
-                      setState(() {
-                        _selectedDay = selectedDay;
-                        _focusedDay = focusedDay;
-                      });
-                    },
-                    headerStyle: const HeaderStyle(
-                      titleTextStyle: TextStyle(
-                        fontWeight: FontWeight.w700, // 년도, 월 글씨 두껍게
-                        fontSize: 18,
-                        color: Color(0xFF4F4F4F), // 연검정
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12),
+                  child: Column(
+                    children: [
+                      TableCalendar(
+                        firstDay: DateTime.utc(2020, 1, 1),
+                        lastDay: DateTime.utc(2030, 12, 31),
+                        focusedDay: _focusedDay,
+                        selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
+                        onDaySelected: _onDateSelected,
+                        rowHeight: 40,
+                        eventLoader: (day) {
+                          final normalized = DateTime(day.year, day.month, day.day);
+                          return memoDates.contains(normalized) ? ['memo'] : [];
+                        },
+                        headerStyle: const HeaderStyle(
+                          titleTextStyle: TextStyle(fontWeight: FontWeight.w700, fontSize: 18),
+                          formatButtonVisible: false,
+                          titleCentered: true,
+                        ),
+                        calendarStyle: const CalendarStyle(
+                          markerDecoration: BoxDecoration(color: Color(0xFF6495ED), shape: BoxShape.circle),
+                          selectedDecoration: BoxDecoration(color: Color(0xFF6495ED), shape: BoxShape.circle),
+                          selectedTextStyle: TextStyle(fontWeight: FontWeight.w900, color: Colors.white),
+                        ),
+                        calendarBuilders: CalendarBuilders(
+                          defaultBuilder: (context, day, focusedDay) {
+                            final isToday = isSameDay(day, DateTime.now());
+                            final text = Text('${day.day}',
+                                style: TextStyle(fontWeight: FontWeight.w600));
+                            return Center(
+                              child: isToday ? Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [text, const Text('오늘', style: TextStyle(fontSize: 10, color: Colors.red))],
+                              ) : text,
+                            );
+                          },
+                        ),
                       ),
-                      formatButtonVisible: false, // format 변경 버튼 제거
-                      titleCentered: true, // 년도, 월 가운데 정렬
-                    ),
-                    daysOfWeekStyle: const DaysOfWeekStyle(
-                      weekdayStyle: TextStyle(
-                        fontWeight: FontWeight.w600, // 평일 요일 글씨 두껍게
-                        color: Color(0xFF4F4F4F),
-                      ),
-                      weekendStyle: TextStyle(
-                        fontWeight: FontWeight.w600, // 주말 요일 글씨 두껍게
-                        color: Colors.redAccent,
-                      ),
-                    ),
-                    calendarStyle: const CalendarStyle(
-                      defaultTextStyle: TextStyle(
-                        fontWeight: FontWeight.w600, // 평소 글씨 두껍게
-                        color: Color(0xFF4F4F4F), // 살짝 연한 검정 느낌
-                      ),
-                      selectedDecoration: BoxDecoration(
-                        color: Color(0xFFE5CFC3),
-                        shape: BoxShape.circle,
-                      ),
-                      selectedTextStyle: TextStyle(
-                        fontWeight: FontWeight.w900, // 선택 날짜 글씨 더 두껍게
-                        color: Colors.white, // 선택 날짜 글씨색 (배경이 진하니까 흰색)
-                      ),
-                      todayDecoration: BoxDecoration(),
-                    ),
-                    calendarBuilders: CalendarBuilders(
-                      todayBuilder: (context, day, focusedDay) {
-                        final isSelected = _selectedDay != null &&
-                            isSameDay(day, _selectedDay);
-                        return Center(
-                          child: Text(
-                            '${day.day}',
-                            style: TextStyle(
-                              fontWeight: isSelected
-                                  ? FontWeight.w900
-                                  : FontWeight.normal,
-                              color: isSelected ? Colors.white : Colors.black87,
-                            ),
+                      const SizedBox(height: 8),
+                      Row(
+                        children: [
+                          Expanded(
+                              child: TextField(
+                                onChanged: _onSearchChanged,
+                                decoration: InputDecoration(
+                                  prefixIcon: const Icon(Icons.search, color: Color(0xFF6495ED)),
+                                  hintText: 'Search notes...',
+                                  filled: true,
+                                  fillColor: Color(0xFFF1F4F8),
+                                  contentPadding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
+                                  isDense: true,
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(30),
+                                    borderSide: BorderSide.none,
+                                  ),
+                                  focusedBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(30),
+                                    borderSide: const BorderSide(color: Color(0xFF6495ED), width: 1.5),
+                                  ),
+                                ),
+                              )),
+                          IconButton(
+                            icon: Icon(_sortNewestFirst ? Icons.arrow_downward : Icons.arrow_upward),
+                            onPressed: _toggleSortOrder,
                           ),
-                        );
-                      },
-
-                      // 🔥 여기가 핵심
-                      defaultBuilder: (context, day, focusedDay) {
-                        final isSaturday = day.weekday == DateTime.saturday;
-                        final isSunday = day.weekday == DateTime.sunday;
-
-                        Color textColor = const Color(0xFF4F4F4F); // 평일 기본색
-                        if (isSaturday) {
-                          textColor = Colors.blueAccent;
-                        } else if (isSunday) {
-                          textColor = Colors.redAccent;
-                        }
-                        return Center(
-                          child: Text(
-                            '${day.day}',
-                            style: TextStyle(
-                              fontWeight: FontWeight.w600,
-                              color: textColor,
-                            ),
-                          ),
-                        );
-                      },
-                      // ✅ 요일 헤더 색상 따로 지정
-                      dowBuilder: (context, day) {
-                        final weekday = day.weekday;
-                        final text = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][weekday % 7];
-                        Color color = const Color(0xFF4F4F4F); // 기본 평일색
-                        if (weekday == DateTime.saturday) {
-                          color = Colors.blueAccent;
-                        } else if (weekday == DateTime.sunday) {
-                          color = Colors.redAccent;
-                        }
-                        return Center(
-                          child: Text(
-                            text,
-                            style: TextStyle(
-                              color: color,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        );
-                      },
-                    ),
+                        ],
+                      ),
+                    ],
                   ),
                 ),
               ),
@@ -146,32 +210,80 @@ class _Tab2ScreenState extends State<Tab2Screen> {
           ),
           SliverToBoxAdapter(
             child: Padding(
-              padding:
-              const EdgeInsets.symmetric(horizontal: 20.0, vertical: 12.0),
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(minHeight: 100),
-                child: LayoutBuilder(
-                  builder: (context, constraints) {
-                    return SingleChildScrollView(
-                      physics: const ClampingScrollPhysics(), // 자연스러운 스크롤
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: List.generate(
-                          1,
-                          // ← 백엔드에서 받아올 메모 수에 따라 유동적. 스크롤 기능 테스트용. 숫자 늘리면 텍스트 늘어남.
-                              (index) => const Padding(
-                            padding: EdgeInsets.only(bottom: 12.0),
-                            child: Text(
-                              '오늘의 메모가 없습니다.',
-                              style:
-                              TextStyle(fontSize: 18, color: Colors.grey),
-                            ),
+              padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 12.0),
+              child: _filteredNotes.isEmpty
+                  ? const Text('No Schedule.', style: TextStyle(fontSize: 18, color: Colors.grey))
+                  : Column(
+                children: _filteredNotes.map((entry) {
+                  final lines = entry.content.split('\n');
+                  final title = lines.first;
+                  final deltaJson = lines.skip(1).join('\n');
+                  String preview = '';
+
+                  try {
+                    final parsed = jsonDecode(deltaJson) as List<dynamic>;
+                    final doc = Document.fromJson(parsed);
+                    preview = doc.toPlainText().trim();
+                  } catch (e) {
+                    preview = deltaJson;
+                  }
+
+                  return GestureDetector(
+                    onTap: () async {
+                      await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => NoteEditScreen(
+                            folderKey: entry.folderKey,
+                            initialContent: entry.content,
+                            noteIndex: entry.index,
+                            onNoteSaved: (_) => _reload(),
                           ),
                         ),
+                      );
+                    },
+                    child: Card(
+                      margin: const EdgeInsets.only(bottom: 16),
+                      color: const Color(0xFFF9FAFB),
+                      elevation: 3,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
                       ),
-                    );
-                  },
-                ),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              title,
+                              style: const TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: Color(0xFF333333),
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              preview.length > 100 ? '${preview.substring(0, 100)}...' : preview,
+                              style: const TextStyle(fontSize: 14, color: Color(0xFF666666)),
+                              maxLines: 3,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            const SizedBox(height: 12),
+                            Align(
+                              alignment: Alignment.bottomRight,
+                              child: Text(
+                                DateFormat('MMM d').format(
+                                    DateFormat('yyyy.MM.dd').parse(entry.date)),
+                                style: const TextStyle(fontSize: 12, color: Colors.grey),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  );
+                }).toList(),
               ),
             ),
           ),
@@ -180,4 +292,3 @@ class _Tab2ScreenState extends State<Tab2Screen> {
     );
   }
 }
-

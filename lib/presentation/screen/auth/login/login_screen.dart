@@ -23,7 +23,7 @@ const TextStyle logoTextStyle = TextStyle(
 
 const TextStyle forgotPasswordStyle = TextStyle(
   fontSize: 13,
-  color: Color(0xFF8B674C),
+  color: Color(0xFF6495ED),
   fontFamily: 'Montserrat',
   fontWeight: FontWeight.w800,
 );
@@ -32,7 +32,7 @@ const TextStyle signUpLinkStyle = TextStyle(
     fontSize: 14,
     fontFamily: 'Montserrat',
     fontWeight: FontWeight.w800,
-    color: Color(0xFF8B674C));
+    color: Color(0xFF6495ED));
 
 class _LoginScreenState extends State<LoginScreen> {
   Key _formKey = UniqueKey(); // ⭐️ 키를 매번 새로 주기
