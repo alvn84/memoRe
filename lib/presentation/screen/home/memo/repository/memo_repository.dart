@@ -97,3 +97,32 @@ class MemoRepository {
     return response.statusCode == 200;
   }
 }
+
+// 메모 번역
+Future<String> translateText(String inputText, String targetLang) async {
+  final token = await TokenStorage.getToken(); // 로그인 기반 인증 사용 시
+  final url = Uri.parse('$baseUrl/api/translate');
+
+  try {
+    final response = await http.post(
+      url,
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token', // 필요 없으면 제거 가능
+      },
+      body: jsonEncode({
+        'text': inputText,
+        'targetLanguage': targetLang,
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      final json = jsonDecode(response.body);
+      return json['translatedText'] ?? '번역 결과 없음';
+    } else {
+      return '번역 실패: ${response.statusCode}';
+    }
+  } catch (e) {
+    return '서버 오류: $e';
+  }
+}

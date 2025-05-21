@@ -8,6 +8,7 @@ import '../../../auth/token_storage.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:flutter/services.dart';
+import '';
 
 class NoteEditScreen extends StatefulWidget {
   final Memo? initialMemo;
@@ -132,19 +133,43 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
         actions: [
           // ✅ 새로 추가한 버튼 (예: 별 버튼)
           IconButton(
-            icon: const Icon(Icons.star_border, color: Color(0xFF6495ED)),
+              icon: const Icon(Icons.translate, color: Color(0xFF6495ED)),
+              onPressed: () async {
+                final title = _titleController.text;
+                final body = _quillController.document.toPlainText();
+                final combined = '$body';
+
+                final translated =
+                    await translateText(combined, 'en'); // 영어로 번역
+
+                if (!context.mounted) return;
+
+                showDialog(
+                  context: context,
+                  builder: (_) => AlertDialog(
+                    title: const Text('번역 결과'),
+                    content: Text(translated),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(context),
+                        child: const Text('닫기'),
+                      ),
+                    ],
+                  ),
+                );
+              }),
+          IconButton(
+            icon: Image.asset(
+              'assets/icons/ai_summary.png',
+              width: 33,
+              height: 35,
+            ),
             onPressed: () async {
               // 그대로 출력
               final preview = await previewMemoText(
                 _titleController.text,
                 _quillController.document.toPlainText(),
               );
-              // 서버 통신하여 출력
-              final summary = await summarizeText(
-                _titleController.text,
-                _quillController.document.toPlainText(),
-              );
-
               if (!context.mounted) return;
 
               showDialog(
@@ -195,6 +220,39 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
             ),
           ),
         ],
+      ),
+      floatingActionButton: Padding(
+        padding: const EdgeInsets.only(bottom: 40),
+        child: FloatingActionButton(
+          onPressed: () async {
+            final preview = await previewMemoText(
+              _titleController.text,
+              _quillController.document.toPlainText(),
+            );
+
+            if (!context.mounted) return;
+
+            showDialog(
+              context: context,
+              builder: (_) => AlertDialog(
+                title: const Text('미리보기'),
+                content: Text(preview),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: const Text('닫기'),
+                  ),
+                ],
+              ),
+            );
+          },
+          shape: const CircleBorder(),
+          child: Image.asset(
+            'assets/icons/meta_icon.png',
+            width: 28,
+            height: 28,
+          ),
+        ),
       ),
     );
   }

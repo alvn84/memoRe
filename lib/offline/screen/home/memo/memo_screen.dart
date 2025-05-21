@@ -1,9 +1,12 @@
 import 'dart:convert'; // 🔧 delta 저장/복원용
+import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 import 'package:flutter_quill/extensions.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:intl/intl.dart';
+import '../../../../../presentation/screen/auth/api_config.dart';
+import '../../../../../presentation/screen/auth/token_storage.dart';
 
 class NoteEditScreen extends StatefulWidget {
   // 메모 저장 콜백, 기존 내용, 메모 인덱스, 폴더 키
@@ -92,7 +95,6 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
 
   @override
   void dispose() {
-    _autoSaveNote(); // ✅ 화면 닫을 때 자동 저장
     super.dispose();
   }
 
@@ -101,18 +103,23 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
     final title = _titleController.text.trim();
     final deltaJson = _controller.document.toDelta().toJson();
     final fullNote = '$title\n${jsonEncode(deltaJson)}';
-    final dateString = DateFormat('yyyy.MM.dd').format(_selectedDate ?? DateTime.now());
+    final dateString =
+        DateFormat('yyyy.MM.dd').format(_selectedDate ?? DateTime.now());
 
-    if ((title.isNotEmpty || _controller.document.length > 1) && widget.folderKey != null) {
+    if ((title.isNotEmpty || _controller.document.length > 1) &&
+        widget.folderKey != null) {
       final prefs = await SharedPreferences.getInstance();
       final notes = prefs.getStringList(widget.folderKey!) ?? [];
-      final modifiedDates = prefs.getStringList('${widget.folderKey!}_modified') ?? [];
-      final writtenDates = prefs.getStringList('${widget.folderKey!}_writtenDates') ?? [];
+      final modifiedDates =
+          prefs.getStringList('${widget.folderKey!}_modified') ?? [];
+      final writtenDates =
+          prefs.getStringList('${widget.folderKey!}_writtenDates') ?? [];
 
       if (widget.noteIndex != null && widget.noteIndex! < notes.length) {
         // 수정 모드: 인덱스에 덮어쓰기
         notes[widget.noteIndex!] = fullNote;
-        modifiedDates[widget.noteIndex!] = DateFormat('yyyy.MM.dd').format(DateTime.now());
+        modifiedDates[widget.noteIndex!] =
+            DateFormat('yyyy.MM.dd').format(DateTime.now());
         writtenDates[widget.noteIndex!] = dateString;
       } else {
         // 새 메모 추가
@@ -123,12 +130,43 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
 
       await prefs.setStringList(widget.folderKey!, notes);
       await prefs.setStringList('${widget.folderKey!}_modified', modifiedDates);
-      await prefs.setStringList('${widget.folderKey!}_writtenDates', writtenDates);
+      await prefs.setStringList(
+          '${widget.folderKey!}_writtenDates', writtenDates);
     }
 
     widget.onNoteSaved(fullNote);
   }
 
+  Future<void> _uploadNoteToServer(
+      String title, String content, DateTime? date) async {
+    try {
+      final token = await TokenStorage.getToken();
+      print('🔑 token: $token');
+      final formattedDate =
+          DateFormat('yyyy-MM-dd').format(date ?? DateTime.now());
+      final plainText = _controller.document.toPlainText();
+
+      final response = await http.post(
+        Uri.parse('$baseUrl/api/memos'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: jsonEncode({
+          'title': title,
+          'content': plainText,
+          'date': formattedDate,
+          // 필요하면 folderId도 같이 보낼 수 있음
+        }),
+      );
+
+      if (response.statusCode != 200) {
+        print('서버 저장 실패: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('서버 연동 중 예외 발생: $e');
+    }
+  }
 
   // ✅ 메모 내용을 요약해서 다이얼로그로 보여주는 기능 (AI 요약 자리)
   void _summarizeNoteAI() async {
@@ -141,15 +179,18 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: const Color(0xFFFAFAFA),
-        title: const Text('AI Summary', style: TextStyle(fontWeight: FontWeight.bold)),
-        content: Text('New York City, also known as “The Big Apple,” is a vibrant global hub for finance, arts, and culture. \n\nFamous for landmarks like the Statue of Liberty, Times Square, and Central Park, it consists of five boroughs: Manhattan, Brooklyn, Queens, The Bronx, and Staten Island. \n\nKnown for its diversity, energy, and iconic attractions, NYC is often called “the city that never sleeps.”'),
+        title: const Text('AI Summary',
+            style: TextStyle(fontWeight: FontWeight.bold)),
+        content: Text(
+            'New York City, also known as “The Big Apple,” is a vibrant global hub for finance, arts, and culture. \n\nFamous for landmarks like the Statue of Liberty, Times Square, and Central Park, it consists of five boroughs: Manhattan, Brooklyn, Queens, The Bronx, and Staten Island. \n\nKnown for its diversity, energy, and iconic attractions, NYC is often called “the city that never sleeps.”'),
         //Text(summary.isNotEmpty ? summary : 'No content to summarize.'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
             child: const Text(
               'Add to Memo',
-              style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF6495ED)),
+              style: TextStyle(
+                  fontWeight: FontWeight.bold, color: Color(0xFF6495ED)),
             ),
           ),
           TextButton(
@@ -172,7 +213,8 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
           onTap: _pickDate,
           child: Text(
             _formattedDate(),
-            style: const TextStyle(color: Colors.black87, fontWeight: FontWeight.bold),
+            style: const TextStyle(
+                color: Colors.black87, fontWeight: FontWeight.bold),
           ),
         ),
         centerTitle: true,
@@ -190,14 +232,19 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
             tooltip: 'Redo',
             onPressed: () => _controller.redo(),
           ),
-          /* IconButton(
+          IconButton(
             icon: const Icon(Icons.check, color: Color(0xFF6495ED)),
             tooltip: 'Save',
-            onPressed: () {
-              _autoSaveNote();
+            onPressed: () async {
+              await _autoSaveNote();
+              await _uploadNoteToServer(
+                _titleController.text.trim(),
+                _controller.document.toPlainText(),
+                _selectedDate,
+              );
               Navigator.pop(context);
             },
-          ), */
+          ),
         ],
       ),
 
@@ -212,7 +259,9 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
               style: const TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
               decoration: const InputDecoration(
                 hintText: 'Title',
-                hintStyle: TextStyle(color: Colors.black26,),
+                hintStyle: TextStyle(
+                  color: Colors.black26,
+                ),
                 border: InputBorder.none,
                 filled: true,
                 fillColor: Colors.white,
@@ -232,7 +281,8 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
                 child: QuillEditor.basic(
                   configurations: QuillEditorConfigurations(
                     controller: _controller,
-                    sharedConfigurations: const QuillSharedConfigurations(locale: Locale('en')),
+                    sharedConfigurations:
+                        const QuillSharedConfigurations(locale: Locale('en')),
                   ),
                 ),
               ),
@@ -247,12 +297,12 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
               child: QuillToolbar.simple(
                 configurations: QuillSimpleToolbarConfigurations(
                   buttonOptions: QuillSimpleToolbarButtonOptions(
-                    base: QuillToolbarBaseButtonOptions(
-                      iconSize: 18,
-                    )
-                  ),
+                      base: QuillToolbarBaseButtonOptions(
+                    iconSize: 18,
+                  )),
                   controller: _controller,
-                  sharedConfigurations: const QuillSharedConfigurations(locale: Locale('en')),
+                  sharedConfigurations:
+                      const QuillSharedConfigurations(locale: Locale('en')),
                   showListCheck: true,
                   showListNumbers: true,
                   showSearchButton: true,

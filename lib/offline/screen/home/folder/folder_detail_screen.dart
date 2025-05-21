@@ -52,25 +52,27 @@ class _FolderDetailScreenState extends State<FolderDetailScreen> {
   Future<void> _loadNotes() async {
     final prefs = await SharedPreferences.getInstance();
     final notes = prefs.getStringList(widget.folderName) ?? [];
-    final uniqueNotes = notes.toSet().toList();
-    writtenDates = prefs.getStringList('${widget.folderName}_writtenDates') ?? [];
-    modifiedDates = prefs.getStringList('${widget.folderName}_modified') ?? [];
+    final written = prefs.getStringList('${widget.folderName}_writtenDates') ?? [];
+    final modified = prefs.getStringList('${widget.folderName}_modified') ?? [];
 
-    // writtenDates가 notes 길이보다 짧을 수 있으므로 보정
-    while (writtenDates.length < uniqueNotes.length) {
-      writtenDates.add(DateFormat('yyyy.MM.dd').format(DateTime.now()));
+    while (written.length < notes.length) {
+      written.add(DateFormat('yyyy.MM.dd').format(DateTime.now()));
     }
 
-    while (modifiedDates.length < noteContents.length) {
-      modifiedDates.add(DateFormat('yyyy.MM.dd').format(DateTime.now()));
+    while (modified.length < notes.length) {
+      modified.add(DateFormat('yyyy.MM.dd').format(DateTime.now()));
     }
+
+    // ⬇ 여기서 다시 반영
+    await prefs.setStringList(widget.folderName, notes);
+    await prefs.setStringList('${widget.folderName}_writtenDates', written);
+    await prefs.setStringList('${widget.folderName}_modified', modified);
 
     setState(() {
-      noteContents = uniqueNotes;
+      noteContents = notes;
+      writtenDates = written;
+      modifiedDates = modified;
     });
-
-    await prefs.setStringList(widget.folderName, uniqueNotes);
-    await prefs.setStringList('${widget.folderName}_writtenDates', writtenDates);
   }
 
   void _addNewNote() async {
