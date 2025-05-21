@@ -28,9 +28,8 @@ class FavoriteScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Favorites', style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),),
-        backgroundColor: Colors.transparent,
-        centerTitle: true,
+        title: const Text('즐겨찾기'),
+        backgroundColor: Colors.transparent, // 배경 투명
       ),
       body: ListView(
         padding: const EdgeInsets.all(16),
@@ -41,7 +40,7 @@ class FavoriteScreen extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           ...folderList.map((folder) => ListTile(
-            leading: const Icon(Icons.folder, color: Color(0xFFE5CFC3)),
+            leading: const Icon(Icons.folder, color: Color(0xFFB0E0E6)),
             title: Text(folder),
           )),
           const Divider(height: 32),
