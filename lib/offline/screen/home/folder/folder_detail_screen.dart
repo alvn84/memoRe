@@ -302,7 +302,6 @@ class _FolderDetailScreenState extends State<FolderDetailScreen> {
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
-                        child: Expanded(
                           child: Padding(
                             padding: const EdgeInsets.all(12.0),
                             child: Column(
@@ -330,7 +329,6 @@ class _FolderDetailScreenState extends State<FolderDetailScreen> {
                               ],
                             ),
                           ),
-                        ),
                       ),
                     );
                   },

@@ -99,19 +99,21 @@ class _LoginFormState extends State<LoginForm> {
               ),
               decoration: InputDecoration(
                 labelText: 'Email',
+                filled: true,
+                fillColor: Color(0xFFF1F4F8),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(15), // 텍스트필드 둥글기 조절
                 ),
                 enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(15),
+                  borderRadius: BorderRadius.circular(20),
                   borderSide: const BorderSide(
-                    color: Color(0xFFE5CFC3), // 기본 테두리 색상
+                    color: Colors.transparent, // 기본 테두리 색상
                   ),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(15),
                   borderSide: const BorderSide(
-                    color: Color(0xFFB89B89), // 포커스(선택 시) 테두리 색상
+                    color: Color(0xFF6495ED), // 포커스(선택 시) 테두리 색상
                     width: 2.0, // 테두리 두께 (선택)
                   ),
                 ),
@@ -131,20 +133,22 @@ class _LoginFormState extends State<LoginForm> {
               obscureText: true,
               autofocus: false,
               decoration: InputDecoration(
+                filled: true,
+                fillColor: Color(0xFFF1F4F8),
                 labelText: 'Password',
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(15), // 텍스트필드 둥글기 조절
                 ),
                 enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(15),
+                  borderRadius: BorderRadius.circular(20),
                   borderSide: const BorderSide(
-                    color: Color(0xFFE5CFC3), // 기본 테두리 색상
+                    color: Colors.transparent,// 기본 테두리 색상
                   ),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(15),
                   borderSide: const BorderSide(
-                    color: Color(0xFFB89B89), // 포커스(선택 시) 테두리 색상
+                    color: Color(0xFF6495ED), // 포커스(선택 시) 테두리 색상
                     width: 2.0, // 테두리 두께 (선택)
                   ),
                 ),
@@ -163,7 +167,7 @@ class _LoginFormState extends State<LoginForm> {
               height: 40,
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Color(0xFFB89B89), // 배경색
+                  backgroundColor: Color(0xFF6495ED), // 배경색
                 ),
                 onPressed: _handleLogin,
                 /*onPressed: () {
@@ -201,10 +205,10 @@ class _LoginFormState extends State<LoginForm> {
               );
             },
             child: const Text(
-              '로그인 없이 사용',
+              'Use without login',
               style: TextStyle(
                 fontSize: 15,
-                color: Color(0xFFB89B89), // ✅ 메인 포인트 컬러도 아님. 그냥 조용하게 회색.
+                color: Color(0xFF6495ED), // ✅ 메인 포인트 컬러도 아님. 그냥 조용하게 회색.
               ),
             ),
           ),

@@ -1,20 +1,20 @@
+
 import 'dart:convert'; // 🔧 delta 저장/복원용
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 import 'package:flutter_quill/extensions.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:intl/intl.dart';
-import '../../../../../presentation/screen/auth/api_config.dart';
-import '../../../../../presentation/screen/auth/token_storage.dart';
+import 'memo_editor.dart';
+import 'memo_toolbar.dart';
+import 'memo_storage_helper.dart';
 
 class NoteEditScreen extends StatefulWidget {
-  // 메모 저장 콜백, 기존 내용, 메모 인덱스, 폴더 키
   final Function(String) onNoteSaved;
   final String? initialContent;
   final int? noteIndex;
   final String? folderKey;
-  final String? initialDate; // 예: '2025.05.20'
+  final String? initialDate;
 
   const NoteEditScreen({
     super.key,
@@ -34,139 +34,24 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
   final TextEditingController _titleController = TextEditingController();
   DateTime? _selectedDate;
 
-  @override
-  void initState() {
-    super.initState();
+  void _translateMemo() {
+    final text = _controller.document.toPlainText();
 
-    // ✅ 기존 메모 로딩 또는 새 문서 생성
-    if (widget.initialContent != null) {
-      final parts = widget.initialContent!.split('\n');
-      final title = parts.first;
-      _titleController.text = title;
-
-      try {
-        final deltaString = parts.skip(1).join('\n');
-        final deltaJson = jsonDecode(deltaString) as List<dynamic>;
-        final doc = Document.fromJson(deltaJson);
-        _controller = QuillController(
-          document: doc,
-          selection: const TextSelection.collapsed(offset: 0),
-        );
-      } catch (e) {
-        final content = parts.skip(1).join('\n');
-        final doc = Document()..insert(0, content);
-        _controller = QuillController(
-          document: doc,
-          selection: const TextSelection.collapsed(offset: 0),
-        );
-      }
-    } else {
-      _controller = QuillController.basic();
-    }
-    if (widget.initialDate != null) {
-      _selectedDate = DateFormat('yyyy.MM.dd').parse(widget.initialDate!);
-    } else {
-      _selectedDate = DateTime.now();
-    }
-  }
-
-  // ✅ 선택된 날짜를 "yyyy.MM.dd" 형식으로 반환
-  String _formattedDate() {
-    final date = _selectedDate ?? DateTime.now();
-    return DateFormat('yyyy.MM.dd').format(date);
-  }
-
-  // ✅ 날짜 선택 다이얼로그 열기
-  void _pickDate() async {
-    final picked = await showDatePicker(
+    showDialog(
       context: context,
-      initialDate: _selectedDate ?? DateTime.now(),
-      firstDate: DateTime(2000),
-      lastDate: DateTime(2100),
+      builder: (_) => AlertDialog(
+        title: const Text('Translate'),
+        content: Text('This would translate:\n\n$text'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('OK'),
+          ),
+        ],
+      ),
     );
-    if (picked != null) {
-      setState(() {
-        _selectedDate = picked;
-      });
-    }
-    await _autoSaveNote();
-    print('선택된 날짜: $_selectedDate');
   }
 
-  @override
-  void dispose() {
-    super.dispose();
-  }
-
-  // ✅ 메모 자동 저장 함수 (SharedPreferences에 저장)
-  Future<void> _autoSaveNote() async {
-    final title = _titleController.text.trim();
-    final deltaJson = _controller.document.toDelta().toJson();
-    final fullNote = '$title\n${jsonEncode(deltaJson)}';
-    final dateString =
-        DateFormat('yyyy.MM.dd').format(_selectedDate ?? DateTime.now());
-
-    if ((title.isNotEmpty || _controller.document.length > 1) &&
-        widget.folderKey != null) {
-      final prefs = await SharedPreferences.getInstance();
-      final notes = prefs.getStringList(widget.folderKey!) ?? [];
-      final modifiedDates =
-          prefs.getStringList('${widget.folderKey!}_modified') ?? [];
-      final writtenDates =
-          prefs.getStringList('${widget.folderKey!}_writtenDates') ?? [];
-
-      if (widget.noteIndex != null && widget.noteIndex! < notes.length) {
-        // 수정 모드: 인덱스에 덮어쓰기
-        notes[widget.noteIndex!] = fullNote;
-        modifiedDates[widget.noteIndex!] =
-            DateFormat('yyyy.MM.dd').format(DateTime.now());
-        writtenDates[widget.noteIndex!] = dateString;
-      } else {
-        // 새 메모 추가
-        notes.add(fullNote);
-        modifiedDates.add(DateFormat('yyyy.MM.dd').format(DateTime.now()));
-        writtenDates.add(dateString);
-      }
-
-      await prefs.setStringList(widget.folderKey!, notes);
-      await prefs.setStringList('${widget.folderKey!}_modified', modifiedDates);
-      await prefs.setStringList(
-          '${widget.folderKey!}_writtenDates', writtenDates);
-    }
-
-    widget.onNoteSaved(fullNote);
-  }
-
-  Future<void> _uploadNoteToServer(
-      String title, String content, DateTime? date) async {
-    try {
-      final token = await TokenStorage.getToken();
-      print('🔑 token: $token');
-      final formattedDate =
-          DateFormat('yyyy-MM-dd').format(date ?? DateTime.now());
-      final plainText = _controller.document.toPlainText();
-
-      final response = await http.post(
-        Uri.parse('$baseUrl/api/memos'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
-        },
-        body: jsonEncode({
-          'title': title,
-          'content': plainText,
-          'date': formattedDate,
-          // 필요하면 folderId도 같이 보낼 수 있음
-        }),
-      );
-
-      if (response.statusCode != 200) {
-        print('서버 저장 실패: ${response.statusCode}');
-      }
-    } catch (e) {
-      print('서버 연동 중 예외 발생: $e');
-    }
-  }
 
   // ✅ 메모 내용을 요약해서 다이얼로그로 보여주는 기능 (AI 요약 자리)
   void _summarizeNoteAI() async {
@@ -202,20 +87,85 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
     );
   }
 
+  bool _isFabExpanded = false;
+
+  @override
+  void initState() {
+    super.initState();
+
+    if (widget.initialContent != null) {
+      final parts = widget.initialContent!.split('\n');
+      final title = parts.first;
+      _titleController.text = title;
+
+      try {
+        final deltaString = parts.skip(1).join('\n');
+        final deltaJson = jsonDecode(deltaString) as List<dynamic>;
+        final doc = Document.fromJson(deltaJson);
+        _controller = QuillController(
+          document: doc,
+          selection: const TextSelection.collapsed(offset: 0),
+        );
+      } catch (_) {
+        final content = parts.skip(1).join('\n');
+        final doc = Document()..insert(0, content);
+        _controller = QuillController(
+          document: doc,
+          selection: const TextSelection.collapsed(offset: 0),
+        );
+      }
+    } else {
+      _controller = QuillController.basic();
+    }
+
+    _selectedDate = widget.initialDate != null
+        ? DateFormat('yyyy.MM.dd').parse(widget.initialDate!)
+        : DateTime.now();
+  }
+
+  String _formattedDate() => DateFormat('yyyy.MM.dd').format(_selectedDate!);
+
+  void _pickDate() async {
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: _selectedDate!,
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2100),
+    );
+    if (picked != null) {
+      setState(() => _selectedDate = picked);
+      await MemoStorageHelper.autoSaveMemo(
+        titleController: _titleController,
+        controller: _controller,
+        folderKey: widget.folderKey,
+        memoIndex: widget.noteIndex,
+        selectedDate: _selectedDate!,
+        onSaved: widget.onNoteSaved,
+      );
+    }
+  }
+
+  @override
+  void dispose() {
+    MemoStorageHelper.autoSaveMemo(
+      titleController: _titleController,
+      controller: _controller,
+      folderKey: widget.folderKey,
+      memoIndex: widget.noteIndex,
+      selectedDate: _selectedDate!,
+      onSaved: widget.onNoteSaved,
+    );
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-
-      // ✅ 상단 앱바 - 날짜 선택 및 저장, Undo/Redo
       appBar: AppBar(
         title: InkWell(
           onTap: _pickDate,
-          child: Text(
-            _formattedDate(),
-            style: const TextStyle(
-                color: Colors.black87, fontWeight: FontWeight.bold),
-          ),
+          child: Text(_formattedDate(), style: const TextStyle(color: Colors.black87, fontWeight: FontWeight.bold)),
         ),
         centerTitle: true,
         backgroundColor: Colors.transparent,
@@ -224,135 +174,116 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
         actions: [
           IconButton(
             icon: const Icon(Icons.undo, color: Colors.black87),
-            tooltip: 'Undo',
             onPressed: () => _controller.undo(),
           ),
           IconButton(
             icon: const Icon(Icons.redo, color: Colors.black87),
-            tooltip: 'Redo',
             onPressed: () => _controller.redo(),
-          ),
-          IconButton(
-            icon: const Icon(Icons.check, color: Color(0xFF6495ED)),
-            tooltip: 'Save',
-            onPressed: () async {
-              await _autoSaveNote();
-              await _uploadNoteToServer(
-                _titleController.text.trim(),
-                _controller.document.toPlainText(),
-                _selectedDate,
-              );
-              Navigator.pop(context);
-            },
           ),
         ],
       ),
-
-      // ✅ 본문 UI 구성
       body: Column(
         children: [
-          // 제목 입력란
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 0),
+            padding: const EdgeInsets.symmetric(horizontal: 0),
             child: TextField(
               controller: _titleController,
               style: const TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
               decoration: const InputDecoration(
                 hintText: 'Title',
-                hintStyle: TextStyle(
-                  color: Colors.black26,
-                ),
+                hintStyle: TextStyle(color: Colors.black26),
                 border: InputBorder.none,
                 filled: true,
                 fillColor: Colors.white,
               ),
             ),
           ),
-
-          // 본문 에디터
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Container(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(12),
-                  color: Colors.white,
-                ),
-                child: QuillEditor.basic(
-                  configurations: QuillEditorConfigurations(
-                    controller: _controller,
-                    sharedConfigurations:
-                        const QuillSharedConfigurations(locale: Locale('en')),
-                  ),
-                ),
-              ),
-            ),
-          ),
-
-          // 하단 툴바
-          Padding(
-            padding: const EdgeInsets.only(bottom: 20),
-            child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: QuillToolbar.simple(
-                configurations: QuillSimpleToolbarConfigurations(
-                  buttonOptions: QuillSimpleToolbarButtonOptions(
-                      base: QuillToolbarBaseButtonOptions(
-                    iconSize: 18,
-                  )),
-                  controller: _controller,
-                  sharedConfigurations:
-                      const QuillSharedConfigurations(locale: Locale('en')),
-                  showListCheck: true,
-                  showListNumbers: true,
-                  showSearchButton: true,
-                  showListBullets: true,
-                  // 나머지 버튼은 다 숨김
-                  showLink: false,
-                  showStrikeThrough: false,
-                  showDividers: false,
-                  showHeaderStyle: false,
-                  showBackgroundColorButton: false,
-                  showInlineCode: false,
-                  showUndo: false,
-                  showRedo: false,
-                  showColorButton: false,
-                  showItalicButton: false,
-                  showFontFamily: false,
-                  showFontSize: false,
-                  showSubscript: false,
-                  showSuperscript: false,
-                  showUnderLineButton: false,
-                  showCenterAlignment: false,
-                  showIndent: false,
-                  showCodeBlock: false,
-                  showQuote: false,
-                  showDirection: false,
-                  showClearFormat: false,
-                  showClipboardCopy: false,
-                  showClipboardCut: false,
-                  showClipboardPaste: false,
-                ),
-              ),
-            ),
-          ),
+          Expanded(child: MemoEditor(controller: _controller)),
+          MemoToolbar(controller: _controller),
         ],
       ),
-
-      // ✅ 우측 하단 요약 버튼 (AI)
       floatingActionButton: Padding(
         padding: const EdgeInsets.only(bottom: 40),
-        child: FloatingActionButton(
-          onPressed: _summarizeNoteAI,
-          backgroundColor: const Color(0xFFFAFAFA),
-          shape: const CircleBorder(),
-          child: Image.asset(
-            'assets/icons/meta_icon.png',
-            width: 28,
-            height: 28,
-          ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // 🔹 번역 버튼
+            AnimatedSlide(
+              offset: _isFabExpanded ? Offset.zero : const Offset(0, 0.3),
+              duration: const Duration(milliseconds: 200),
+              curve: Curves.easeOut,
+              child: AnimatedOpacity(
+                opacity: _isFabExpanded ? 1 : 0,
+                duration: const Duration(milliseconds: 200),
+                child: Column(
+                  children: [
+                    FloatingActionButton(
+                      heroTag: 'translate',
+                      mini: true,
+                      shape: const CircleBorder(),
+                      backgroundColor: const Color(0xFF6495ED),
+                      onPressed: _translateMemo,
+                      child: const Icon(Icons.auto_awesome, color: Colors.white),
+                    ),
+                    const SizedBox(height: 4),
+                    const Text('Cloud-based AI', style: TextStyle(fontSize: 12, color: Colors.black87)),
+                  ],
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 12),
+
+            // 🔹 요약 버튼
+            AnimatedSlide(
+              offset: _isFabExpanded ? Offset.zero : const Offset(0, 0.3),
+              duration: const Duration(milliseconds: 200),
+              curve: Curves.easeOut,
+              child: AnimatedOpacity(
+                opacity: _isFabExpanded ? 1 : 0,
+                duration: const Duration(milliseconds: 200),
+                child: Column(
+                  children: [
+                    FloatingActionButton(
+                      heroTag: 'summarize',
+                      mini: true,
+                      shape: const CircleBorder(),
+                      backgroundColor: const Color(0xFFFAFAFA),
+                      onPressed: _summarizeNoteAI,
+                      child: Image.asset(
+                        'assets/icons/meta_icon.png',
+                        width: 28,
+                        height: 28,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    const Text('Llama', style: TextStyle(fontSize: 12, color: Colors.black87)),
+                  ],
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 12),
+
+            // 🔹 메인 FAB 버튼 (열고 닫는 역할)
+            FloatingActionButton(
+              heroTag: 'main',
+              backgroundColor: _isFabExpanded ? const Color(0xFFFAFAFA) : const Color(0xFF6495ED),
+              shape: const CircleBorder(),
+              onPressed: () {
+                setState(() {
+                  _isFabExpanded = !_isFabExpanded;
+                });
+              },
+              child: Icon(
+                _isFabExpanded ? Icons.close : Icons.add,
+                color: _isFabExpanded ? const Color(0xFF6495ED) : Colors.white,
+              ),
+            ),
+          ],
         ),
       ),
+
     );
   }
 }

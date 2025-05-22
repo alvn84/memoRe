@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:memore/presentation/screen/auth/login/login_screen.dart';
+import 'package:memore/offline/screen/auth/login/login_screen.dart';
 
 class ProfileSettingScreen extends StatelessWidget {
   const ProfileSettingScreen({super.key});

@@ -7,9 +7,8 @@ class TrashScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Trash', style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),),
-        backgroundColor: Colors.transparent,
-        centerTitle: true,
+        title: const Text('휴지통'),
+        backgroundColor: Colors.transparent, // 배경 투명
       ),
       body: const Center(
         child: Text(
