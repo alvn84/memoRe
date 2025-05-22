@@ -40,7 +40,7 @@ class Tab1Controller {
       icon: folder.icon,
       isStarred: !folder.isStarred,
       createdAt: folder.createdAt,
-      imagePath: folder.imagePath,
+      imageUrl: folder.imageUrl,
     );
     final newList = [...folders];
     newList[index] = updated;
@@ -57,7 +57,7 @@ class Tab1Controller {
       icon: folder.icon,
       isStarred: folder.isStarred,
       createdAt: folder.createdAt,
-      imagePath: folder.imagePath,
+      imageUrl: folder.imageUrl,
     );
     final newList = [...folders];
     newList[index] = updated;
@@ -66,7 +66,7 @@ class Tab1Controller {
 
   // 이미지 변경
   static List<Folder> setProfileImage(
-      List<Folder> folders, int index, String imagePath) {
+      List<Folder> folders, int index, String imageUrl) {
     final folder = folders[index];
     final updated = Folder(
       name: folder.name,
@@ -74,7 +74,7 @@ class Tab1Controller {
       icon: folder.icon,
       isStarred: folder.isStarred,
       createdAt: folder.createdAt,
-      imagePath: imagePath,
+      imageUrl: imageUrl,
     );
     final newList = [...folders];
     newList[index] = updated;

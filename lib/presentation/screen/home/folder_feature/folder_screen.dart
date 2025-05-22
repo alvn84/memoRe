@@ -9,13 +9,13 @@ import '../memo/screen/note_edit_screen.dart';
 class FolderDetailScreen extends StatefulWidget {
   final int? folderId;
   final String folderName;
-  final String? imagePath;
+  final String? imageUrl;
 
   const FolderDetailScreen({
     super.key,
     required this.folderId,
     required this.folderName,
-    this.imagePath,
+    this.imageUrl,
   });
 
   @override
@@ -117,8 +117,8 @@ class _FolderDetailScreenState extends State<FolderDetailScreen> {
               background: Stack(
                 fit: StackFit.expand,
                 children: [
-                  widget.imagePath != null
-                      ? Image.file(File(widget.imagePath!), fit: BoxFit.cover)
+                  widget.imageUrl != null
+                      ? Image.file(File(widget.imageUrl!), fit: BoxFit.cover)
                       : Container(color: Color(0xFF6495ED)),
                   Container(color: Colors.black.withOpacity(0.3)),
                 ],

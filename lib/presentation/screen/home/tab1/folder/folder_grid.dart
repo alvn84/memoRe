@@ -29,10 +29,10 @@ class FolderGrid extends StatelessWidget {
       child: GridView.builder(
         itemCount: filteredFolders.length,
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 3,
+          crossAxisCount: 2,
           crossAxisSpacing: 12.0,
-          mainAxisSpacing: 20.0,
-          childAspectRatio: 0.8,
+          mainAxisSpacing: 12.0,
+          childAspectRatio: 0.95,
         ),
         itemBuilder: (context, index) {
           final folder = filteredFolders[index];
@@ -41,7 +41,11 @@ class FolderGrid extends StatelessWidget {
           return InkWell(
             onTap: () => onTapFolder(folder),
             onLongPress: () => onLongPressFolder(originalIndex),
-            child: FolderTile(folder: folder),
+            child: FolderTile(
+              key: ValueKey(
+                  '${folder.id}_${folder.color.value}_${folder.imageUrl ?? ''}'),
+              folder: folder,
+            ),
           );
         },
       ),

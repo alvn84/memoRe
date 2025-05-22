@@ -8,7 +8,6 @@ import '../../../auth/token_storage.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:flutter/services.dart';
-import '';
 
 class NoteEditScreen extends StatefulWidget {
   final Memo? initialMemo;
@@ -137,7 +136,7 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
               onPressed: () async {
                 final title = _titleController.text;
                 final body = _quillController.document.toPlainText();
-                final combined = '$body';
+                final combined = body;
 
                 final translated =
                     await translateText(combined, 'en'); // 영어로 번역

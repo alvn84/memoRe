@@ -14,6 +14,7 @@ import 'folder/folder_grid.dart';
 import 'folder/folder_option_sheet.dart';
 import 'tab1_search_appbar.dart';
 import '../memo/screen/note_edit_screen.dart';
+import 'folder/folder_storage.dart';
 
 class Tab1Screen extends StatefulWidget {
   const Tab1Screen({super.key});
@@ -43,7 +44,6 @@ class _Tab1ScreenState extends State<Tab1Screen> {
     super.initState();
     _loadFolders();
   }
-
 
   void _handleMainFabPressed() {
     if (!_isFabExpanded) {
@@ -133,7 +133,7 @@ class _Tab1ScreenState extends State<Tab1Screen> {
         isStarred: !folders[index].isStarred,
         // 즐겨찾기 상태만 변경
         createdAt: folders[index].createdAt,
-        imagePath: folders[index].imagePath, // ⭐️ 프로필 이미지 유지
+        imageUrl: folders[index].imageUrl, // ⭐️ 프로필 이미지 유지
       );
     });
   }
@@ -153,18 +153,16 @@ class _Tab1ScreenState extends State<Tab1Screen> {
           runSpacing: 12,
           children: pastelColors.map((color) {
             return GestureDetector(
-              onTap: () {
+              onTap: () async {
+                final updatedFolder = await FolderStorage.updateFolderColor(
+                  folders[index].id!,
+                  color,
+                );
+
                 setState(() {
-                  folders[index] = Folder(
-                    name: folders[index].name,
-                    color: color,
-                    // 테두리 색상만 변경
-                    icon: folders[index].icon,
-                    isStarred: folders[index].isStarred,
-                    createdAt: folders[index].createdAt,
-                    imagePath: folders[index].imagePath, // ⭐️ 프로필 이미지 유지
-                  );
+                  folders[index] = updatedFolder; // ✅ 서버 응답 기반으로 갱신
                 });
+
                 Navigator.pop(context);
               },
               child: CircleAvatar(
@@ -228,16 +226,19 @@ class _Tab1ScreenState extends State<Tab1Screen> {
     final pickedFile = await picker.pickImage(source: ImageSource.gallery);
 
     if (pickedFile != null) {
-      setState(() {
-        folders[index] = Folder(
-          name: folders[index].name,
-          color: folders[index].color,
-          icon: folders[index].icon,
-          isStarred: folders[index].isStarred,
-          createdAt: folders[index].createdAt,
-          imagePath: pickedFile.path,
+      final updated = folders[index].copyWith(imageUrl: pickedFile.path);
+
+      try {
+        await FolderStorage.updateFolderImage(updated.id!, pickedFile.path);
+        setState(() {
+          folders[index] = updated;
+        });
+      } catch (e) {
+        print('❌ 이미지 업데이트 실패: $e');
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('이미지 저장에 실패했습니다.')),
         );
-      });
+      }
     }
   }
 
@@ -273,6 +274,7 @@ class _Tab1ScreenState extends State<Tab1Screen> {
               folders = [defaultFolder, ...userFolders];
             });
           },
+          searchFocusNode: _searchFocusNode,
         ),
         body: FolderGrid(
           folders: folders,
@@ -284,7 +286,7 @@ class _Tab1ScreenState extends State<Tab1Screen> {
                 builder: (_) => FolderDetailScreen(
                   folderId: folder.id!, // ✅ 추가
                   folderName: folder.name,
-                  imagePath: folder.imagePath,
+                  imageUrl: folder.imageUrl,
                 ),
               ),
             );

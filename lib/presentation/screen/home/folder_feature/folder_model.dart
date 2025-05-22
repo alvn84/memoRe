@@ -8,7 +8,7 @@ class Folder {
   final IconData icon;
   final bool isStarred;
   final DateTime createdAt;
-  final String? imagePath; // 프로필 이미지 경로 추가
+  final String? imageUrl; // 프로필 이미지 경로 추가
 
   Folder({
     this.id,
@@ -17,8 +17,28 @@ class Folder {
     required this.icon,
     this.isStarred = false,
     required this.createdAt,
-    this.imagePath, // nullable 처리
+    this.imageUrl, // nullable 처리
   });
+
+  Folder copyWith({
+    int? id,
+    String? name,
+    Color? color,
+    IconData? icon,
+    bool? isStarred,
+    DateTime? createdAt,
+    String? imageUrl,
+  }) {
+    return Folder(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      color: color ?? this.color,
+      icon: icon ?? this.icon,
+      isStarred: isStarred ?? this.isStarred,
+      createdAt: createdAt ?? this.createdAt,
+      imageUrl: imageUrl ?? this.imageUrl,
+    );
+  }
 
   Map<String, dynamic> toJson() {
     return {
@@ -28,19 +48,34 @@ class Folder {
       'icon': icon.codePoint,
       'isStarred': isStarred,
       'createdAt': createdAt.toIso8601String(),
-      'imagePath': imagePath,
+      'imageUrl': imageUrl,
     };
   }
 
   factory Folder.fromJson(Map<String, dynamic> json) {
-    return Folder(
-      id: json['id'],
-      name: json['name'] ?? '',
-      color: Color((json['color'] ?? 0xFFFFE082)), // 기본 노랑색
-      icon: IconData((json['icon'] ?? Icons.folder.codePoint), fontFamily: 'MaterialIcons'),
-      isStarred: json['isStarred'] ?? false,
-      createdAt: DateTime.tryParse(json['createdAt'] ?? '') ?? DateTime.now(),
-      imagePath: json['imagePath'],
-    );
+    try {
+      final rawColor = json['color'];
+      final int colorInt = rawColor is int
+          ? rawColor
+          : int.tryParse(rawColor.toString(), radix: 16) ?? 0xFFFFE082;
+
+      return Folder(
+        id: json['id'],
+        name: json['name'] ?? '',
+        color: Color(colorInt),
+        icon: IconData(
+          (json['icon'] ?? Icons.folder.codePoint),
+          fontFamily: 'MaterialIcons',
+        ),
+        isStarred: json['isStarred'] ?? false,
+        createdAt: DateTime.tryParse(json['createdAt'] ?? '') ?? DateTime.now(),
+        imageUrl: (json['imageUrl'] == null || json['imageUrl'] == "null")
+            ? null
+            : json['imageUrl'],
+      );
+    } catch (e) {
+      print('❌ Folder 파싱 오류: $e\n원본 JSON: $json');
+      rethrow;
+    }
   }
 }
