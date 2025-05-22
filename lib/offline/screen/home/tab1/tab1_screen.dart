@@ -79,19 +79,19 @@ class _Tab1ScreenState extends State<Tab1Screen> {
   }
 
   // 즐겨찾기 등록 함수
-  void _toggleStar(int index) {
+  Future<void> _toggleStar(int index) async {
     setState(() {
       folders[index] = Folder(
         name: folders[index].name,
         color: folders[index].color,
         icon: folders[index].icon,
         isStarred: !folders[index].isStarred,
-        // 즐겨찾기 상태만 변경
         createdAt: folders[index].createdAt,
-        imagePath: folders[index].imagePath, // ⭐️ 프로필 이미지 유지
+        imagePath: folders[index].imagePath,
       );
     });
-    _saveFolders();
+
+    await FolderStorage.saveFolders(folders); // 이제 에러 안 남
   }
 
   // 폴더 색상 변경 함수

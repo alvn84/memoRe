@@ -1,60 +1,119 @@
+import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import '../../home/folder/folder_detail_screen.dart';
+import '../../home/folder/folder_model.dart';
+import '../../home/folder/folder_storage.dart';
 
-class FavoriteScreen extends StatelessWidget {
+class FavoriteScreen extends StatefulWidget {
   const FavoriteScreen({super.key});
 
-  final List<String> folderList = const [
-    '여행 메모',
-    '업무 기록',
-    '일상 노트',
-  ];
+  @override
+  State<FavoriteScreen> createState() => _FavoriteScreenState();
+}
 
-  final List<Map<String, String>> memoList = const [
-    {
-      'title': '제주도 여행 준비물',
-      'date': '2025.04.10',
-    },
-    {
-      'title': '회의록 - 서비스 기획',
-      'date': '2025.04.08',
-    },
-    {
-      'title': '맛집 리스트',
-      'date': '2025.04.01',
-    },
-  ];
+class _FavoriteScreenState extends State<FavoriteScreen> {
+  List<Folder> favoriteFolders = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadFavorites();
+  }
+
+  Future<void> _loadFavorites() async {
+    final allFolders = await FolderStorage.loadFolders();
+    setState(() {
+      favoriteFolders = allFolders.where((f) => f.isStarred).toList();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('즐겨찾기'),
-        backgroundColor: Colors.transparent, // 배경 투명
+        title: const Text('Favorite'),
+        backgroundColor: Colors.transparent,
       ),
-      body: ListView(
+      body: Padding(
         padding: const EdgeInsets.all(16),
-        children: [
-          const Text(
-            '폴더',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 8),
-          ...folderList.map((folder) => ListTile(
-            leading: const Icon(Icons.folder, color: Color(0xFFB0E0E6)),
-            title: Text(folder),
-          )),
-          const Divider(height: 32),
-          const Text(
-            '메모',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 8),
-          ...memoList.map((memo) => ListTile(
-            leading: const Icon(Icons.note, color: Color(0xFF6495ED)),
-            title: Text(memo['title']!),
-            subtitle: Text('${memo['date']}'),
-          )),
-        ],
+        child: favoriteFolders.isEmpty
+            ? const Center(child: Text('즐겨찾기한 폴더가 없습니다.'))
+            : ListView.builder(
+          itemCount: favoriteFolders.length,
+          itemBuilder: (context, index) {
+            final folder = favoriteFolders[index];
+            return GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => FolderDetailScreen(
+                      folderName: folder.name,
+                      imagePath: folder.imagePath,
+                    ),
+                  ),
+                );
+              },
+              child: Container(
+                margin: const EdgeInsets.only(bottom: 16),
+                height: 160,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(16),
+                  color: folder.imagePath == null ? folder.color : null,
+                  image: folder.imagePath != null
+                      ? DecorationImage(
+                    image: FileImage(File(folder.imagePath!)),
+                    fit: BoxFit.cover,
+                  )
+                      : null,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black12,
+                      blurRadius: 6,
+                      offset: Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: Stack(
+                  children: [
+                    // 반투명 블러 박스
+                    Positioned(
+                      bottom: 0,
+                      left: 0,
+                      right: 0,
+                      child: Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Colors.black.withOpacity(0.4),
+                          borderRadius: const BorderRadius.only(
+                            bottomLeft: Radius.circular(16),
+                            bottomRight: Radius.circular(16),
+                          ),
+                        ),
+                        child: Text(
+                          folder.name,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
+                    // ⭐️ 아이콘 표시 (오른쪽 상단)
+                    const Positioned(
+                      top: 8,
+                      right: 8,
+                      child: Icon(Icons.star, color: Colors.yellowAccent, size: 24),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        ),
       ),
     );
   }

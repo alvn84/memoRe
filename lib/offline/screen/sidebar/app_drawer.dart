@@ -23,7 +23,7 @@ class AppDrawer extends StatelessWidget {
             ),
             // 메뉴 리스트
             ListTile(
-              leading: const Icon(Icons.auto_awesome, color: Color(0xFF6495ED)),
+              leading: const Icon(Icons.star, color: Color(0xFF6495ED)),
               title: const Text('Favorites',style:TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
               onTap: () {
                 Navigator.pop(context); // 드로어 닫고
