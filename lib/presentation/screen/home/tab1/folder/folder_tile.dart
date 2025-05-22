@@ -45,6 +45,17 @@ class FolderTile extends StatelessWidget {
                     : null,
               ),
             ),
+            // ✅ 즐겨찾기 아이콘 (오른쪽 상단에 조건부 표시)
+            if (folder.isStarred)
+              const Positioned(
+                top: 8,
+                right: 8,
+                child: Icon(
+                  Icons.star,
+                  color: Colors.amber,
+                  size: 28,
+                ),
+              ),
             // 반투명 텍스트 배경 + 이름 표시
             Positioned(
               left: 0,

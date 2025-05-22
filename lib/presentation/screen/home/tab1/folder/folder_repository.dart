@@ -150,4 +150,25 @@ class FolderRepository {
       throw Exception('폴더 이름 변경 실패');
     }
   }
+
+  // 즐겨찾기 상태 토글
+  static Future<Folder> toggleStarred(int folderId) async {
+    final token = await TokenStorage.getToken();
+
+    final response = await http.patch(
+      Uri.parse('$baseUrl/api/folders/$folderId/star'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      final json = jsonDecode(response.body);
+      return Folder.fromJson(json);
+    } else {
+      print('❌ 즐겨찾기 토글 실패: ${response.statusCode}');
+      throw Exception('즐겨찾기 토글 실패');
+    }
+  }
 }

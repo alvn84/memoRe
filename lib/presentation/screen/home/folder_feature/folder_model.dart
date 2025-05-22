@@ -40,18 +40,6 @@ class Folder {
     );
   }
 
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'name': name,
-      'color': color.value,
-      'icon': icon.codePoint,
-      'isStarred': isStarred,
-      'createdAt': createdAt.toIso8601String(),
-      'imageUrl': imageUrl,
-    };
-  }
-
   factory Folder.fromJson(Map<String, dynamic> json) {
     try {
       final rawColor = json['color'];
@@ -67,7 +55,7 @@ class Folder {
           (json['icon'] ?? Icons.folder.codePoint),
           fontFamily: 'MaterialIcons',
         ),
-        isStarred: json['isStarred'] ?? false,
+        isStarred: json['starred'] ?? false, // ✅ 여기가 핵심!
         createdAt: DateTime.tryParse(json['createdAt'] ?? '') ?? DateTime.now(),
         imageUrl: (json['imageUrl'] == null || json['imageUrl'] == "null")
             ? null
@@ -77,5 +65,17 @@ class Folder {
       print('❌ Folder 파싱 오류: $e\n원본 JSON: $json');
       rethrow;
     }
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'name': name,
+      'color': color.value,
+      'icon': icon.codePoint,
+      'starred': isStarred, // ✅ 여기도!
+      'createdAt': createdAt.toIso8601String(),
+      'imageUrl': imageUrl,
+    };
   }
 }

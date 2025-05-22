@@ -123,19 +123,21 @@ class _Tab1ScreenState extends State<Tab1Screen> {
     }
   }
 
-  // 즐겨찾기 등록 함수
-  void _toggleStar(int index) {
-    setState(() {
-      folders[index] = Folder(
-        name: folders[index].name,
-        color: folders[index].color,
-        icon: folders[index].icon,
-        isStarred: !folders[index].isStarred,
-        // 즐겨찾기 상태만 변경
-        createdAt: folders[index].createdAt,
-        imageUrl: folders[index].imageUrl, // ⭐️ 프로필 이미지 유지
+  void _toggleStar(int index) async {
+    final folderId = folders[index].id;
+    if (folderId == null) return;
+
+    try {
+      final updated = await FolderRepository.toggleStarred(folderId);
+      setState(() {
+        folders[index] = updated;
+      });
+    } catch (e) {
+      print('❌ 즐겨찾기 상태 변경 실패: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('즐겨찾기 변경 실패')),
       );
-    });
+    }
   }
 
   // 폴더 색상 변경 함수
@@ -288,10 +290,12 @@ class _Tab1ScreenState extends State<Tab1Screen> {
               context,
               MaterialPageRoute(
                 builder: (_) => FolderDetailScreen(
-                  folderId: folder.id!, // ✅ 추가
+                  folderId: folder.id!,
+                  // ✅ 추가
                   folderName: folder.name,
                   imageUrl: folder.imageUrl,
-                  folderColor: folder.color, // ✅ 전달
+                  folderColor: folder.color,
+                  // ✅ 전달
                   folders: folders, // ✅ 현재 폴더 목록 전체 전달
                 ),
               ),
