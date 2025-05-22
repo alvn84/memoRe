@@ -113,6 +113,23 @@ class MemoRepository {
     }
   }
 
+  Future<List<Memo>> getAllMemos() async {
+    final token = await TokenStorage.getToken();
+    final response = await http.get(
+      Uri.parse('$baseUrl/api/memos/all'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      final List<dynamic> data = jsonDecode(response.body);
+      return data.map((json) => Memo.fromJson(json)).toList();
+    } else {
+      throw Exception('전체 메모 불러오기 실패: ${response.statusCode}');
+    }
+  }
 }
 
 // 메모 번역

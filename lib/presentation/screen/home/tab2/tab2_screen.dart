@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-
+import '../memo/repository/memo_repository.dart';
+import '../memo/model/memo_model.dart';
 import 'tab2_calendar.dart';
 
 class Tab2Screen extends StatefulWidget {
@@ -12,11 +13,29 @@ class Tab2Screen extends StatefulWidget {
 class _Tab2ScreenState extends State<Tab2Screen> {
   DateTime? _selectedDay;
   DateTime _focusedDay = DateTime.now();
+  List<Memo> allMemos = [];
+
+  void _loadAllMemos() async {
+    allMemos = await MemoRepository().getAllMemos();
+    setState(() {});
+  }
+
+  List<Memo> get selectedDayMemos {
+    return allMemos.where((memo) {
+      if (memo.updatedAt == null) return false;
+      final updated = DateTime.parse(memo.updatedAt!);
+      return updated.year == _selectedDay!.year &&
+          updated.month == _selectedDay!.month &&
+          updated.day == _selectedDay!.day;
+    }).toList();
+  }
+
 
   @override
   void initState() {
     super.initState();
     _selectedDay = _focusedDay;
+    _loadAllMemos();
   }
 
   @override
@@ -58,18 +77,34 @@ class _Tab2ScreenState extends State<Tab2Screen> {
                       physics: const ClampingScrollPhysics(), // 자연스러운 스크롤
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
-                        children: List.generate(
-                          1,
-                          // ← 백엔드에서 받아올 메모 수에 따라 유동적. 스크롤 기능 테스트용. 숫자 늘리면 텍스트 늘어남.
-                          (index) => const Padding(
-                            padding: EdgeInsets.only(bottom: 12.0),
-                            child: Text(
-                              '오늘의 메모가 없습니다.',
-                              style:
-                                  TextStyle(fontSize: 18, color: Colors.grey),
+                        children: selectedDayMemos.isNotEmpty
+                            ? selectedDayMemos.map((memo) {
+                          return Padding(
+                            padding: const EdgeInsets.only(bottom: 12.0),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  memo.title,
+                                  style: const TextStyle(
+                                      fontSize: 18, fontWeight: FontWeight.bold),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  memo.content,
+                                  style: const TextStyle(fontSize: 16),
+                                ),
+                                const Divider(),
+                              ],
                             ),
-                          ),
-                        ),
+                          );
+                        }).toList()
+                            : [
+                          const Text(
+                            '오늘의 메모가 없습니다.',
+                            style: TextStyle(fontSize: 18, color: Colors.grey),
+                          )
+                        ],
                       ),
                     );
                   },
