@@ -6,7 +6,7 @@ import '../../folder_feature/folder_model.dart';
 import '../../../auth/token_storage.dart';
 import '../../../auth/api_config.dart';
 
-class FolderStorage {
+class FolderRepository {
   // 폴더 전체 조회
   static Future<List<Folder>> loadFolders() async {
     final token = await TokenStorage.getToken(); // 🔐 로그인 토큰 불러오기
@@ -99,9 +99,6 @@ class FolderStorage {
       'imageUrl': null, // ✅ 명시적으로 제거 요청
     };
 
-    print('📤 [요청] 폴더 색상 변경 요청: folderId=$folderId');
-    print('📤 [요청 바디] $requestBody');
-
     final response = await http.patch(
       Uri.parse('$baseUrl/api/folders/$folderId/color'),
       headers: {
@@ -110,9 +107,6 @@ class FolderStorage {
       },
       body: jsonEncode(requestBody),
     );
-
-    print('📥 [응답 상태코드] ${response.statusCode}');
-    print('📥 [응답 바디] ${response.body}');
 
     if (response.statusCode == 200) {
       final json = jsonDecode(response.body);
@@ -135,6 +129,25 @@ class FolderStorage {
 
     if (response.statusCode != 200) {
       throw Exception('이미지 변경 실패: ${response.statusCode}');
+    }
+  }
+
+  // 폴더 이름 변경
+  static Future<void> renameFolder(int folderId, String newName) async {
+    final token = await TokenStorage.getToken();
+
+    final response = await http.patch(
+      Uri.parse('$baseUrl/api/folders/$folderId'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+      body: jsonEncode({'name': newName}),
+    );
+
+    if (response.statusCode != 200) {
+      print('❌ 폴더 이름 변경 실패: ${response.statusCode}');
+      throw Exception('폴더 이름 변경 실패');
     }
   }
 }

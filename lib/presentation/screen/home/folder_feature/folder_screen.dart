@@ -5,17 +5,22 @@ import 'package:intl/intl.dart';
 import '../memo/model/memo_model.dart';
 import '../memo/repository/memo_repository.dart';
 import '../memo/screen/note_edit_screen.dart';
+import '../folder_feature/folder_model.dart';
 
 class FolderDetailScreen extends StatefulWidget {
   final int? folderId;
   final String folderName;
   final String? imageUrl;
+  final Color folderColor;
+  final List<Folder> folders; // ✅ 폴더 전체 리스트
 
   const FolderDetailScreen({
     super.key,
     required this.folderId,
     required this.folderName,
     this.imageUrl,
+    required this.folderColor,
+    required this.folders, // ✅ 여기 추가
   });
 
   @override
@@ -68,6 +73,50 @@ class _FolderDetailScreenState extends State<FolderDetailScreen> {
     _refresh();
   }
 
+  void _showMoveMemoDialog(Memo memo) async {
+    final foldersExcludingCurrent =
+        widget.folders.where((f) => f.id != memo.folderId).toList();
+
+    int? selectedFolderId;
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('메모 이동'),
+          content: DropdownButtonFormField<int>(
+            decoration: const InputDecoration(labelText: '이동할 폴더 선택'),
+            items: foldersExcludingCurrent.map((folder) {
+              return DropdownMenuItem<int>(
+                value: folder.id!,
+                child: Text(folder.name),
+              );
+            }).toList(),
+            onChanged: (value) {
+              selectedFolderId = value;
+            },
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('취소'),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                if (selectedFolderId != null) {
+                  await _repo.moveMemo(memo.id!, selectedFolderId!);
+                  Navigator.pop(context);
+                  _refresh(); // 이동 후 다시 불러오기
+                }
+              },
+              child: const Text('이동'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   void dispose() {
     _scrollController.dispose();
@@ -106,12 +155,12 @@ class _FolderDetailScreenState extends State<FolderDetailScreen> {
                   shadows: _isScrolled
                       ? []
                       : const [
-                    Shadow(
-                      offset: Offset(1.0, 1.0),
-                      blurRadius: 3.0,
-                      color: Colors.black54,
-                    ),
-                  ],
+                          Shadow(
+                            offset: Offset(1.0, 1.0),
+                            blurRadius: 3.0,
+                            color: Colors.black54,
+                          ),
+                        ],
                 ),
               ),
               background: Stack(
@@ -119,8 +168,8 @@ class _FolderDetailScreenState extends State<FolderDetailScreen> {
                 children: [
                   widget.imageUrl != null
                       ? Image.file(File(widget.imageUrl!), fit: BoxFit.cover)
-                      : Container(color: Color(0xFF6495ED)),
-                  Container(color: Colors.black.withOpacity(0.3)),
+                      : Container(color: widget.folderColor), // ✅ 폴더 색상 적용
+                  Container(color: Colors.black.withOpacity(0.3)), // 어두운 오버레이
                 ],
               ),
             ),
@@ -151,7 +200,7 @@ class _FolderDetailScreenState extends State<FolderDetailScreen> {
                     childAspectRatio: _isGridView ? 1 : 2.5,
                   ),
                   delegate: SliverChildBuilderDelegate(
-                        (context, index) {
+                    (context, index) {
                       final memo = memos[index];
                       return GestureDetector(
                         onTap: () async {
@@ -170,8 +219,8 @@ class _FolderDetailScreenState extends State<FolderDetailScreen> {
                           showDialog(
                             context: context,
                             builder: (_) => AlertDialog(
-                              title: Text('메모 삭제'),
-                              content: Text('이 메모를 삭제하시겠습니까?'),
+                              title: const Text('메모 옵션'),
+                              content: const Text('이 메모에 대해 어떤 작업을 하시겠습니까?'),
                               actions: [
                                 TextButton(
                                   onPressed: () => Navigator.pop(context),
@@ -184,6 +233,14 @@ class _FolderDetailScreenState extends State<FolderDetailScreen> {
                                   },
                                   child: const Text('삭제',
                                       style: TextStyle(color: Colors.red)),
+                                ),
+                                TextButton(
+                                  onPressed: () {
+                                    Navigator.pop(context);
+                                    _showMoveMemoDialog(
+                                        memo); // ✅ 이동 다이얼로그 함수 호출
+                                  },
+                                  child: const Text('다른 폴더로 이동'),
                                 ),
                               ],
                             ),
@@ -207,8 +264,10 @@ class _FolderDetailScreenState extends State<FolderDetailScreen> {
                                     style: const TextStyle(fontSize: 14)),
                                 const Spacer(),
                                 Text(
-                                  DateFormat('yyyy.MM.dd')
-                                      .format(DateTime.now()),
+                                  memo.updatedAt != null
+                                      ? DateFormat('yyyy.MM.dd').format(
+                                          DateTime.parse(memo.updatedAt!))
+                                      : '날짜 없음',
                                   style: const TextStyle(
                                       fontSize: 12, color: Colors.grey),
                                 ),

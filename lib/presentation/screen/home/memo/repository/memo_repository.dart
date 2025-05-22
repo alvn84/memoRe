@@ -96,6 +96,23 @@ class MemoRepository {
     }
     return response.statusCode == 200;
   }
+
+  Future<void> moveMemo(int memoId, int targetFolderId) async {
+    final token = await TokenStorage.getToken();
+    final response = await http.patch(
+      Uri.parse('$baseUrl/api/memos/$memoId/move'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+      body: jsonEncode({'targetFolderId': targetFolderId}),
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception('메모 이동 실패: ${response.statusCode}');
+    }
+  }
+
 }
 
 // 메모 번역

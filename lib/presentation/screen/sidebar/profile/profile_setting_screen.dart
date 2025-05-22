@@ -4,7 +4,7 @@ import 'package:http/http.dart' as http;
 
 import '../../auth/api_config.dart';
 import '../../auth/token_storage.dart';
-import '../model/user.dart';
+import '../model/user_model.dart';
 import 'dart:convert';
 
 class ProfileSettingScreen extends StatelessWidget {

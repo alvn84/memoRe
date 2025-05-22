@@ -1,11 +1,11 @@
 // - - - - - - - - - - - - - - - Tab1에서의 상태 관리 코드 - - - - - - - - - - - - - - -
 import '../folder_feature/folder_model.dart';
-import 'folder/folder_storage.dart';
+import 'folder/folder_repository.dart';
 
 class Tab1Controller {
   // 폴더 불러오기
   static Future<List<Folder>> loadFolders() async {
-    final folders = await FolderStorage.loadFolders();
+    final folders = await FolderRepository.loadFolders();
     print('✅ 서버에서 받은 폴더: $folders');
     return folders;
   }
@@ -22,7 +22,7 @@ class Tab1Controller {
     final folder = folders[index];
 
     try {
-      await FolderStorage.deleteFolder(folder.id!); // 서버에 삭제 요청
+      await FolderRepository.deleteFolder(folder.id!); // 서버에 삭제 요청
       final newList = [...folders]..removeAt(index); // UI 목록에서도 제거
       return newList;
     } catch (e) {

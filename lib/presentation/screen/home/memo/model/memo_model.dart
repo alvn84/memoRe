@@ -4,6 +4,7 @@ class Memo {
   final String content;
   final String imageUrl;
   final int? folderId; // ✅ 서버 연동용 folderId (정수)
+  final String? updatedAt;
 
   Memo({
     this.id,
@@ -11,6 +12,7 @@ class Memo {
     required this.content,
     required this.imageUrl,
     this.folderId, // ✅ 변경됨
+    this.updatedAt,
   });
 
   factory Memo.fromJson(Map<String, dynamic> json) => Memo(
@@ -18,7 +20,8 @@ class Memo {
         title: json['title'] ?? '',
         content: json['content'] ?? '',
         imageUrl: json['imageUrl'] ?? '',
-        folderId: json['folderId'] ?? 0, // 서버 응답에 따라 조정
+        folderId: json['folderId'] ?? 0,
+        updatedAt: json['updatedAt'], // ✅ 여기도 받아야 함
       );
 
   Map<String, dynamic> toJson() => {
@@ -33,7 +36,8 @@ class Memo {
     String? title,
     String? content,
     String? imageUrl,
-    int? folderId, // ✅ 함께 복사 가능
+    int? folderId,
+    String? updatedAt,
   }) {
     return Memo(
       id: id ?? this.id,
@@ -41,6 +45,7 @@ class Memo {
       content: content ?? this.content,
       imageUrl: imageUrl ?? this.imageUrl,
       folderId: folderId ?? this.folderId,
+      updatedAt: updatedAt ?? this.updatedAt,
     );
   }
 }

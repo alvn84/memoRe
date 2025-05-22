@@ -7,14 +7,14 @@ import '../ai/ai_travel_chat_screen.dart';
 import '../folder_feature/folder_model.dart';
 import '../folder_feature/folder_reorder.dart';
 import '../folder_feature/folder_screen.dart';
-import 'folder/folder_storage.dart';
+import 'folder/folder_repository.dart';
 import 'floating_action_button/add_folder_dialog.dart';
 import 'floating_action_button/tab1_fab.dart';
 import 'folder/folder_grid.dart';
 import 'folder/folder_option_sheet.dart';
 import 'tab1_search_appbar.dart';
 import '../memo/screen/note_edit_screen.dart';
-import 'folder/folder_storage.dart';
+import 'folder/folder_repository.dart';
 
 class Tab1Screen extends StatefulWidget {
   const Tab1Screen({super.key});
@@ -78,7 +78,7 @@ class _Tab1ScreenState extends State<Tab1Screen> {
 
   Future<void> _saveFolder(Folder folder) async {
     try {
-      await FolderStorage.saveFolder(folder); // 서버에 저장
+      await FolderRepository.saveFolder(folder); // 서버에 저장
       folders.add(folder); // UI 목록에도 반영
       setState(() {}); // 새로고침
     } catch (e) {
@@ -110,7 +110,7 @@ class _Tab1ScreenState extends State<Tab1Screen> {
     final folder = folders[index];
 
     try {
-      await FolderStorage.deleteFolder(folder.id); // 서버에 삭제 요청
+      await FolderRepository.deleteFolder(folder.id); // 서버에 삭제 요청
 
       setState(() {
         folders.removeAt(index); // UI에서도 제거
@@ -154,7 +154,7 @@ class _Tab1ScreenState extends State<Tab1Screen> {
           children: pastelColors.map((color) {
             return GestureDetector(
               onTap: () async {
-                final updatedFolder = await FolderStorage.updateFolderColor(
+                final updatedFolder = await FolderRepository.updateFolderColor(
                   folders[index].id!,
                   color,
                 );
@@ -199,17 +199,21 @@ class _Tab1ScreenState extends State<Tab1Screen> {
             child: const Text('취소'),
           ),
           ElevatedButton(
-            onPressed: () {
+            onPressed: () async {
               if (newName.trim().isNotEmpty) {
-                setState(() {
-                  folders[index] = Folder(
-                    name: newName.trim(),
-                    color: folders[index].color,
-                    icon: folders[index].icon,
-                    isStarred: folders[index].isStarred,
-                    createdAt: folders[index].createdAt,
+                try {
+                  await FolderRepository.renameFolder(
+                      folders[index].id!, newName.trim());
+                  setState(() {
+                    folders[index] =
+                        folders[index].copyWith(name: newName.trim());
+                  });
+                } catch (e) {
+                  print('❌ 폴더 이름 변경 실패: $e');
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('이름 변경에 실패했습니다.')),
                   );
-                });
+                }
                 Navigator.pop(context);
               }
             },
@@ -229,7 +233,7 @@ class _Tab1ScreenState extends State<Tab1Screen> {
       final updated = folders[index].copyWith(imageUrl: pickedFile.path);
 
       try {
-        await FolderStorage.updateFolderImage(updated.id!, pickedFile.path);
+        await FolderRepository.updateFolderImage(updated.id!, pickedFile.path);
         setState(() {
           folders[index] = updated;
         });
@@ -287,6 +291,8 @@ class _Tab1ScreenState extends State<Tab1Screen> {
                   folderId: folder.id!, // ✅ 추가
                   folderName: folder.name,
                   imageUrl: folder.imageUrl,
+                  folderColor: folder.color, // ✅ 전달
+                  folders: folders, // ✅ 현재 폴더 목록 전체 전달
                 ),
               ),
             );
