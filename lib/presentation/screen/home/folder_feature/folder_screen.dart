@@ -252,24 +252,52 @@ class _FolderDetailScreenState extends State<FolderDetailScreen> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(memo.title,
-                                    style: const TextStyle(
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.bold),
-                                    overflow: TextOverflow.ellipsis),
+                                // 제목 + 별 아이콘 가로 배치
+                                Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Expanded(
+                                      child: Text(
+                                        memo.title,
+                                        style: const TextStyle(
+                                            fontSize: 18, fontWeight: FontWeight.bold),
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ),
+                                    IconButton(
+                                      icon: Icon(
+                                        memo.isStarred ? Icons.star : Icons.star_border,
+                                        color: memo.isStarred ? Colors.amber : Colors.grey,
+                                        size: 22,
+                                      ),
+                                      padding: EdgeInsets.zero, // 여백 최소화
+                                      constraints: const BoxConstraints(), // 공간 최소화
+                                      onPressed: () async {
+                                        try {
+                                          await _repo.toggleStarred(memo.id!);
+                                          _refresh(); // UI 갱신
+                                        } catch (e) {
+                                          ScaffoldMessenger.of(context).showSnackBar(
+                                            const SnackBar(content: Text('즐겨찾기 변경 실패')),
+                                          );
+                                        }
+                                      },
+                                    ),
+                                  ],
+                                ),
                                 const SizedBox(height: 8),
-                                Text(memo.content,
-                                    maxLines: 4,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: const TextStyle(fontSize: 14)),
+                                Text(
+                                  memo.content,
+                                  maxLines: 4,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: const TextStyle(fontSize: 14),
+                                ),
                                 const Spacer(),
                                 Text(
                                   memo.updatedAt != null
-                                      ? DateFormat('yyyy.MM.dd').format(
-                                          DateTime.parse(memo.updatedAt!))
+                                      ? DateFormat('yyyy.MM.dd').format(DateTime.parse(memo.updatedAt!))
                                       : '날짜 없음',
-                                  style: const TextStyle(
-                                      fontSize: 12, color: Colors.grey),
+                                  style: const TextStyle(fontSize: 12, color: Colors.grey),
                                 ),
                               ],
                             ),

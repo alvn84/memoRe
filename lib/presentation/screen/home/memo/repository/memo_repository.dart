@@ -130,6 +130,24 @@ class MemoRepository {
       throw Exception('전체 메모 불러오기 실패: ${response.statusCode}');
     }
   }
+
+  Future<void> toggleStarred(int memoId) async {
+    final token = await TokenStorage.getToken();
+    final response = await http.patch(
+      Uri.parse('$baseUrl/api/memos/$memoId/star'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+    );
+    print('📥 [즐겨찾기 토글] 응답 코드: ${response.statusCode}');
+    print('📥 [즐겨찾기 토글] 응답 바디: ${response.body}');
+
+    if (response.statusCode != 200) {
+      print('❌ 즐겨찾기 토글 실패: ${response.statusCode}');
+      throw Exception('즐겨찾기 토글 실패');
+    }
+  }
 }
 
 // 메모 번역
