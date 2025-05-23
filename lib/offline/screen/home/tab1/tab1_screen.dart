@@ -14,6 +14,7 @@ import 'dart:io';
 import 'folder_grid.dart';
 import 'folder_toolbar.dart';
 import 'folder_option_sheet.dart';
+import 'folder_creation_screen.dart';
 
 class Tab1Screen extends StatefulWidget {
   const Tab1Screen({super.key});
@@ -440,11 +441,25 @@ class _Tab1ScreenState extends State<Tab1Screen> {
                       mini: true,
                       shape: const CircleBorder(),
                       backgroundColor: Color(0xFF6495ED),
-                      onPressed: () {
+                      onPressed: () async {
                         setState(() {
                           _isFabExpanded = false;
                         });
-                        _addNewFolder();
+                        // 새로운 화면으로 이동
+                        final result = await Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const NewFolderScreen(),
+                          ),
+                        );
+
+                        // ✅ result가 null이 아니고 Folder 타입이면 추가
+                        if (result != null && result is Folder) {
+                          setState(() {
+                            folders.add(result);
+                          });
+                          _saveFolders();
+                        }
                       },
                       child: const Icon(Icons.create_new_folder,
                           color: Color(0xFFFAFAFA)),
