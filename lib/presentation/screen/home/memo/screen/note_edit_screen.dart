@@ -1,13 +1,19 @@
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_quill/flutter_quill.dart';
+import 'package:http/http.dart' as http;
+import 'package:image_picker/image_picker.dart';
+import 'package:intl/intl.dart';
+
+import '../../../auth/api_config.dart';
 import '../../../auth/token_storage.dart';
 import '../model/memo_model.dart';
 import '../repository/memo_repository.dart';
-import '../../../auth/api_config.dart';
-import '../../../auth/token_storage.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
-import 'package:flutter/services.dart';
+import 'memo_editor.dart';
+import 'memo_toolbar.dart';
 
 class NoteEditScreen extends StatefulWidget {
   final Memo? initialMemo;
@@ -31,6 +37,9 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
   final TextEditingController _titleController = TextEditingController();
   late QuillController _quillController;
   final _repo = MemoRepository();
+  late DateTime _selectedDate = DateTime.now();
+  File? _selectedImage;
+  bool _isFabExpanded = false;
 
   @override
   void initState() {
@@ -47,6 +56,31 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
     }
   }
 
+  Future<void> _insertImage() async {
+    final picker = ImagePicker();
+    final picked = await picker.pickImage(source: ImageSource.gallery);
+    if (picked != null) {
+      final index = _quillController.selection.baseOffset;
+      final length = _quillController.selection.extentOffset - index;
+      _quillController.replaceText(
+          index, length, BlockEmbed.image(picked.path), null);
+    }
+  }
+
+  String _formattedDate() => DateFormat('yyyy.MM.dd').format(_selectedDate!);
+
+  void _pickDate() async {
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: _selectedDate,
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2100),
+    );
+    if (picked != null) {
+      setState(() => _selectedDate = picked);
+    }
+  }
+
   Future<void> saveMemo() async {
     final title = _titleController.text.trim();
     final plainText = _quillController.document.toPlainText().trim();
@@ -57,7 +91,7 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
       id: widget.initialMemo?.id,
       title: title,
       content: plainText,
-      imageUrl: '',
+      imageUrl: _selectedImage?.path ?? '',
       folderId: widget.folderId, // 퀵메모면 서버가 무시함
     );
 
@@ -123,68 +157,28 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFFAFAFA),
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        title: const Text('메모 작성'),
+        title: InkWell(
+          onTap: _pickDate,
+          child: Text(_formattedDate(), style: const TextStyle(color: Colors.black87, fontWeight: FontWeight.bold)),
+        ),
+        centerTitle: true,
         backgroundColor: Colors.transparent,
         elevation: 0,
-        leading: const BackButton(color: Color(0xFF6495ED)),
+        leading: const BackButton(color: Colors.black87),
         actions: [
-          // ✅ 새로 추가한 버튼 (예: 별 버튼)
           IconButton(
-              icon: const Icon(Icons.translate, color: Color(0xFF6495ED)),
-              onPressed: () async {
-                final title = _titleController.text;
-                final body = _quillController.document.toPlainText();
-                final combined = body;
-
-                final translated =
-                    await translateText(combined, 'en'); // 영어로 번역
-
-                if (!context.mounted) return;
-
-                showDialog(
-                  context: context,
-                  builder: (_) => AlertDialog(
-                    title: const Text('번역 결과'),
-                    content: Text(translated),
-                    actions: [
-                      TextButton(
-                        onPressed: () => Navigator.pop(context),
-                        child: const Text('닫기'),
-                      ),
-                    ],
-                  ),
-                );
-              }),
-          IconButton(
-            icon: Image.asset(
-              'assets/icons/ai_summary.png',
-              width: 33,
-              height: 35,
-            ),
-            onPressed: () async {
-              // 그대로 출력
-              final preview = await previewMemoText(
-                _titleController.text,
-                _quillController.document.toPlainText(),
-              );
-              if (!context.mounted) return;
-
-              showDialog(
-                context: context,
-                builder: (_) => AlertDialog(
-                  title: const Text('요약 결과'),
-                  content: Text(preview),
-                  actions: [
-                    TextButton(
-                      onPressed: () => Navigator.pop(context),
-                      child: const Text('닫기'),
-                    ),
-                  ],
-                ),
-              );
+            icon: const Icon(Icons.undo, color: Colors.black87),
+            onPressed: () {
+              _quillController.undo();
+              FocusScope.of(context).unfocus(); // 🔧 undo 후 키보드 강제 해제
             },
+
+          ),
+          IconButton(
+            icon: const Icon(Icons.redo, color: Colors.black87),
+            onPressed: () => _quillController.redo(),
           ),
           IconButton(
             icon: const Icon(Icons.check, color: Color(0xFF6495ED)),
@@ -195,62 +189,107 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
       body: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8),
+            padding: const EdgeInsets.symmetric(horizontal: 0),
             child: TextField(
               controller: _titleController,
-              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              style: const TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
               decoration: const InputDecoration(
-                hintText: '제목을 입력하세요',
+                hintText: 'Title',
+                hintStyle: TextStyle(color: Colors.black26),
                 border: InputBorder.none,
+                filled: true,
+                fillColor: Colors.white,
               ),
             ),
           ),
-          const Divider(height: 1),
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12),
-              child: QuillEditor.basic(
-                configurations: QuillEditorConfigurations(
-                  controller: _quillController,
-                  sharedConfigurations:
-                      const QuillSharedConfigurations(locale: Locale('ko')),
-                ),
-              ),
-            ),
-          ),
+          Expanded(child: MemoEditor(controller: _quillController)),
+          MemoToolbar(controller: _quillController),
         ],
       ),
       floatingActionButton: Padding(
         padding: const EdgeInsets.only(bottom: 40),
-        child: FloatingActionButton(
-          onPressed: () async {
-            final preview = await previewMemoText(
-              _titleController.text,
-              _quillController.document.toPlainText(),
-            );
-
-            if (!context.mounted) return;
-
-            showDialog(
-              context: context,
-              builder: (_) => AlertDialog(
-                title: const Text('미리보기'),
-                content: Text(preview),
-                actions: [
-                  TextButton(
-                    onPressed: () => Navigator.pop(context),
-                    child: const Text('닫기'),
-                  ),
-                ],
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // 🔹 번역 버튼
+            AnimatedSlide(
+              offset: _isFabExpanded ? Offset.zero : const Offset(0, 0.3),
+              duration: const Duration(milliseconds: 200),
+              curve: Curves.easeOut,
+              child: AnimatedOpacity(
+                opacity: _isFabExpanded ? 1 : 0,
+                duration: const Duration(milliseconds: 200),
+                child: Column(
+                  children: [
+                    FloatingActionButton(
+                      heroTag: 'translate',
+                      mini: true,
+                      shape: const CircleBorder(),
+                      backgroundColor: const Color(0xFF6495ED),
+                      onPressed: () {},
+                      child:
+                          const Icon(Icons.auto_awesome, color: Colors.white),
+                    ),
+                    const SizedBox(height: 4),
+                    const Text('Cloud-based AI',
+                        style: TextStyle(fontSize: 12, color: Colors.black87)),
+                  ],
+                ),
               ),
-            );
-          },
-          shape: const CircleBorder(),
-          child: Image.asset(
-            'assets/icons/meta_icon.png',
-            width: 28,
-            height: 28,
-          ),
+            ),
+
+            const SizedBox(height: 12),
+
+            // 🔹 요약 버튼
+            AnimatedSlide(
+              offset: _isFabExpanded ? Offset.zero : const Offset(0, 0.3),
+              duration: const Duration(milliseconds: 200),
+              curve: Curves.easeOut,
+              child: AnimatedOpacity(
+                opacity: _isFabExpanded ? 1 : 0,
+                duration: const Duration(milliseconds: 200),
+                child: Column(
+                  children: [
+                    FloatingActionButton(
+                      heroTag: 'summarize',
+                      mini: true,
+                      shape: const CircleBorder(),
+                      backgroundColor: const Color(0xFFFAFAFA),
+                      onPressed: () {},
+                      child: Image.asset(
+                        'assets/icons/meta_icon.png',
+                        width: 28,
+                        height: 28,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    const Text('Llama',
+                        style: TextStyle(fontSize: 12, color: Colors.black87)),
+                  ],
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 12),
+
+            // 🔹 메인 FAB 버튼 (열고 닫는 역할)
+            FloatingActionButton(
+              heroTag: 'main',
+              backgroundColor: _isFabExpanded
+                  ? const Color(0xFFFAFAFA)
+                  : const Color(0xFF6495ED),
+              shape: const CircleBorder(),
+              onPressed: () {
+                setState(() {
+                  _isFabExpanded = !_isFabExpanded;
+                });
+              },
+              child: Icon(
+                _isFabExpanded ? Icons.close : Icons.add,
+                color: _isFabExpanded ? const Color(0xFF6495ED) : Colors.white,
+              ),
+            ),
+          ],
         ),
       ),
     );

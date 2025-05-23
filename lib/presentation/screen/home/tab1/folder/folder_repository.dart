@@ -48,7 +48,13 @@ class FolderRepository {
 
   // 단일 폴더 저장
   static Future<void> saveFolder(Folder folder) async {
-    final body = jsonEncode({'name': folder.name}); // 서버 요구사항에 맞게 name만 전송
+    final body = jsonEncode({
+      'name': folder.name,
+      'location': folder.location,
+      'startDate': folder.startDate?.toIso8601String(),
+      'endDate': folder.endDate?.toIso8601String(),
+      'imageUrl': folder.imageUrl, // ✅ 이미지 URL 추가
+    }); // 서버 요구사항에 맞게 name만 전송
 
     print('📤 서버에 보낼 폴더 데이터: $body'); // 🔍 전송 값 디버깅 로그
 
@@ -61,6 +67,9 @@ class FolderRepository {
       },
       body: body,
     );
+
+    print('📤 저장 요청 바디: $body');
+    print('📤 Authorization: Bearer $token');
 
     if (response.statusCode != 200) {
       print('❌ 폴더 저장 실패: ${response.statusCode}');

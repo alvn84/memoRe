@@ -90,18 +90,27 @@ class _Tab1ScreenState extends State<Tab1Screen> {
   }
 
   Future<void> _addNewFolder() async {
-    final folderName = await showAddFolderDialog(context);
-    if (folderName != null && folderName.isNotEmpty) {
+    final result = await showAddFolderDialog(context);
+
+    if (result != null &&
+        result['name'] != null &&
+        result['location'] != null &&
+        result['startDate'] != null &&
+        result['endDate'] != null) {
       final folder = Folder(
-        name: folderName,
+        name: result['name'],
         color: const Color(0xFFFFE082),
         icon: Icons.folder,
         createdAt: DateTime.now(),
+        location: result['location'],
+        startDate: result['startDate'],
+        endDate: result['endDate'],
+        imageUrl: result['imageUrl'], // ✅ 이미지 경로 추가
       );
 
-      await _saveFolder(folder); // 1. 서버에 먼저 저장
-      await _loadFolders(); // 2. 서버에서 목록 다시 불러오기
-      setState(() {}); // 3. UI 갱신
+      await _saveFolder(folder); // 서버 저장
+      await _loadFolders();      // 서버에서 목록 다시 로딩
+      setState(() {});           // UI 갱신
     }
   }
 

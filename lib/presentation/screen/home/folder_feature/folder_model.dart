@@ -10,6 +10,11 @@ class Folder {
   final DateTime createdAt;
   final String? imageUrl; // 프로필 이미지 경로 추가
 
+  // ✅ 새로 추가된 필드
+  final String? location;
+  final DateTime? startDate;
+  final DateTime? endDate;
+
   Folder({
     this.id,
     required this.name,
@@ -18,6 +23,9 @@ class Folder {
     this.isStarred = false,
     required this.createdAt,
     this.imageUrl, // nullable 처리
+    this.location,
+    this.startDate,
+    this.endDate,
   });
 
   Folder copyWith({
@@ -28,6 +36,9 @@ class Folder {
     bool? isStarred,
     DateTime? createdAt,
     String? imageUrl,
+    String? location,
+    DateTime? startDate,
+    DateTime? endDate,
   }) {
     return Folder(
       id: id ?? this.id,
@@ -37,6 +48,9 @@ class Folder {
       isStarred: isStarred ?? this.isStarred,
       createdAt: createdAt ?? this.createdAt,
       imageUrl: imageUrl ?? this.imageUrl,
+      location: location ?? this.location,
+      startDate: startDate ?? this.startDate,
+      endDate: endDate ?? this.endDate,
     );
   }
 
@@ -55,11 +69,18 @@ class Folder {
           (json['icon'] ?? Icons.folder.codePoint),
           fontFamily: 'MaterialIcons',
         ),
-        isStarred: json['starred'] ?? false, // ✅ 여기가 핵심!
+        isStarred: json['starred'] ?? false,
+        // ✅ 여기가 핵심!
         createdAt: DateTime.tryParse(json['createdAt'] ?? '') ?? DateTime.now(),
         imageUrl: (json['imageUrl'] == null || json['imageUrl'] == "null")
             ? null
             : json['imageUrl'],
+        location: json['location'],
+        startDate: json['startDate'] != null
+            ? DateTime.tryParse(json['startDate'])
+            : null,
+        endDate:
+            json['endDate'] != null ? DateTime.tryParse(json['endDate']) : null,
       );
     } catch (e) {
       print('❌ Folder 파싱 오류: $e\n원본 JSON: $json');
@@ -76,6 +97,9 @@ class Folder {
       'starred': isStarred, // ✅ 여기도!
       'createdAt': createdAt.toIso8601String(),
       'imageUrl': imageUrl,
+      'location': location,
+      'startDate': startDate?.toIso8601String(),
+      'endDate': endDate?.toIso8601String(),
     };
   }
 }
