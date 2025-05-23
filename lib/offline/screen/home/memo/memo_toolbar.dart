@@ -1,6 +1,7 @@
 // Quill 하단 툴바 담당
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart';
+import 'package:tuple/tuple.dart';
 import 'memo_screen.dart';
 
 class MemoToolbar extends StatelessWidget {
