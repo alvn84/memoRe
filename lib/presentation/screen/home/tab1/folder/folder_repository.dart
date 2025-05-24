@@ -67,10 +67,6 @@ class FolderRepository {
       },
       body: body,
     );
-
-    print('📤 저장 요청 바디: $body');
-    print('📤 Authorization: Bearer $token');
-
     if (response.statusCode != 200) {
       print('❌ 폴더 저장 실패: ${response.statusCode}');
       throw Exception('폴더 저장 실패');
@@ -180,4 +176,7 @@ class FolderRepository {
       throw Exception('즐겨찾기 토글 실패');
     }
   }
+
+
+
 }

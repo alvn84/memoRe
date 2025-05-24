@@ -37,7 +37,7 @@ class _NewFolderScreenState extends State<NewFolderScreen>
   @override
   void initState() {
     super.initState();
-    placesApi = PlacesApi(apiKey: '')..setLanguage('en');
+    placesApi = PlacesApi(apiKey: 'AIzaSyBmSwL2iuoNT0IR3UupWveT9Z5A608-LN4')..setLanguage('en');
     _checkConnectivity();
   }
 

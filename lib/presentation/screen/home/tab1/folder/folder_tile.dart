@@ -20,6 +20,7 @@ class FolderTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+
     return GestureDetector(
       onTap: onTap,
       onLongPress: onLongPress,
@@ -35,13 +36,20 @@ class FolderTile extends StatelessWidget {
               height: 220,
               decoration: BoxDecoration(
                 color: folder.color,
-                image: (folder.imageUrl != null && folder.imageUrl != "null")
+                image: (folder.imageUrl != null &&
+                    folder.imageUrl != "null" &&
+                    folder.imageUrl!.isNotEmpty)
                     ? DecorationImage(
-                        image: folder.imageUrl!.startsWith('assets/')
-                            ? AssetImage(folder.imageUrl!) as ImageProvider
-                            : FileImage(File(folder.imageUrl!)),
-                        fit: BoxFit.cover,
-                      )
+                  image: folder.imageUrl!.startsWith('http')
+                      ? NetworkImage(folder.imageUrl!) // ✅ 서버 이미지 처리 추가
+                      : folder.imageUrl!.startsWith('assets/')
+                      ? AssetImage(folder.imageUrl!) as ImageProvider
+                      : FileImage(File(folder.imageUrl!)), // 기존 로컬 파일 처리 유지
+                  fit: BoxFit.cover,
+                  onError: (error, stackTrace) {
+                    print('❌ 이미지 로딩 실패: $error');
+                  },
+                )
                     : null,
               ),
             ),

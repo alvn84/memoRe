@@ -8,6 +8,7 @@ Future<Map<String, dynamic>?> showAddFolderDialog(BuildContext context) {
   final locationController = TextEditingController();
   DateTimeRange? selectedDateRange;
   File? selectedImage;
+  String? selectedImageUrl; // ✅ 추가
 
   return showDialog<Map<String, dynamic>>(
     context: context,
@@ -77,6 +78,7 @@ Future<Map<String, dynamic>?> showAddFolderDialog(BuildContext context) {
                       if (picked != null) {
                         setState(() {
                           selectedImage = File(picked.path);
+                          selectedImageUrl = picked.path;
                         });
                       }
                     },
@@ -101,6 +103,7 @@ Future<Map<String, dynamic>?> showAddFolderDialog(BuildContext context) {
                   'location': locationController.text.trim(),
                   'startDate': selectedDateRange!.start,
                   'endDate': selectedDateRange!.end,
+                  'imageUrl': selectedImageUrl, // ✅ 포함!
                 });
               }
             },
