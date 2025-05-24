@@ -12,6 +12,7 @@ import '../../../auth/api_config.dart';
 import '../../../auth/token_storage.dart';
 import '../model/memo_model.dart';
 import '../repository/memo_repository.dart';
+import 'ai/ai_model_sheet.dart';
 import 'memo_editor.dart';
 import 'memo_toolbar.dart';
 
@@ -211,7 +212,6 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // 🔹 번역 버튼
             AnimatedSlide(
               offset: _isFabExpanded ? Offset.zero : const Offset(0, 0.3),
               duration: const Duration(milliseconds: 200),
@@ -226,7 +226,16 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
                       mini: true,
                       shape: const CircleBorder(),
                       backgroundColor: const Color(0xFF6495ED),
-                      onPressed: () {},
+                      onPressed: () {
+                        showModalBottomSheet(
+                          context: context,
+                          isScrollControlled: true,
+                          shape: const RoundedRectangleBorder(
+                            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                          ),
+                          builder: (context) => const AiModalSheet(),
+                        );
+                      },
                       child:
                           const Icon(Icons.auto_awesome, color: Colors.white),
                     ),
