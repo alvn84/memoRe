@@ -7,6 +7,7 @@ import '../ai/ai_travel_chat_screen.dart';
 import '../folder_feature/folder_model.dart';
 import '../folder_feature/folder_reorder.dart';
 import '../folder_feature/folder_screen.dart';
+import 'floating_action_button/add_folder_screen.dart';
 import 'folder/folder_repository.dart';
 import 'floating_action_button/add_folder_dialog.dart';
 import 'floating_action_button/tab1_fab.dart';
@@ -90,7 +91,10 @@ class _Tab1ScreenState extends State<Tab1Screen> {
   }
 
   Future<void> _addNewFolder() async {
-    final result = await showAddFolderDialog(context);
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => const AddFolderScreen()),
+    );
 
     if (result != null &&
         result['name'] != null &&

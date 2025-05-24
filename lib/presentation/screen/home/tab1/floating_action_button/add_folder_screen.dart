@@ -1,33 +1,32 @@
+// lib/presentation/screen/home/tab1/add_folder_screen.dart
+
 import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
-import '../folder/folder_model.dart';
-import 'package:nova_places_api/nova_places_api.dart';
+import 'package:nova_places_api/models/place_autocomplete_prediction.dart';
+import 'package:nova_places_api/service/places_api.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 
-class NewFolderScreen extends StatefulWidget {
-  const NewFolderScreen({super.key});
-
+class AddFolderScreen extends StatefulWidget {
+  const AddFolderScreen({super.key});
 
   @override
-  State<NewFolderScreen> createState() => _NewFolderScreenState();
+  State<AddFolderScreen> createState() => _AddFolderScreenState();
 }
 
-class _NewFolderScreenState extends State<NewFolderScreen>
+class _AddFolderScreenState extends State<AddFolderScreen>
     with TickerProviderStateMixin {
   int _step = 0;
-  String? _destination;
+  String? _location;
   DateTimeRange? _dateRange;
-  String? _title;
-  String? _imagePath;
+  String? _name;
+  String? _imageUrl;
   bool _isOnline = true;
 
-  final TextEditingController _destinationController = TextEditingController();
-  final TextEditingController _titleController = TextEditingController();
-
+  final TextEditingController _locationController = TextEditingController();
+  final TextEditingController _nameController = TextEditingController();
   final PageController _pageController = PageController();
 
   // 클래스 내 변수 선언
@@ -37,7 +36,8 @@ class _NewFolderScreenState extends State<NewFolderScreen>
   @override
   void initState() {
     super.initState();
-    placesApi = PlacesApi(apiKey: 'AIzaSyBmSwL2iuoNT0IR3UupWveT9Z5A608-LN4')..setLanguage('en');
+    placesApi = PlacesApi(apiKey: 'AIzaSyBmSwL2iuoNT0IR3UupWveT9Z5A608-LN4')
+      ..setLanguage('en');
     _checkConnectivity();
   }
 
@@ -49,12 +49,16 @@ class _NewFolderScreenState extends State<NewFolderScreen>
   }
 
   void _nextStep() {
-    if ((_step == 0 && (_destination == null || _destination!.isEmpty)) ||
+    FocusScope.of(context).unfocus(); // ✅ 키보드 내리기
+
+    if ((_step == 0 && (_location == null || _location!.isEmpty)) ||
         (_step == 1 && _dateRange == null) ||
-        (_step == 2 && (_title == null || _title!.isEmpty))) {
+        (_step == 2 && (_name == null || _name!.isEmpty))) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Please select an option.', style: TextStyle(color: Color(0xFF6495ED), fontWeight: FontWeight.bold)),
+          content: Text('Please select an option.',
+              style: TextStyle(
+                  color: Color(0xFF6495ED), fontWeight: FontWeight.bold)),
           backgroundColor: Color(0xFFF1F4F8),
           behavior: SnackBarBehavior.floating,
         ),
@@ -87,15 +91,14 @@ class _NewFolderScreenState extends State<NewFolderScreen>
   }
 
   void _submit() {
-    if (_destination != null && _dateRange != null && _title != null) {
-      final folder = Folder(
-        name: _title!,
-        color: const Color(0xFF6495ED),
-        icon: Icons.folder,
-        createdAt: DateTime.now(),
-        imagePath: _imagePath,
-      );
-      Navigator.pop(context, folder);
+    if (_location != null && _dateRange != null && _name != null) {
+      Navigator.pop(context, {
+        'name': _name,
+        'location': _location,
+        'startDate': _dateRange!.start,
+        'endDate': _dateRange!.end,
+        'imageUrl': _imageUrl,
+      });
     }
   }
 
@@ -103,14 +106,13 @@ class _NewFolderScreenState extends State<NewFolderScreen>
     final picker = ImagePicker();
     final pickedFile = await picker.pickImage(source: ImageSource.gallery);
     if (pickedFile != null) {
-      setState(() => _imagePath = pickedFile.path);
+      setState(() => _imageUrl = pickedFile.path);
     }
   }
 
   List<Widget> _buildSteps() {
     return [
       Column(
-        mainAxisSize: MainAxisSize.min,
         children: [
           const Text(
             "Where are you going?",
@@ -118,7 +120,7 @@ class _NewFolderScreenState extends State<NewFolderScreen>
           ),
           const SizedBox(height: 24),
           TextField(
-            controller: _destinationController,
+            controller: _locationController,
             decoration: InputDecoration(
               hintText: "Enter your destination",
               filled: true,
@@ -127,11 +129,12 @@ class _NewFolderScreenState extends State<NewFolderScreen>
                 borderRadius: BorderRadius.circular(20),
                 borderSide: BorderSide.none,
               ),
-              contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+              contentPadding:
+                  const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
             ),
             onChanged: (val) async {
               setState(() {
-                _destination = val;
+                _location = val;
               });
 
               if (_isOnline && val.isNotEmpty) {
@@ -177,8 +180,8 @@ class _NewFolderScreenState extends State<NewFolderScreen>
                       style: const TextStyle(fontSize: 14),
                     ),
                     onTap: () {
-                      _destinationController.text = prediction.description ?? '';
-                      _destination = prediction.description;
+                      _locationController.text = prediction.description ?? '';
+                      _location = prediction.description;
                       setState(() => predictions = []);
                     },
                   );
@@ -190,7 +193,8 @@ class _NewFolderScreenState extends State<NewFolderScreen>
       Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Text("When is your trip?", style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+          const Text("When is your trip?",
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
           const SizedBox(height: 24),
           TextButton(
             onPressed: () async {
@@ -198,7 +202,7 @@ class _NewFolderScreenState extends State<NewFolderScreen>
               final picked = await showDateRangePicker(
                 context: context,
                 firstDate: DateTime(now.year - 1),
-                lastDate: DateTime(now.year + 2),
+                lastDate: DateTime(now.year + 5),
               );
               if (picked != null) {
                 setState(() => _dateRange = picked);
@@ -207,38 +211,44 @@ class _NewFolderScreenState extends State<NewFolderScreen>
             child: Text(
               _dateRange == null
                   ? "Select travel period"
-                  : "${DateFormat('yMMMd').format(_dateRange!.start)} - ${DateFormat('yMMMd').format(_dateRange!.end)}",
-              style: const TextStyle(fontSize: 20, color: Color(0xFF6495ED), fontWeight: FontWeight.bold),
+                  : '${DateFormat('yyyy.MM.dd').format(_dateRange!.start)} ~ ${DateFormat('yyyy.MM.dd').format(_dateRange!.end)}',
             ),
-          )
-        ],
-      ),
-      Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const Text("What would you like to name this trip?", style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
-          const SizedBox(height: 24),
-          TextField(
-            controller: _titleController,
-            decoration: InputDecoration(
-              hintText: "Enter a title",
-              filled: true,
-              fillColor: Color(0xFFF1F4F8),
-              border: OutlineInputBorder(borderRadius: BorderRadius.circular(20), borderSide: BorderSide.none),
-            ),
-            onChanged: (val) => _title = val,
           ),
         ],
       ),
       Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Text("Choose a background image", style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+          const Text("What would you like to name this trip?",
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
           const SizedBox(height: 24),
+          TextField(
+            controller: _nameController,
+            decoration: InputDecoration(
+              hintText: "Enter a title",
+              filled: true,
+              fillColor: Color(0xFFF1F4F8),
+              border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(20),
+                  borderSide: BorderSide.none),
+            ),
+            onChanged: (val) => _name = val,
+          )
+        ],
+      ),
+      Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Text("Choose a background image",
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+          const SizedBox(height: 24),
+          const SizedBox(height: 20),
           ElevatedButton.icon(
             onPressed: _pickImage,
             icon: const Icon(Icons.image, color: Colors.white),
-            label: const Text("Select Image", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+            label: const Text("Select Image",
+                style: TextStyle(
+                    color: Colors.white, fontWeight: FontWeight.bold)),
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFF6495ED),
               shape: RoundedRectangleBorder(
@@ -246,12 +256,12 @@ class _NewFolderScreenState extends State<NewFolderScreen>
               ),
             ),
           ),
-          if (_imagePath != null) ...[
-            const SizedBox(height: 20),
+          if (_imageUrl != null) ...[
+            const SizedBox(height: 12),
             ClipRRect(
               borderRadius: BorderRadius.circular(12),
               child: Image.file(
-                File(_imagePath!),
+                File(_imageUrl!),
                 width: 200,
                 height: 120,
                 fit: BoxFit.cover,
@@ -268,7 +278,8 @@ class _NewFolderScreenState extends State<NewFolderScreen>
     return Scaffold(
       backgroundColor: const Color(0xFFFAFAFA),
       appBar: AppBar(
-        title: const Text("New Trip Setup", style: TextStyle(color: Colors.black)),
+        title:
+            const Text("New Trip Setup", style: TextStyle(color: Colors.black)),
         backgroundColor: Colors.transparent,
         elevation: 0,
         iconTheme: const IconThemeData(color: Colors.black),
@@ -276,7 +287,21 @@ class _NewFolderScreenState extends State<NewFolderScreen>
       body: PageView(
         controller: _pageController,
         physics: const NeverScrollableScrollPhysics(),
-        children: _buildSteps().map((step) => Center(child: Padding(padding: const EdgeInsets.all(24.0), child: step))).toList(),
+        children: _buildSteps().map(
+              (step) => Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Spacer(flex: 2), // 👈 위쪽 여백
+                  step,
+                  const Spacer(flex: 20), // 👈 아래쪽 여백 (더 크게 해서 위로 밀어냄)
+                ],
+              ),
+            ),
+          ),
+        ).toList(),
       ),
       bottomSheet: Padding(
         padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
@@ -288,9 +313,11 @@ class _NewFolderScreenState extends State<NewFolderScreen>
                   onPressed: _prevStep,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.grey.shade300,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20)),
                   ),
-                  child: const Text('Back', style: TextStyle(color: Colors.black)),
+                  child:
+                      const Text('Back', style: TextStyle(color: Colors.black)),
                 ),
               ),
             if (_step > 0) const SizedBox(width: 10),
@@ -299,11 +326,13 @@ class _NewFolderScreenState extends State<NewFolderScreen>
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF6495ED),
                   padding: const EdgeInsets.symmetric(vertical: 14),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(30)),
                 ),
                 onPressed: _nextStep,
                 child: Text(_step < 3 ? "Next" : "Create Folder",
-                    style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                    style: const TextStyle(
+                        color: Colors.white, fontWeight: FontWeight.bold)),
               ),
             ),
           ],
