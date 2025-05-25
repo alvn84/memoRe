@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 import '../repository/memo_repository.dart';
 import 'memo_screen.dart';
+import 'ai/ai_repository.dart';
 
 class MemoToolbar extends StatelessWidget {
   final QuillController controller;

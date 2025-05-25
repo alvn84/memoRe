@@ -12,7 +12,7 @@ import '../../../auth/api_config.dart';
 import '../../../auth/token_storage.dart';
 import '../model/memo_model.dart';
 import '../repository/memo_repository.dart';
-import 'ai/ai_model_sheet.dart';
+import 'ai/ai_modal_sheet.dart';
 import 'memo_editor.dart';
 import 'memo_toolbar.dart';
 
@@ -227,13 +227,19 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
                       shape: const CircleBorder(),
                       backgroundColor: const Color(0xFF6495ED),
                       onPressed: () {
+                        final title = _titleController.text;
+                        final content = _quillController.document.toPlainText();
+
                         showModalBottomSheet(
                           context: context,
                           isScrollControlled: true,
                           shape: const RoundedRectangleBorder(
                             borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
                           ),
-                          builder: (context) => const AiModalSheet(),
+                          builder: (context) => AiModalSheet(
+                            title: title,
+                            content: content,
+                          ),
                         );
                       },
                       child:

@@ -1,7 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:memore/presentation/screen/home/memo/screen/ai/summary_tab.dart';
+import 'package:memore/presentation/screen/home/memo/screen/ai/translate_tab.dart';
+import 'package:memore/presentation/screen/home/memo/screen/ai/schedule_tab.dart';
+import 'package:memore/presentation/screen/home/memo/screen/ai/place_tab.dart';
+import 'package:memore/presentation/screen/home/memo/screen/ai/caption_tab.dart';
+import 'ai_repository.dart';
 
 class AiModalSheet extends StatelessWidget {
-  const AiModalSheet({super.key});
+  final String title;
+  final String content;
+
+  const AiModalSheet({
+    super.key,
+    required this.title,
+    required this.content,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -20,6 +33,7 @@ class AiModalSheet extends StatelessWidget {
                   Tab(icon: Icon(Icons.summarize), text: '요약'),
                   Tab(icon: Icon(Icons.translate), text: '번역'),
                   Tab(icon: Icon(Icons.calendar_today), text: '일정'),
+                  Tab(icon: Icon(Icons.place), text: '장소'),
                   Tab(
                     icon: Icon(Icons.tag),
                     child: (Text(
@@ -27,18 +41,17 @@ class AiModalSheet extends StatelessWidget {
                       textAlign: TextAlign.center,
                     )),
                   ),
-                  Tab(icon: Icon(Icons.place), text: '장소'), // ← 추가
                 ],
               ),
               SizedBox(
                 height: 300, // 적당한 높이 설정
-                child: const TabBarView(
+                child: TabBarView(
                   children: [
-                    Center(child: Text('📝 요약 탭')),
-                    Center(child: Text('🌐 번역 탭')),
-                    Center(child: Text('📅 일정 탭')),
-                    Center(child: Text('🏷️ 캡션/해시태그 탭')),
-                    Center(child: Text('📍️ 장소')),
+                    SummaryTab(title: title, content: content),
+                    TranslateTab(title: title, content: content),
+                    ScheduleTab(title: title, content: content),
+                    PlaceTab(title: title, content: content),
+                    CaptionTab(title: title, content: content),
                   ],
                 ),
               ),
