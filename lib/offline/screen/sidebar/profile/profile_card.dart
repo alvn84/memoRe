@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'profile_setting_screen.dart'; // ⭐️ 프로필 설정 화면 임포트
+import 'package:memore/presentation/screen/auth/login/login_screen.dart';
 
 class ProfileCard extends StatelessWidget {
   const ProfileCard({super.key});
@@ -25,12 +26,12 @@ class ProfileCard extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 16.0),
           child: InkWell(
             borderRadius: BorderRadius.circular(12),
-            onTap: () {
+            /*onTap: () {
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => const ProfileSettingScreen()),
               );
-            },
+            },*/
             child: Container(
               padding: const EdgeInsets.all(10.0),
               decoration: BoxDecoration(
@@ -68,7 +69,10 @@ class ProfileCard extends StatelessWidget {
                   // 🔵 로그인 버튼
                   ElevatedButton(
                     onPressed: () {
-                      // 로그인 페이지로 이동 로직 작성
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const LoginScreen()),
+                      );
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Color(0xFF6495ED),

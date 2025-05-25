@@ -15,6 +15,8 @@ import 'folder_grid.dart';
 import 'folder_toolbar.dart';
 import 'folder_option_sheet.dart';
 import 'folder_creation_screen.dart';
+import 'dart:convert'; // for jsonEncode
+import 'package:shared_preferences/shared_preferences.dart'; // for SharedPreferences
 
 class Tab1Screen extends StatefulWidget {
   const Tab1Screen({super.key});
@@ -72,11 +74,20 @@ class _Tab1ScreenState extends State<Tab1Screen> {
   }
 
   // 폴더 삭제 함수
-  void _deleteFolder(int index) {
+  void _deleteFolder(int index) async {
+    final deletedFolder = folders[index];
+
+    // 1. 폴더 리스트에서 제거
     setState(() {
       folders.removeAt(index);
     });
-    _saveFolders();
+    await _saveFolders();
+
+    // 2. 휴지통에 추가
+    final prefs = await SharedPreferences.getInstance();
+    final trashList = prefs.getStringList('trash_folders') ?? [];
+    trashList.add(jsonEncode(deletedFolder.toJson()));
+    await prefs.setStringList('trash_folders', trashList);
   }
 
   // 즐겨찾기 등록 함수
