@@ -33,7 +33,8 @@ class AppDrawer extends StatelessWidget {
                 );
               },
             ),
-            ListTile(
+            // 친구기능 오프라인에선 작동 안 함
+            /*ListTile(
               leading: const Icon(Icons.group, color: Color(0xFF6495ED)),
               title: const Text('Friends', style:TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
               onTap: () {
@@ -43,7 +44,7 @@ class AppDrawer extends StatelessWidget {
                   MaterialPageRoute(builder: (context) => const FriendScreen()),
                 );
               },
-            ),
+            ),*/
             /*ListTile(
               leading: const Icon(Icons.share, color: Color(0xFF6495ED)),
               title: const Text('Shared',style:TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),

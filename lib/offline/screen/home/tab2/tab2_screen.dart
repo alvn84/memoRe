@@ -1,4 +1,5 @@
-// ✅ 수정된 Tab2Screen 전체 코드 (정확한 메모 수정 반영)
+// ✅ 통합된 Tab2Screen 코드 (여행 일정 + 메모 일정 모두 표시)
+
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
@@ -6,6 +7,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 import '../memo/memo_screen.dart';
+import '../folder/folder_model.dart';
+import '../folder/folder_storage.dart';
 
 class MemoEntry {
   final String folderKey;
@@ -34,6 +37,9 @@ class _Tab2ScreenState extends State<Tab2Screen> {
   List<MemoEntry> _allNotes = [];
   List<MemoEntry> _filteredNotes = [];
   Set<DateTime> memoDates = {};
+  Set<DateTime> travelDates = {};
+  Map<DateTime, String> travelDateToTripName = {};
+  String? _currentTripName;
   String _searchQuery = '';
   bool _sortNewestFirst = true;
 
@@ -42,6 +48,31 @@ class _Tab2ScreenState extends State<Tab2Screen> {
     super.initState();
     _selectedDay = _focusedDay;
     _onDateSelected(_selectedDay!, _focusedDay);
+  }
+
+  Future<void> _loadTravelDates() async {
+    final folders = await FolderStorage.loadFolders();
+    final tempSet = <DateTime>{};
+    final tempMap = <DateTime, String>{};
+
+    for (final folder in folders) {
+      if (folder.dateRange != null) {
+        final range = folder.dateRange!;
+        for (DateTime d = range.start;
+        !d.isAfter(range.end);
+        d = d.add(const Duration(days: 1))) {
+          final day = DateTime(d.year, d.month, d.day);
+          tempSet.add(day);
+          tempMap[day] = folder.name;
+        }
+      }
+    }
+
+    setState(() {
+      travelDates = tempSet;
+      travelDateToTripName = tempMap;
+      _currentTripName = travelDateToTripName[_selectedDay];
+    });
   }
 
   Future<List<MemoEntry>> _loadMemosForDate(DateTime date) async {
@@ -85,8 +116,11 @@ class _Tab2ScreenState extends State<Tab2Screen> {
     });
 
     final memos = await _loadMemosForDate(selectedDay);
+    await _loadTravelDates();
+
     setState(() {
       _allNotes = memos;
+      _currentTripName = travelDateToTripName[selectedDay];
       _applySearchAndSort();
     });
   }
@@ -134,8 +168,8 @@ class _Tab2ScreenState extends State<Tab2Screen> {
             flexibleSpace: Container(
               color: const Color(0xFFFAFAFA),
               child: FlexibleSpaceBar(
-                background: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12),
+                background: SingleChildScrollView(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 1),
                   child: Column(
                     children: [
                       TableCalendar(
@@ -147,7 +181,9 @@ class _Tab2ScreenState extends State<Tab2Screen> {
                         rowHeight: 40,
                         eventLoader: (day) {
                           final normalized = DateTime(day.year, day.month, day.day);
-                          return memoDates.contains(normalized) ? ['memo'] : [];
+                          return memoDates.contains(normalized) || travelDates.contains(normalized)
+                              ? ['event']
+                              : [];
                         },
                         headerStyle: const HeaderStyle(
                           titleTextStyle: TextStyle(fontWeight: FontWeight.w700, fontSize: 18),
@@ -159,43 +195,45 @@ class _Tab2ScreenState extends State<Tab2Screen> {
                           selectedDecoration: BoxDecoration(color: Color(0xFF6495ED), shape: BoxShape.circle),
                           selectedTextStyle: TextStyle(fontWeight: FontWeight.w900, color: Colors.white),
                         ),
-                        calendarBuilders: CalendarBuilders(
-                          defaultBuilder: (context, day, focusedDay) {
-                            final isToday = isSameDay(day, DateTime.now());
-                            final text = Text('${day.day}',
-                                style: TextStyle(fontWeight: FontWeight.w600));
-                            return Center(
-                              child: isToday ? Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [text, const Text('오늘', style: TextStyle(fontSize: 10, color: Colors.red))],
-                              ) : text,
-                            );
-                          },
-                        ),
                       ),
                       const SizedBox(height: 8),
+                      if (_currentTripName != null)
+                        Padding(
+                          padding: const EdgeInsets.only(top: 8.0, bottom: 4),
+                          child: Row(
+                            children: [
+                              const Icon(Icons.place, size: 18, color: Color(0xFF6495ED)),
+                              const SizedBox(width: 6),
+                              Text(
+                                'You are in "$_currentTripName"',
+                                style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Color(0xFF6495ED)),
+                              ),
+                            ],
+                          ),
+                        ),
                       Row(
                         children: [
                           Expanded(
-                              child: TextField(
-                                onChanged: _onSearchChanged,
-                                decoration: InputDecoration(
-                                  prefixIcon: const Icon(Icons.search, color: Color(0xFF6495ED)),
-                                  hintText: 'Search notes...',
-                                  filled: true,
-                                  fillColor: Color(0xFFF1F4F8),
-                                  contentPadding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
-                                  isDense: true,
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(30),
-                                    borderSide: BorderSide.none,
-                                  ),
-                                  focusedBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(30),
-                                    borderSide: const BorderSide(color: Color(0xFF6495ED), width: 1.5),
-                                  ),
+                            child: TextField(
+                              onChanged: _onSearchChanged,
+                              decoration: InputDecoration(
+                                prefixIcon: const Icon(Icons.search, color: Color(0xFF6495ED)),
+                                hintText: 'Search notes...',
+                                filled: true,
+                                fillColor: Color(0xFFF1F4F8),
+                                contentPadding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
+                                isDense: true,
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(30),
+                                  borderSide: BorderSide.none,
                                 ),
-                              )),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(30),
+                                  borderSide: const BorderSide(color: Color(0xFF6495ED), width: 1.5),
+                                ),
+                              ),
+                            ),
+                          ),
                           IconButton(
                             icon: Icon(_sortNewestFirst ? Icons.arrow_downward : Icons.arrow_upward),
                             onPressed: _toggleSortOrder,

@@ -94,6 +94,8 @@ class _NewFolderScreenState extends State<NewFolderScreen>
         icon: Icons.folder,
         createdAt: DateTime.now(),
         imagePath: _imagePath,
+        destination: _destination,          // ✅ 추가
+        dateRange: _dateRange,
       );
       Navigator.pop(context, folder);
     }
