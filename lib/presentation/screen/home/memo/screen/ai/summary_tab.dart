@@ -2,8 +2,12 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'dart:convert';
+import '../../../../auth/token_storage.dart';
+import '../../../../auth/api_config.dart';
 
-final openAiApiKey = dotenv.env['OPENAI_API_KEY'] ?? '';
+
+
 
 class SummaryTab extends StatefulWidget {
   final String? title;
@@ -32,34 +36,25 @@ class _SummaryTabState extends State<SummaryTab> {
   Future<void> _summarize() async {
     setState(() => _isLoading = true);
 
-    final text = '${widget.title}\n${widget.content}';
-    const apiUrl = 'https://api.openai.com/v1/chat/completions';
+    const apiUrl = '$baseUrl/api/openai/summarize'; // 👉 서버 주소로 변경
+    final requestBody = {
+      'title': widget.title,
+      'content': widget.content,
+    };
 
     try {
       final response = await http.post(
         Uri.parse(apiUrl),
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': 'Bearer $openAiApiKey',
+          // OpenAI API 키는 프론트에서 보내지 않음 ❌ 서버가 내부적으로 처리
         },
-        body: jsonEncode({
-          'model': 'gpt-3.5-turbo',
-          'messages': [
-            {'role': 'system', 'content': '당신은 여행 메모를 간결하게 요약해주는 어시스턴트입니다.'},
-            {
-              'role': 'user',
-              'content': text,
-            },
-          ],
-          'temperature': 0.7,
-        }),
+        body: jsonEncode(requestBody),
       );
 
       if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
         setState(() {
-          _summary =
-              data['choices'][0]['message']['content']?.trim() ?? '요약 실패';
+          _summary = response.body.trim();
         });
       } else {
         setState(() {
