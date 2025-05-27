@@ -51,8 +51,14 @@ class _Tab1FloatingButtonsState extends State<Tab1FloatingButtons> {
                 const SizedBox(height: 4),
                 const Text('AI Travel Picks',
                     style: TextStyle(
+                        shadows: [
+                          Shadow(
+                              offset: Offset(1.0, 1.0),
+                              blurRadius: 3.0,
+                              color: Colors.black54)
+                        ],
                         fontSize: 11,
-                        color: Color(0xFF6495ED),
+                        color: Colors.white,
                         fontWeight: FontWeight.bold)),
               ],
             ),
@@ -82,8 +88,14 @@ class _Tab1FloatingButtonsState extends State<Tab1FloatingButtons> {
                 const SizedBox(height: 4),
                 const Text('New Folder',
                     style: TextStyle(
+                        shadows: [
+                          Shadow(
+                              offset: Offset(1.0, 1.0),
+                              blurRadius: 3.0,
+                              color: Colors.black54)
+                        ],
                         fontSize: 11,
-                        color: Color(0xFF6495ED),
+                        color: Colors.white,
                         fontWeight: FontWeight.bold)),
               ],
             ),
@@ -95,10 +107,11 @@ class _Tab1FloatingButtonsState extends State<Tab1FloatingButtons> {
         FloatingActionButton(
           heroTag: 'mainFab',
           backgroundColor: widget.isFabExpanded
-              ? const Color(0xFFFDEEDC)
+              ? const Color(0xFFFAFAFA)
               : const Color(0xFF6495ED),
           shape: const CircleBorder(),
-          onPressed: widget.onMainFabPressed, // ← 이걸로 변경
+          onPressed: widget.onMainFabPressed,
+          // ← 이걸로 변경
           child: Icon(
             widget.isFabExpanded ? Icons.note_add : Icons.add,
             color:

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import '../memo/repository/memo_repository.dart';
 import '../memo/model/memo_model.dart';
 import 'tab2_calendar.dart';
@@ -29,7 +30,6 @@ class _Tab2ScreenState extends State<Tab2Screen> {
           updated.day == _selectedDay!.day;
     }).toList();
   }
-
 
   @override
   void initState() {
@@ -79,32 +79,62 @@ class _Tab2ScreenState extends State<Tab2Screen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: selectedDayMemos.isNotEmpty
                             ? selectedDayMemos.map((memo) {
-                          return Padding(
-                            padding: const EdgeInsets.only(bottom: 12.0),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  memo.title,
-                                  style: const TextStyle(
-                                      fontSize: 18, fontWeight: FontWeight.bold),
-                                ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  memo.content,
-                                  style: const TextStyle(fontSize: 16),
-                                ),
-                                const Divider(),
-                              ],
-                            ),
-                          );
-                        }).toList()
+                                return SizedBox(
+                                  width: double.infinity, // 👉 가로 최대 너비로 확장
+                                  child: Card(
+                                    margin: const EdgeInsets.only(bottom: 16),
+                                    color: const Color(0xFFF9FAFB),
+                                    elevation: 3,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(16),
+                                    ),
+                                    child: Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 16.0, vertical: 12),
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            memo.title,
+                                            style: const TextStyle(
+                                              fontSize: 18,
+                                              fontWeight: FontWeight.bold,
+                                              color: Color(0xFF333333),
+                                            ),
+                                          ),
+                                          const SizedBox(height: 8),
+                                          Text(
+                                            memo.content,
+                                            style:
+                                                const TextStyle(fontSize: 14),
+                                            maxLines: 3,
+                                          ),
+                                          const SizedBox(height: 12),
+                                          Align(
+                                            alignment: Alignment.bottomRight,
+                                            child: Text(
+                                              DateFormat('MMM d').format(
+                                                  DateTime.parse(
+                                                      memo.updatedAt!)),
+                                              style: const TextStyle(
+                                                  fontSize: 12,
+                                                  color: Colors.grey),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                );
+                              }).toList()
                             : [
-                          const Text(
-                            '오늘의 메모가 없습니다.',
-                            style: TextStyle(fontSize: 18, color: Colors.grey),
-                          )
-                        ],
+                                const Text(
+                                  '오늘의 메모가 없습니다.',
+                                  style: TextStyle(
+                                      fontSize: 18, color: Colors.grey),
+                                )
+                              ],
                       ),
                     );
                   },

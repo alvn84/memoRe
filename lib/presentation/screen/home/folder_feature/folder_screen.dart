@@ -177,31 +177,39 @@ class _FolderDetailScreenState extends State<FolderDetailScreen> {
                   showDialog(
                     context: context,
                     builder: (context) => AlertDialog(
+                      backgroundColor: const Color(0xFFF1F4F8),
+                      // ✅ 원하는 색상 지정
                       title: const Text('AI 여행 가이드'),
                       content: SingleChildScrollView(
                         child: Text(
-                          widget.folder.aiGuide?.trim() ?? 'AI 가이드를 불러오지 못했습니다.',
+                          widget.folder.aiGuide?.trim() ??
+                              'AI 가이드를 불러오지 못했습니다.',
                           style: const TextStyle(fontSize: 14),
                         ),
                       ),
                       actions: [
                         TextButton(
                           onPressed: () => Navigator.pop(context),
-                          child: const Text('닫기'),
+                          child: const Text(
+                            '닫기',
+                            style: TextStyle(color: Colors.black87),
+                          ),
                         ),
                       ],
                     ),
                   );
                 },
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                   decoration: BoxDecoration(
                     color: const Color(0xFFF1F4F8),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Row(
                     children: const [
-                      Icon(Icons.tips_and_updates, size: 18, color: Colors.blueAccent),
+                      Icon(Icons.tips_and_updates,
+                          size: 18, color: Colors.blueAccent),
                       SizedBox(width: 8),
                       Expanded(
                         child: Text(
@@ -213,7 +221,8 @@ class _FolderDetailScreenState extends State<FolderDetailScreen> {
                           ),
                         ),
                       ),
-                      Icon(Icons.arrow_forward_ios, size: 14, color: Colors.grey),
+                      Icon(Icons.arrow_forward_ios,
+                          size: 14, color: Colors.grey),
                     ],
                   ),
                 ),
@@ -311,25 +320,37 @@ class _FolderDetailScreenState extends State<FolderDetailScreen> {
                                   crossAxisAlignment: CrossAxisAlignment.center,
                                   children: [
                                     Text(
-                                      DateFormat('MMM d').format(DateTime.parse(memo.updatedAt!)),
-                                      style: const TextStyle(fontSize: 18, color: Colors.blueAccent,),
+                                      DateFormat('MMM d').format(
+                                          DateTime.parse(memo.updatedAt!)),
+                                      style: const TextStyle(
+                                        fontSize: 18,
+                                        color: Colors.blueAccent,
+                                      ),
                                     ),
-                                    const Spacer(), // 👉 날짜와 별 버튼 사이 여백을 최대한 벌려줌
+                                    const Spacer(),
+                                    // 👉 날짜와 별 버튼 사이 여백을 최대한 벌려줌
                                     IconButton(
                                       icon: Icon(
-                                        memo.isStarred ? Icons.star : Icons.star_border,
-                                        color: memo.isStarred ? Colors.amber : Colors.grey,
+                                        memo.isStarred
+                                            ? Icons.star
+                                            : Icons.star_border,
+                                        color: memo.isStarred
+                                            ? Colors.amber
+                                            : Colors.grey,
                                         size: 20,
                                       ),
                                       padding: EdgeInsets.zero,
-                                      constraints: const BoxConstraints(minWidth: 30, minHeight: 30),
+                                      constraints: const BoxConstraints(
+                                          minWidth: 30, minHeight: 30),
                                       onPressed: () async {
                                         try {
                                           await _repo.toggleStarred(memo.id!);
                                           _refresh();
                                         } catch (e) {
-                                          ScaffoldMessenger.of(context).showSnackBar(
-                                            const SnackBar(content: Text('즐겨찾기 변경 실패')),
+                                          ScaffoldMessenger.of(context)
+                                              .showSnackBar(
+                                            const SnackBar(
+                                                content: Text('즐겨찾기 변경 실패')),
                                           );
                                         }
                                       },
@@ -337,11 +358,13 @@ class _FolderDetailScreenState extends State<FolderDetailScreen> {
                                   ],
                                 ),
                                 Text(
-                                    memo.title,
-                                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                                    overflow: TextOverflow.ellipsis,
-                                    maxLines: 2,
-                                  ),
+                                  memo.title,
+                                  style: const TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold),
+                                  overflow: TextOverflow.ellipsis,
+                                  maxLines: 2,
+                                ),
 
                                 SizedBox(height: 6.5),
                                 // 본문 텍스트

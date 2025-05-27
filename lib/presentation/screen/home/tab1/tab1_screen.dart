@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:memore/presentation/screen/home/tab1/tab1_controller.dart';
 
-import '../ai/ai_travel_chat_screen.dart';
+import 'floating_action_button/ai_travel_chat_screen.dart';
 import '../folder_feature/folder_model.dart';
 import '../folder_feature/folder_reorder.dart';
 import '../folder_feature/folder_screen.dart';

@@ -113,12 +113,12 @@ class MemoToolbar extends StatelessWidget {
             // 🔵 번역 버튼
             const SizedBox(width: 1),
             // 🔵 번역 버튼 (아이콘만)
-            IconButton(
+            /*IconButton(
               onPressed: () => _translateMemo(context),
               icon: const Icon(Icons.translate, color: Colors.black87),
               tooltip: 'Translate',
             ),
-            const SizedBox(width: 16),
+            const SizedBox(width: 16),*/
           ]
         ),
       ),

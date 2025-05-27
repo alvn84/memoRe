@@ -32,7 +32,7 @@ class _HomeScreenState extends State<HomeScreen> {
         elevation: 0,  // 그림자 제거 (없애는게 깔끔)
         leading: Builder(
           builder: (context) => IconButton(
-            icon: Icon(Icons.menu,color: Color(0xFF6495ED)),
+            icon: Icon(Icons.menu,color: Colors.black87),
             onPressed: () => Scaffold.of(context).openDrawer(),
           ),
         ),
@@ -41,7 +41,7 @@ class _HomeScreenState extends State<HomeScreen> {
           style: TextStyle(
             fontSize: 17,  // 글씨 크기
             fontWeight: FontWeight.bold,
-            color: Color(0xFF6495ED),  // 글씨 색상
+            color: Colors.black87,  // 글씨 색상
           ),
         ),
         centerTitle: true,

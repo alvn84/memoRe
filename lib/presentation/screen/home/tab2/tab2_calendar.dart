@@ -41,7 +41,7 @@ class Tab2Calendar extends StatelessWidget {
         defaultTextStyle:
             TextStyle(fontWeight: FontWeight.w600, color: Color(0xFF4F4F4F)),
         selectedDecoration:
-            BoxDecoration(color: Color(0xFFE5CFC3), shape: BoxShape.circle),
+            BoxDecoration(color: Color(0xFF6495ED), shape: BoxShape.circle),
         selectedTextStyle:
             TextStyle(fontWeight: FontWeight.w900, color: Colors.white),
         todayDecoration: BoxDecoration(),

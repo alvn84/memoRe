@@ -20,6 +20,11 @@ class FolderTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final dateText = (folder.startDate != null && folder.endDate != null)
+        ? '${DateFormat('yyyy.MM.dd').format(folder.startDate!)} ~ ${DateFormat('yyyy.MM.dd').format(folder.endDate!)}'
+        : '날짜 미정';
+
+    final locationText = folder.location ?? '위치 없음';
 
     return GestureDetector(
       onTap: onTap,
@@ -37,19 +42,20 @@ class FolderTile extends StatelessWidget {
               decoration: BoxDecoration(
                 color: folder.color,
                 image: (folder.imageUrl != null &&
-                    folder.imageUrl != "null" &&
-                    folder.imageUrl!.isNotEmpty)
+                        folder.imageUrl != "null" &&
+                        folder.imageUrl!.isNotEmpty)
                     ? DecorationImage(
-                  image: folder.imageUrl!.startsWith('http')
-                      ? NetworkImage(folder.imageUrl!) // ✅ 서버 이미지 처리 추가
-                      : folder.imageUrl!.startsWith('assets/')
-                      ? AssetImage(folder.imageUrl!) as ImageProvider
-                      : FileImage(File(folder.imageUrl!)), // 기존 로컬 파일 처리 유지
-                  fit: BoxFit.cover,
-                  onError: (error, stackTrace) {
-                    print('❌ 이미지 로딩 실패: $error');
-                  },
-                )
+                        image: folder.imageUrl!.startsWith('http')
+                            ? NetworkImage(folder.imageUrl!) // ✅ 서버 이미지 처리 추가
+                            : folder.imageUrl!.startsWith('assets/')
+                                ? AssetImage(folder.imageUrl!) as ImageProvider
+                                : FileImage(
+                                    File(folder.imageUrl!)), // 기존 로컬 파일 처리 유지
+                        fit: BoxFit.cover,
+                        onError: (error, stackTrace) {
+                          print('❌ 이미지 로딩 실패: $error');
+                        },
+                      )
                     : null,
               ),
             ),
@@ -83,22 +89,40 @@ class FolderTile extends StatelessWidget {
                   ),
                 ),
                 alignment: Alignment.bottomLeft,
-                child: Text(
-                  folder.name,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 29,
-                    fontWeight: FontWeight.bold,
-                    shadows: [
-                      Shadow(
-                        offset: Offset(1, 1),
-                        blurRadius: 2,
-                        color: Colors.black38,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      folder.name,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                        shadows: [
+                          Shadow(
+                            offset: Offset(1, 1),
+                            blurRadius: 2,
+                            color: Colors.black38,
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    Text(
+                      locationText,
+                      style:
+                          const TextStyle(color: Colors.white70, fontSize: 14),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    Text(
+                      dateText,
+                      style:
+                          const TextStyle(color: Colors.white70, fontSize: 12),
+                    ),
+                  ],
                 ),
               ),
             ),
