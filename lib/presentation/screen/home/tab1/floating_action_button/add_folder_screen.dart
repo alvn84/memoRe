@@ -9,6 +9,8 @@ import 'package:nova_places_api/models/place_autocomplete_prediction.dart';
 import 'package:nova_places_api/service/places_api.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 
+import '../../folder_feature/folder_model.dart';
+
 class AddFolderScreen extends StatefulWidget {
   const AddFolderScreen({super.key});
 
@@ -23,6 +25,7 @@ class _AddFolderScreenState extends State<AddFolderScreen>
   DateTimeRange? _dateRange;
   String? _name;
   String? _imageUrl;
+  TravelPurpose? _selectedPurpose;
   bool _isOnline = true;
 
   final TextEditingController _locationController = TextEditingController();
@@ -53,7 +56,8 @@ class _AddFolderScreenState extends State<AddFolderScreen>
 
     if ((_step == 0 && (_location == null || _location!.isEmpty)) ||
         (_step == 1 && _dateRange == null) ||
-        (_step == 2 && (_name == null || _name!.isEmpty))) {
+        (_step == 2 && (_name == null || _name!.isEmpty)) ||
+        (_step == 4 && _selectedPurpose == null)) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Please select an option.',
@@ -65,7 +69,7 @@ class _AddFolderScreenState extends State<AddFolderScreen>
       );
       return;
     }
-    if (_step < 3) {
+    if (_step < 4) {
       setState(() {
         _step++;
         _pageController.nextPage(
@@ -98,6 +102,7 @@ class _AddFolderScreenState extends State<AddFolderScreen>
         'startDate': _dateRange!.start,
         'endDate': _dateRange!.end,
         'imageUrl': _imageUrl,
+        'purpose': _selectedPurpose!.value, // ✅ 문자열로 변환해서 넘기기
       });
     }
   }
@@ -269,7 +274,38 @@ class _AddFolderScreenState extends State<AddFolderScreen>
             ),
           ]
         ],
-      )
+      ),
+      Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Text("What's the purpose of this trip?",
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+          const SizedBox(height: 24),
+          DropdownButtonFormField<TravelPurpose>(
+            value: _selectedPurpose,
+            decoration: InputDecoration(
+              filled: true,
+              fillColor: const Color(0xFFF1F4F8),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(20),
+                borderSide: BorderSide.none,
+              ),
+              contentPadding:
+                  const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+            ),
+            items: TravelPurpose.values.map((purpose) {
+              return DropdownMenuItem(
+                value: purpose,
+                child: Text(purpose.name[0].toUpperCase() +
+                    purpose.name.substring(1).toLowerCase()),
+              );
+            }).toList(),
+            onChanged: (value) {
+              setState(() => _selectedPurpose = value);
+            },
+          ),
+        ],
+      ),
     ];
   }
 
@@ -287,21 +323,23 @@ class _AddFolderScreenState extends State<AddFolderScreen>
       body: PageView(
         controller: _pageController,
         physics: const NeverScrollableScrollPhysics(),
-        children: _buildSteps().map(
+        children: _buildSteps()
+            .map(
               (step) => Padding(
-            padding: const EdgeInsets.all(24.0),
-            child: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Spacer(flex: 2), // 👈 위쪽 여백
-                  step,
-                  const Spacer(flex: 20), // 👈 아래쪽 여백 (더 크게 해서 위로 밀어냄)
-                ],
+                padding: const EdgeInsets.all(24.0),
+                child: Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Spacer(flex: 2), // 👈 위쪽 여백
+                      step,
+                      const Spacer(flex: 20), // 👈 아래쪽 여백 (더 크게 해서 위로 밀어냄)
+                    ],
+                  ),
+                ),
               ),
-            ),
-          ),
-        ).toList(),
+            )
+            .toList(),
       ),
       bottomSheet: Padding(
         padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
@@ -330,7 +368,7 @@ class _AddFolderScreenState extends State<AddFolderScreen>
                       borderRadius: BorderRadius.circular(30)),
                 ),
                 onPressed: _nextStep,
-                child: Text(_step < 3 ? "Next" : "Create Folder",
+                child: Text(_step < 4 ? "Next" : "Create Folder",
                     style: const TextStyle(
                         color: Colors.white, fontWeight: FontWeight.bold)),
               ),

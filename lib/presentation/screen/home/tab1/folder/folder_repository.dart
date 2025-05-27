@@ -20,6 +20,11 @@ class FolderRepository {
     );
     if (response.statusCode == 200) {
       final List<dynamic> data = jsonDecode(response.body);
+
+      for (final json in data) {
+        print('📥 서버에서 받은 폴더 JSON: $json');
+      }
+
       List<Folder> folders = data.map((json) => Folder.fromJson(json)).toList();
 
       final hasDefault = folders.any((f) => f.name == 'Default');
@@ -54,6 +59,7 @@ class FolderRepository {
       'startDate': folder.startDate?.toIso8601String(),
       'endDate': folder.endDate?.toIso8601String(),
       'imageUrl': folder.imageUrl, // ✅ 이미지 URL 추가
+      'purpose': folder.purpose?.value, // ✅ 여행 목적 추가
     }); // 서버 요구사항에 맞게 name만 전송
 
     print('📤 서버에 보낼 폴더 데이터: $body'); // 🔍 전송 값 디버깅 로그
@@ -176,7 +182,4 @@ class FolderRepository {
       throw Exception('즐겨찾기 토글 실패');
     }
   }
-
-
-
 }

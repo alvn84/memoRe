@@ -8,19 +8,13 @@ import '../memo/screen/note_edit_screen.dart';
 import '../folder_feature/folder_model.dart';
 
 class FolderDetailScreen extends StatefulWidget {
-  final int? folderId;
-  final String folderName;
-  final String? imageUrl;
-  final Color folderColor;
-  final List<Folder> folders; // ✅ 폴더 전체 리스트
+  final Folder folder; // ✅ 폴더 전체 객체로 변경
+  final List<Folder> folders;
 
   const FolderDetailScreen({
     super.key,
-    required this.folderId,
-    required this.folderName,
-    this.imageUrl,
-    required this.folderColor,
-    required this.folders, // ✅ 여기 추가
+    required this.folder,
+    required this.folders,
   });
 
   @override
@@ -47,7 +41,7 @@ class _FolderDetailScreenState extends State<FolderDetailScreen> {
   }
 
   void _loadMemos() {
-    _memosFuture = _repo.getMemos(widget.folderId!);
+    _memosFuture = _repo.getMemos(widget.folder.id!);
   }
 
   Future<void> _refresh() async {
@@ -61,7 +55,7 @@ class _FolderDetailScreenState extends State<FolderDetailScreen> {
       context,
       MaterialPageRoute(
         builder: (_) => NoteEditScreen(
-          folderId: widget.folderId!,
+          folderId: widget.folder.id!,
           onNoteSaved: _refresh,
         ),
       ),
@@ -148,7 +142,7 @@ class _FolderDetailScreenState extends State<FolderDetailScreen> {
             ],
             flexibleSpace: FlexibleSpaceBar(
               title: Text(
-                widget.folderName,
+                widget.folder.name,
                 style: TextStyle(
                   color: _isScrolled ? Colors.black : Colors.white,
                   fontWeight: FontWeight.bold,
@@ -166,11 +160,63 @@ class _FolderDetailScreenState extends State<FolderDetailScreen> {
               background: Stack(
                 fit: StackFit.expand,
                 children: [
-                  widget.imageUrl != null
-                      ? Image.file(File(widget.imageUrl!), fit: BoxFit.cover)
-                      : Container(color: widget.folderColor), // ✅ 폴더 색상 적용
+                  widget.folder.imageUrl != null
+                      ? Image.file(File(widget.folder.imageUrl!),
+                          fit: BoxFit.cover)
+                      : Container(color: widget.folder.color), // ✅ 폴더 색상 적용
                   Container(color: Colors.black.withOpacity(0.3)), // 어두운 오버레이
                 ],
+              ),
+            ),
+          ),
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              child: GestureDetector(
+                onTap: () {
+                  showDialog(
+                    context: context,
+                    builder: (context) => AlertDialog(
+                      title: const Text('AI 여행 가이드'),
+                      content: SingleChildScrollView(
+                        child: Text(
+                          widget.folder.aiGuide?.trim() ?? 'AI 가이드를 불러오지 못했습니다.',
+                          style: const TextStyle(fontSize: 14),
+                        ),
+                      ),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(context),
+                          child: const Text('닫기'),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFF1F4F8),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Row(
+                    children: const [
+                      Icon(Icons.tips_and_updates, size: 18, color: Colors.blueAccent),
+                      SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          'AI 가이드 보기',
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: Colors.black87,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                      Icon(Icons.arrow_forward_ios, size: 14, color: Colors.grey),
+                    ],
+                  ),
+                ),
               ),
             ),
           ),
@@ -208,7 +254,7 @@ class _FolderDetailScreenState extends State<FolderDetailScreen> {
                             context,
                             MaterialPageRoute(
                               builder: (_) => NoteEditScreen(
-                                folderId: widget.folderId!,
+                                folderId: widget.folder.id!,
                                 initialMemo: memo,
                                 onNoteSaved: _refresh,
                               ),

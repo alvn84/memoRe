@@ -100,7 +100,14 @@ class _Tab1ScreenState extends State<Tab1Screen> {
         result['name'] != null &&
         result['location'] != null &&
         result['startDate'] != null &&
-        result['endDate'] != null) {
+        result['endDate'] != null &&
+        result['purpose'] != null) {
+      // ✅ 목적 문자열 → enum 매핑
+      final TravelPurpose purpose = TravelPurpose.values.firstWhere(
+        (e) => e.value == result['purpose'],
+        orElse: () => TravelPurpose.other,
+      );
+
       final folder = Folder(
         name: result['name'],
         color: const Color(0xFFFFE082),
@@ -109,12 +116,14 @@ class _Tab1ScreenState extends State<Tab1Screen> {
         location: result['location'],
         startDate: result['startDate'],
         endDate: result['endDate'],
-        imageUrl: result['imageUrl'], // ✅ 이미지 경로 추가
+        imageUrl: result['imageUrl'],
+        // ✅ 이미지 경로 추가
+        purpose: purpose, // ✅ 필수로 추가!
       );
 
       await _saveFolder(folder); // 서버 저장
-      await _loadFolders();      // 서버에서 목록 다시 로딩
-      setState(() {});           // UI 갱신
+      await _loadFolders(); // 서버에서 목록 다시 로딩
+      setState(() {}); // UI 갱신
     }
   }
 
@@ -303,12 +312,7 @@ class _Tab1ScreenState extends State<Tab1Screen> {
               context,
               MaterialPageRoute(
                 builder: (_) => FolderDetailScreen(
-                  folderId: folder.id!,
-                  // ✅ 추가
-                  folderName: folder.name,
-                  imageUrl: folder.imageUrl,
-                  folderColor: folder.color,
-                  // ✅ 전달
+                  folder: folder,
                   folders: folders, // ✅ 현재 폴더 목록 전체 전달
                 ),
               ),

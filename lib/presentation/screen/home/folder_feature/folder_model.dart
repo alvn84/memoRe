@@ -1,5 +1,23 @@
-// - - - - - - - - - - - - - - - 폴더 데이터 모델 - - - - - - - - - - - - - - -
 import 'package:flutter/material.dart';
+
+enum TravelPurpose {
+  tourism('TOURISM'),
+  business('BUSINESS'),
+  relaxation('RELAXATION'),
+  other('OTHER');
+
+  final String value;
+
+  const TravelPurpose(this.value);
+
+  static TravelPurpose? fromString(String? value) {
+    if (value == null) return null;
+    return TravelPurpose.values.firstWhere(
+      (e) => e.value == value,
+      orElse: () => TravelPurpose.other,
+    );
+  }
+}
 
 class Folder {
   final int? id;
@@ -8,12 +26,14 @@ class Folder {
   final IconData icon;
   final bool isStarred;
   final DateTime createdAt;
-  final String? imageUrl; // 프로필 이미지 경로 추가
+  final String? imageUrl;
 
-  // ✅ 새로 추가된 필드
+  // ✅ 새로 추가된 필드들
   final String? location;
   final DateTime? startDate;
   final DateTime? endDate;
+  final TravelPurpose? purpose; // ← 여기에 목적 추가
+  final String? aiGuide; // 🔥 AI 가이드 필드 추가
 
   Folder({
     this.id,
@@ -22,10 +42,12 @@ class Folder {
     required this.icon,
     this.isStarred = false,
     required this.createdAt,
-    this.imageUrl, // nullable 처리
+    this.imageUrl,
     this.location,
     this.startDate,
     this.endDate,
+    this.purpose,
+    this.aiGuide,
   });
 
   Folder copyWith({
@@ -39,6 +61,8 @@ class Folder {
     String? location,
     DateTime? startDate,
     DateTime? endDate,
+    TravelPurpose? purpose,
+    String? aiGuide,
   }) {
     return Folder(
       id: id ?? this.id,
@@ -51,6 +75,8 @@ class Folder {
       location: location ?? this.location,
       startDate: startDate ?? this.startDate,
       endDate: endDate ?? this.endDate,
+      purpose: purpose ?? this.purpose,
+      aiGuide: aiGuide ?? this.aiGuide,
     );
   }
 
@@ -70,7 +96,6 @@ class Folder {
           fontFamily: 'MaterialIcons',
         ),
         isStarred: json['starred'] ?? false,
-        // ✅ 여기가 핵심!
         createdAt: DateTime.tryParse(json['createdAt'] ?? '') ?? DateTime.now(),
         imageUrl: (json['imageUrl'] == null || json['imageUrl'] == "null")
             ? null
@@ -81,6 +106,8 @@ class Folder {
             : null,
         endDate:
             json['endDate'] != null ? DateTime.tryParse(json['endDate']) : null,
+        purpose: TravelPurpose.fromString(json['purpose']),
+        aiGuide: json['aiGuide'],
       );
     } catch (e) {
       print('❌ Folder 파싱 오류: $e\n원본 JSON: $json');
@@ -94,12 +121,14 @@ class Folder {
       'name': name,
       'color': color.value,
       'icon': icon.codePoint,
-      'starred': isStarred, // ✅ 여기도!
+      'starred': isStarred,
       'createdAt': createdAt.toIso8601String(),
       'imageUrl': imageUrl,
       'location': location,
       'startDate': startDate?.toIso8601String(),
       'endDate': endDate?.toIso8601String(),
+      'purpose': purpose?.value,
+      'aiGuide': aiGuide,
     };
   }
 }
