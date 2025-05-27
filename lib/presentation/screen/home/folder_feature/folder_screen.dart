@@ -237,12 +237,12 @@ class _FolderDetailScreenState extends State<FolderDetailScreen> {
               final memos = snapshot.data!;
 
               return SliverPadding(
-                padding: const EdgeInsets.all(16.0),
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
                 sliver: SliverGrid(
                   gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: _isGridView ? 2 : 1,
-                    crossAxisSpacing: 16,
-                    mainAxisSpacing: 16,
+                    crossAxisSpacing: 7,
+                    mainAxisSpacing: 7,
                     childAspectRatio: _isGridView ? 1 : 2.5,
                   ),
                   delegate: SliverChildBuilderDelegate(
@@ -293,91 +293,68 @@ class _FolderDetailScreenState extends State<FolderDetailScreen> {
                           );
                         },
                         child: Card(
-                          child: Stack(
-                            children: [
-                              Padding(
-                                padding: const EdgeInsets.all(12.0),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
+                          color: Colors.white,
+                          elevation: 4,
+                          shadowColor: Colors.black26,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.all(12.0),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                // ✅ 날짜 표시를 가장 위로 이동
+
+                                // 제목 + 별 아이콘
+                                Row(
+                                  crossAxisAlignment: CrossAxisAlignment.center,
                                   children: [
-                                    // 제목 + 별 아이콘 가로 배치
-                                    Row(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Expanded(
-                                          child: Text(
-                                            memo.title,
-                                            style: const TextStyle(
-                                                fontSize: 18,
-                                                fontWeight: FontWeight.bold),
-                                            overflow: TextOverflow.ellipsis,
-                                          ),
-                                        ),
-                                        Transform.translate(
-                                          // 별 버튼 위치 조정
-                                          offset: const Offset(10, -10),
-                                          child: IconButton(
-                                            icon: Icon(
-                                              memo.isStarred
-                                                  ? Icons.star
-                                                  : Icons.star_border,
-                                              color: memo.isStarred
-                                                  ? Colors.amber
-                                                  : Colors.grey,
-                                              size: 22,
-                                            ),
-                                            padding: EdgeInsets.zero,
-                                            // 여백 최소화
-                                            constraints: const BoxConstraints(),
-                                            // 공간 최소화
-                                            onPressed: () async {
-                                              try {
-                                                await _repo
-                                                    .toggleStarred(memo.id!);
-                                                _refresh(); // UI 갱신
-                                              } catch (e) {
-                                                ScaffoldMessenger.of(context)
-                                                    .showSnackBar(
-                                                  const SnackBar(
-                                                      content:
-                                                          Text('즐겨찾기 변경 실패')),
-                                                );
-                                              }
-                                            },
-                                          ),
-                                        ),
-                                      ],
+                                    Text(
+                                      DateFormat('MMM d').format(DateTime.parse(memo.updatedAt!)),
+                                      style: const TextStyle(fontSize: 18, color: Colors.blueAccent,),
                                     ),
-                                    const SizedBox(height: 8),
-                                    // 본문 텍스트
-                                    Expanded(
-                                      child: Text(
-                                        memo.content,
-                                        maxLines: 4,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: const TextStyle(fontSize: 14),
+                                    const Spacer(), // 👉 날짜와 별 버튼 사이 여백을 최대한 벌려줌
+                                    IconButton(
+                                      icon: Icon(
+                                        memo.isStarred ? Icons.star : Icons.star_border,
+                                        color: memo.isStarred ? Colors.amber : Colors.grey,
+                                        size: 20,
                                       ),
+                                      padding: EdgeInsets.zero,
+                                      constraints: const BoxConstraints(minWidth: 30, minHeight: 30),
+                                      onPressed: () async {
+                                        try {
+                                          await _repo.toggleStarred(memo.id!);
+                                          _refresh();
+                                        } catch (e) {
+                                          ScaffoldMessenger.of(context).showSnackBar(
+                                            const SnackBar(content: Text('즐겨찾기 변경 실패')),
+                                          );
+                                        }
+                                      },
                                     ),
-                                    const SizedBox(height: 24),
-                                    // 날짜 고정 위한 아래 공간 확보
                                   ],
                                 ),
-                              ),
-                              // ✅ 날짜를 카드 맨 아래에 고정
-                              Positioned(
-                                bottom: 8,
-                                left: 12,
-                                child: Text(
-                                  memo.updatedAt != null
-                                      ? DateFormat('yyyy.MM.dd').format(
-                                          DateTime.parse(memo.updatedAt!))
-                                      : '날짜 없음',
-                                  style: const TextStyle(
-                                      fontSize: 12, color: Colors.grey),
+                                Text(
+                                    memo.title,
+                                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                                    overflow: TextOverflow.ellipsis,
+                                    maxLines: 2,
+                                  ),
+
+                                SizedBox(height: 6.5),
+                                // 본문 텍스트
+                                Expanded(
+                                  child: Text(
+                                    memo.content,
+                                    maxLines: 3,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: const TextStyle(fontSize: 14),
+                                  ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
                         ),
                       );
