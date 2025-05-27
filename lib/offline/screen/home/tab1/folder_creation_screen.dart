@@ -280,7 +280,7 @@ class _NewFolderScreenState extends State<NewFolderScreen>
         physics: const NeverScrollableScrollPhysics(),
         children: _buildSteps().map((step) => Center(child: Padding(padding: const EdgeInsets.all(24.0), child: step))).toList(),
       ),
-      bottomNavigationBar: Padding(
+      bottomSheet: Padding(
         padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
         child: Row(
           children: [

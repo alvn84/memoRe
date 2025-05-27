@@ -96,4 +96,56 @@ class MemoRepository {
     }
     return response.statusCode == 200;
   }
+
+  Future<void> moveMemo(int memoId, int targetFolderId) async {
+    final token = await TokenStorage.getToken();
+    final response = await http.patch(
+      Uri.parse('$baseUrl/api/memos/$memoId/move'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+      body: jsonEncode({'targetFolderId': targetFolderId}),
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception('메모 이동 실패: ${response.statusCode}');
+    }
+  }
+
+  Future<List<Memo>> getAllMemos() async {
+    final token = await TokenStorage.getToken();
+    final response = await http.get(
+      Uri.parse('$baseUrl/api/memos/all'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      final List<dynamic> data = jsonDecode(response.body);
+      return data.map((json) => Memo.fromJson(json)).toList();
+    } else {
+      throw Exception('전체 메모 불러오기 실패: ${response.statusCode}');
+    }
+  }
+
+  Future<void> toggleStarred(int memoId) async {
+    final token = await TokenStorage.getToken();
+    final response = await http.patch(
+      Uri.parse('$baseUrl/api/memos/$memoId/star'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+    );
+    print('📥 [즐겨찾기 토글] 응답 코드: ${response.statusCode}');
+    print('📥 [즐겨찾기 토글] 응답 바디: ${response.body}');
+
+    if (response.statusCode != 200) {
+      print('❌ 즐겨찾기 토글 실패: ${response.statusCode}');
+      throw Exception('즐겨찾기 토글 실패');
+    }
+  }
 }

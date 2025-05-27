@@ -170,6 +170,13 @@ class _LoginFormState extends State<LoginForm> {
                   backgroundColor: Color(0xFF6495ED), // 배경색
                 ),
                 onPressed: _handleLogin,
+                /*onPressed: () {
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const OfflineScreen()),
+                  );
+                },*/
                 child: const Text(
                   'Sign In',
                   style: TextStyle(

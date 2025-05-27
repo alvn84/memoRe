@@ -1,0 +1,64 @@
+import 'package:flutter/material.dart';
+import 'package:memore/presentation/screen/home/memo/screen/ai/summary_tab.dart';
+import 'package:memore/presentation/screen/home/memo/screen/ai/translate_tab.dart';
+import 'package:memore/presentation/screen/home/memo/screen/ai/schedule_tab.dart';
+import 'package:memore/presentation/screen/home/memo/screen/ai/place_tab.dart';
+import 'package:memore/presentation/screen/home/memo/screen/ai/caption_tab.dart';
+import 'ai_repository.dart';
+
+class AiModalSheet extends StatelessWidget {
+  final String title;
+  final String content;
+
+  const AiModalSheet({
+    super.key,
+    required this.title,
+    required this.content,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return DefaultTabController(
+      length: 5,
+      child: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const TabBar(
+                labelColor: Color(0xFF6495ED),
+                unselectedLabelColor: Colors.black54,
+                tabs: [
+                  Tab(icon: Icon(Icons.summarize), text: '요약'),
+                  Tab(icon: Icon(Icons.translate), text: '번역'),
+                  Tab(icon: Icon(Icons.calendar_today), text: '일정'),
+                  Tab(icon: Icon(Icons.place), text: '장소'),
+                  Tab(
+                    icon: Icon(Icons.tag),
+                    child: (Text(
+                      '캡션',
+                      textAlign: TextAlign.center,
+                    )),
+                  ),
+                ],
+              ),
+              SizedBox(
+                height: 300, // 적당한 높이 설정
+                child: TabBarView(
+                  children: [
+                    SummaryTab(title: title, content: content),
+                    TranslateTab(title: title, content: content),
+                    ScheduleTab(title: title, content: content),
+                    PlaceTab(title: title, content: content),
+                    CaptionTab(title: title, content: content),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}

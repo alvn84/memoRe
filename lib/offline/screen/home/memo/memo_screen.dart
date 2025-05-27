@@ -1,9 +1,10 @@
+
+import 'dart:convert'; // 🔧 delta 저장/복원용
+import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 import 'package:flutter_quill/extensions.dart';
 import 'package:intl/intl.dart';
-import 'dart:convert';
-
 import 'memo_editor.dart';
 import 'memo_toolbar.dart';
 import 'memo_storage_helper.dart';
@@ -63,15 +64,18 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: const Color(0xFFFAFAFA),
-        title: const Text('AI Summary', style: TextStyle(fontWeight: FontWeight.bold)),
-        content: Text('New York City, also known as “The Big Apple,” is a vibrant global hub for finance, arts, and culture. \n\nFamous for landmarks like the Statue of Liberty, Times Square, and Central Park, it consists of five boroughs: Manhattan, Brooklyn, Queens, The Bronx, and Staten Island. \n\nKnown for its diversity, energy, and iconic attractions, NYC is often called “the city that never sleeps.”'),
+        title: const Text('AI Summary',
+            style: TextStyle(fontWeight: FontWeight.bold)),
+        content: Text(
+            'New York City, also known as “The Big Apple,” is a vibrant global hub for finance, arts, and culture. \n\nFamous for landmarks like the Statue of Liberty, Times Square, and Central Park, it consists of five boroughs: Manhattan, Brooklyn, Queens, The Bronx, and Staten Island. \n\nKnown for its diversity, energy, and iconic attractions, NYC is often called “the city that never sleeps.”'),
         //Text(summary.isNotEmpty ? summary : 'No content to summarize.'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
             child: const Text(
               'Add to Memo',
-              style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF6495ED)),
+              style: TextStyle(
+                  fontWeight: FontWeight.bold, color: Color(0xFF6495ED)),
             ),
           ),
           TextButton(

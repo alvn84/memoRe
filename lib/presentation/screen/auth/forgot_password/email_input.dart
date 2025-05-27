@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
 import 'reset_password.dart';
+import '../api_config.dart';
 
 class EmailInputScreen extends StatefulWidget {
   const EmailInputScreen({super.key});
@@ -43,7 +44,7 @@ class _EmailInputScreenState extends State<EmailInputScreen> {
 
     try {
       final response = await http.post(
-        Uri.parse('http://223.194.135.221:8080/api/password/forgot'),
+        Uri.parse('$baseUrl/api/password/forgot'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({'email': email}),
       );

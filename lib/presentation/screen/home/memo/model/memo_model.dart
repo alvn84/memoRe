@@ -3,14 +3,18 @@ class Memo {
   final String title;
   final String content;
   final String imageUrl;
-  final int? folderId; // ✅ 서버 연동용 folderId (정수)
+  final int? folderId; // 서버 연동용 folderId
+  final String? updatedAt;
+  final bool isStarred; // ⭐️ 즐겨찾기 여부
 
   Memo({
     this.id,
     required this.title,
     required this.content,
     required this.imageUrl,
-    this.folderId, // ✅ 변경됨
+    this.folderId,
+    this.updatedAt,
+    this.isStarred = false, // 기본값 false
   });
 
   factory Memo.fromJson(Map<String, dynamic> json) => Memo(
@@ -18,14 +22,17 @@ class Memo {
         title: json['title'] ?? '',
         content: json['content'] ?? '',
         imageUrl: json['imageUrl'] ?? '',
-        folderId: json['folderId'] ?? 0, // 서버 응답에 따라 조정
+        folderId: json['folderId'] ?? 0,
+        updatedAt: json['updatedAt'],
+        isStarred: json['starred'] ?? false, // 서버 필드명은 starred
       );
 
   Map<String, dynamic> toJson() => {
         'title': title,
         'content': content,
         'imageUrl': imageUrl,
-        'folderId': folderId, // ✅ 반드시 포함
+        'folderId': folderId,
+        'starred': isStarred,
       };
 
   Memo copyWith({
@@ -33,7 +40,9 @@ class Memo {
     String? title,
     String? content,
     String? imageUrl,
-    int? folderId, // ✅ 함께 복사 가능
+    int? folderId,
+    String? updatedAt,
+    bool? isStarred,
   }) {
     return Memo(
       id: id ?? this.id,
@@ -41,6 +50,8 @@ class Memo {
       content: content ?? this.content,
       imageUrl: imageUrl ?? this.imageUrl,
       folderId: folderId ?? this.folderId,
+      updatedAt: updatedAt ?? this.updatedAt,
+      isStarred: isStarred ?? this.isStarred,
     );
   }
 }
