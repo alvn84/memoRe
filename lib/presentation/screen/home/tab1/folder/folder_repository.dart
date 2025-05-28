@@ -21,10 +21,6 @@ class FolderRepository {
     if (response.statusCode == 200) {
       final List<dynamic> data = jsonDecode(response.body);
 
-      for (final json in data) {
-        print('📥 서버에서 받은 폴더 JSON: $json');
-      }
-
       List<Folder> folders = data.map((json) => Folder.fromJson(json)).toList();
 
       final hasDefault = folders.any((f) => f.name == 'Default');
