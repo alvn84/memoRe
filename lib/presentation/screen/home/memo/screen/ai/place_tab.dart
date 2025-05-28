@@ -22,7 +22,7 @@ class PlaceTab extends StatefulWidget {
 
 class _PlaceTabState extends State<PlaceTab> {
   GoogleMapController? _mapController;
-  static const LatLng _defaultLatLng = LatLng(35.6895, 139.6917);
+  LatLng? _initialPosition;
   final _gestureRecognizers = <Factory<OneSequenceGestureRecognizer>>{
     Factory(() => EagerGestureRecognizer()),
   };
@@ -30,6 +30,33 @@ class _PlaceTabState extends State<PlaceTab> {
   Set<Marker> _markers = {};
   List<MapPlace> _places = [];
   bool _isLoading = true;
+
+  Future<void> _determineInitialPosition() async {
+    bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      print('❌ 위치 서비스 꺼져 있음');
+      return;
+    }
+
+    LocationPermission permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        print('❌ 위치 권한 거부됨');
+        return;
+      }
+    }
+
+    if (permission == LocationPermission.deniedForever) {
+      print('❌ 위치 권한 영구 거부됨');
+      return;
+    }
+
+    final position = await Geolocator.getCurrentPosition();
+    setState(() {
+      _initialPosition = LatLng(position.latitude, position.longitude);
+    });
+  }
 
   Future<void> _getCurrentLocationAndMoveMap() async {
     bool serviceEnabled;
@@ -70,8 +97,8 @@ class _PlaceTabState extends State<PlaceTab> {
   @override
   void initState() {
     super.initState();
+    _determineInitialPosition();
     _loadPlaces();
-    _getCurrentLocationAndMoveMap();  // ✅ initState에서도 호출!
   }
 
   void _loadPlaces() async {
@@ -104,59 +131,59 @@ class _PlaceTabState extends State<PlaceTab> {
 
   @override
   Widget build(BuildContext context) {
-    return _isLoading
-        ? const Center(child: CircularProgressIndicator())
-        : SingleChildScrollView(
-            // 🔑 이렇게 감싸줘야 전체 시트가 스크롤 이벤트를 인식
-            child: Column(
-              children: [
-                SizedBox(
-                  height: 250, // 적당히 고정된 지도 높이
-                  child: GoogleMap(
-                    myLocationEnabled: true,
-                    // ✅ 사용자 위치 표시
-                    myLocationButtonEnabled: true,
-                    // ✅ 기본 위치 버튼 표시 (우측 하단)
-                    initialCameraPosition: const CameraPosition(
-                      target: _defaultLatLng,
-                      zoom: 12,
-                    ),
-                    onMapCreated: (controller) {
-                      _mapController = controller;
-                      _getCurrentLocationAndMoveMap(); // 👈 여기서 호출
-                    },
-                    gestureRecognizers: _gestureRecognizers,
-                    markers: _markers,
-                  ),
-                ),
-                const SizedBox(height: 16), // 간격
-                if (_places.isEmpty)
-                  const Padding(
-                    padding: EdgeInsets.all(16.0),
-                    child: Center(child: Text('📍 추출된 장소가 없습니다.')),
-                  )
-                else
-                  ListView.builder(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemCount: _places.length,
-                    itemBuilder: (context, index) {
-                      final place = _places[index];
-                      return ListTile(
-                        leading: const Icon(Icons.place),
-                        title: Text(place.name),
-                        onTap: () {
-                          // ✅ 마커 위치로 부드럽게 카메라 이동
-                          _mapController?.animateCamera(
-                            CameraUpdate.newLatLng(
-                                LatLng(place.lat, place.lng)),
-                          );
-                        },
-                      );
-                    },
-                  )
-              ],
+    if (_initialPosition == null) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    return SingleChildScrollView(
+      // 🔑 이렇게 감싸줘야 전체 시트가 스크롤 이벤트를 인식
+      child: Column(
+        children: [
+          SizedBox(
+            height: 250, // 적당히 고정된 지도 높이
+            child: GoogleMap(
+              myLocationEnabled: true,
+              // ✅ 사용자 위치 표시
+              myLocationButtonEnabled: true,
+              // ✅ 기본 위치 버튼 표시 (우측 하단)
+              initialCameraPosition: CameraPosition(
+                target: _initialPosition!,
+                zoom: 12,
+              ),
+              onMapCreated: (controller) {
+                _mapController = controller;
+                _getCurrentLocationAndMoveMap(); // 👈 여기서 호출
+              },
+              gestureRecognizers: _gestureRecognizers,
+              markers: _markers,
             ),
-          );
+          ),
+          const SizedBox(height: 16), // 간격
+          if (_places.isEmpty)
+            const Padding(
+              padding: EdgeInsets.all(16.0),
+              child: Center(child: Text('📍 추출된 장소가 없습니다.')),
+            )
+          else
+            ListView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: _places.length,
+              itemBuilder: (context, index) {
+                final place = _places[index];
+                return ListTile(
+                  leading: const Icon(Icons.place),
+                  title: Text(place.name),
+                  onTap: () {
+                    // ✅ 마커 위치로 부드럽게 카메라 이동
+                    _mapController?.animateCamera(
+                      CameraUpdate.newLatLng(LatLng(place.lat, place.lng)),
+                    );
+                  },
+                );
+              },
+            )
+        ],
+      ),
+    );
   }
 }
