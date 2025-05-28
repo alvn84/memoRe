@@ -66,7 +66,7 @@ class _SummaryTabState extends State<SummaryTab> {
           if (_isLoading)
             const Center(child: CircularProgressIndicator())
           else if (_summary.isNotEmpty)
-            Text(_summary, style: const TextStyle(fontSize: 14))
+            SelectableText(_summary, style: const TextStyle(fontSize: 14))
           else
             const Text('(요약 결과 없음)',
                 style: TextStyle(fontSize: 14, color: Colors.black87)),

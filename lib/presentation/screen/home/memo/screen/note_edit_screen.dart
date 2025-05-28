@@ -36,6 +36,7 @@ class NoteEditScreen extends StatefulWidget {
 
 class _NoteEditScreenState extends State<NoteEditScreen> {
   final TextEditingController _titleController = TextEditingController();
+  final FocusNode _editorFocusNode = FocusNode(); // ✅ 추가
   late QuillController _quillController;
   final _repo = MemoRepository();
   late DateTime _selectedDate = DateTime.now();
@@ -55,6 +56,11 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
     } else {
       _quillController = QuillController.basic();
     }
+  }
+  @override
+  void dispose() {
+    _editorFocusNode.dispose(); // ✅ 누수 방지
+    super.dispose();
   }
 
   Future<void> _insertImage() async {
@@ -234,22 +240,46 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
                         showModalBottomSheet(
                           context: context,
                           isScrollControlled: true,
-                          shape: const RoundedRectangleBorder(
-                            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-                          ),
-                          builder: (context) => AiModalSheet(
-                            key: UniqueKey(), // ✅ 매번 새로 마운트되도록
-                            title: _titleController.text,
-                            content: _quillController.document.toPlainText(), // ✅ 최신 메모 내용 전달
-                            onApplyTranslation: (translatedText) {
-                              setState(() {
-                                _quillController = QuillController(
-                                  document: Document()..insert(0, translatedText),
-                                  selection: const TextSelection.collapsed(offset: 0),
+                          backgroundColor: Colors.transparent, // 배경 투명하게
+                          builder: (context) {
+                            return DraggableScrollableSheet(
+                              initialChildSize: 0.5,
+                              // 시트가 처음 차지하는 화면 비율 (50%)
+                              minChildSize: 0.3,
+                              maxChildSize: 0.95,
+                              // 최대 확장 가능 비율
+                              expand: false,
+                              builder: (context, scrollController) {
+                                return Container(
+                                  decoration: const BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.vertical(
+                                        top: Radius.circular(20)),
+                                  ),
+                                  child: SingleChildScrollView(
+                                    controller: scrollController,
+                                    child: AiModalSheet(
+                                      key: UniqueKey(),
+                                      title: _titleController.text,
+                                      content: _quillController.document
+                                          .toPlainText(),
+                                      onApplyTranslation: (translatedText) {
+                                        setState(() {
+                                          _quillController = QuillController(
+                                            document: Document()
+                                              ..insert(0, translatedText),
+                                            selection:
+                                                const TextSelection.collapsed(
+                                                    offset: 0),
+                                          );
+                                        });
+                                      },
+                                    ),
+                                  ),
                                 );
-                              });
-                            },
-                          ),
+                              },
+                            );
+                          },
                         );
                       },
                       child:

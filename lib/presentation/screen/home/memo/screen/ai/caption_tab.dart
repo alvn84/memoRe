@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'ai_repository.dart'; // generateCaption 함수 불러오기
 
-class CaptionTab extends StatelessWidget {
+class CaptionTab extends StatefulWidget {
   final String? title;
   final String? content;
 
@@ -11,8 +12,39 @@ class CaptionTab extends StatelessWidget {
   });
 
   @override
+  State<CaptionTab> createState() => _CaptionTabState();
+}
+
+class _CaptionTabState extends State<CaptionTab> {
+  String _caption = '';
+  bool _isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _generateCaption();
+  }
+
+  Future<void> _generateCaption() async {
+    setState(() => _isLoading = true);
+
+    try {
+      final result = await generateCaption(
+        widget.title ?? '',
+        widget.content ?? '',
+      );
+      setState(() => _caption = result);
+    } catch (e) {
+      setState(() => _caption = '❌ 캡션 생성 실패: $e');
+    } finally {
+      setState(() => _isLoading = false);
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return SingleChildScrollView( // 긴 텍스트 대비 스크롤 가능하게
+      padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -20,33 +52,20 @@ class CaptionTab extends StatelessWidget {
             '🏷️ 메모리 캡션 및 해시태그 추천',
             style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
-          const SizedBox(height: 16),
-          Text(
-            '제목: $title',
-            style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
-          ),
-          const SizedBox(height: 12),
-          Text(
-            (content?.isEmpty ?? true) ? '(내용 없음)' : content!,
-            style: const TextStyle(fontSize: 14, color: Colors.black87),
-          ),
+
           const SizedBox(height: 20),
-          Center(
-            child: ElevatedButton.icon(
-              onPressed: () {
-                // TODO: 요약 기능 실행
-              },
-              icon: const Icon(Icons.auto_fix_high),
-              label: const Text('요약하기'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF6495ED),
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
+          if (_isLoading)
+            const Center(child: CircularProgressIndicator())
+          else if (_caption.isNotEmpty)
+            SelectableText(
+              _caption,
+              style: const TextStyle(fontSize: 14, color: Colors.blueGrey),
+            )
+          else
+            const Text(
+              '(캡션 결과 없음)',
+              style: TextStyle(fontSize: 14, color: Colors.black54),
             ),
-          ),
         ],
       ),
     );

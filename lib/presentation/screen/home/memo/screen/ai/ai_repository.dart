@@ -40,10 +40,6 @@ Future<String> summarizeText(String title, String content) async {
     'content': content,
   };
 
-  print('📤 요약 요청 보냄:');
-  print('📌 제목: $title');
-  print('📝 내용: $content');
-
   try {
     final response = await http.post(
       Uri.parse(apiUrl),
@@ -54,8 +50,6 @@ Future<String> summarizeText(String title, String content) async {
       body: jsonEncode(requestBody),
     );
 
-    print('📥 서버 응답 코드: ${response.statusCode}');
-    print('📥 서버 응답 바디: ${response.body}');
     if (response.statusCode == 200) {
       return response.body.trim();
     } else {
@@ -66,3 +60,70 @@ Future<String> summarizeText(String title, String content) async {
   }
 }
 
+Future<String> generateCaption(String title, String content) async {
+  const apiUrl = '$baseUrl/api/openai/caption';
+  final requestBody = {
+    'title': title,
+    'content': content,
+  };
+
+  try {
+    final response = await http.post(
+      Uri.parse(apiUrl),
+      headers: {
+        'Content-Type': 'application/json',
+        // 토큰 없이 서버에서 OpenAI 처리 (필요 시 추가)
+      },
+      body: jsonEncode(requestBody),
+    );
+
+    if (response.statusCode == 200) {
+      return response.body.trim();
+    } else {
+      return '캡션 생성 실패: ${response.statusCode}';
+    }
+  } catch (e) {
+    return '캡션 예외 발생: $e';
+  }
+}
+
+class MapPlace {
+  final String name;
+  final double lat;
+  final double lng;
+
+  MapPlace({required this.name, required this.lat, required this.lng});
+
+  factory MapPlace.fromJson(Map<String, dynamic> json) {
+    return MapPlace(
+      name: json['name'],
+      lat: json['lat'],
+      lng: json['lng'],
+    );
+  }
+}
+
+Future<List<MapPlace>> extractMapPlaces(String memoText) async {
+  final token = await TokenStorage.getToken();
+  final url = Uri.parse('$baseUrl/api/maps');
+
+  final response = await http.post(
+    url,
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer $token',
+    },
+    body: jsonEncode({
+      'memoText': memoText, // ✅ memoId 제거
+    }),
+  );
+
+  if (response.statusCode == 200) {
+    final json = jsonDecode(response.body);
+    final List places = json['places'] ?? [];
+
+    return places.map((place) => MapPlace.fromJson(place)).toList();
+  } else {
+    throw Exception('장소 추출 실패: ${response.statusCode}');
+  }
+}

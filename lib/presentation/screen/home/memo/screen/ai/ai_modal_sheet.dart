@@ -46,7 +46,7 @@ class AiModalSheet extends StatelessWidget {
                 ],
               ),
               SizedBox(
-                height: 300, // 적당한 높이 설정
+                height: MediaQuery.of(context).size.height * 0.7, // ✅ 70% 화면 높이
                 child: TabBarView(
                   children: [
                     SummaryTab(title: title, content: content),

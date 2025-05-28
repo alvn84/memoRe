@@ -64,20 +64,39 @@ class _TranslateTabState extends State<TranslateTab> {
           if (_isLoading)
             const Center(child: CircularProgressIndicator())
           else if (_translated.isNotEmpty) ...[
-            Text(
+            SelectableText(
               _translated,
               style: const TextStyle(fontSize: 14),
             ),
             const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () {
-                if (widget.onApplyTranslation != null) {
-                  widget.onApplyTranslation!(_translated); // 콜백 호출
-                  Navigator.pop(context); // 창 닫기
-                }
-              },
-              child: const Text('텍스트 대치하기'),
-            ),
+            Center(
+              child: ElevatedButton(
+                onPressed: () {
+                  if (widget.onApplyTranslation != null) {
+                    widget.onApplyTranslation!(_translated);
+                    Navigator.pop(context);
+                  }
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.white, // 좀 더 세련된 블루
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+                  elevation: 10, // 그림자 강조
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16), // 둥글게
+                  ),
+                  shadowColor: Colors.black.withOpacity(0.2),
+                ),
+                child: const Text(
+                  'Replace Text',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 0.5,
+                    color: Color(0xFF4A90E2),
+                  ),
+                ),
+              ),
+            )
           ] else
             const Text(
               '(번역 결과 없음)',
