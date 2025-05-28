@@ -21,7 +21,7 @@ class AiModalSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
-      length: 5,
+      length: 4,
       child: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
@@ -34,7 +34,7 @@ class AiModalSheet extends StatelessWidget {
                 tabs: [
                   Tab(icon: Icon(Icons.summarize), text: '요약'),
                   Tab(icon: Icon(Icons.translate), text: '번역'),
-                  Tab(icon: Icon(Icons.calendar_today), text: '일정'),
+                  /*Tab(icon: Icon(Icons.calendar_today), text: '일정'),*/
                   Tab(icon: Icon(Icons.place), text: '장소'),
                   Tab(
                     icon: Icon(Icons.tag),
@@ -46,7 +46,7 @@ class AiModalSheet extends StatelessWidget {
                 ],
               ),
               SizedBox(
-                height: MediaQuery.of(context).size.height * 0.7, // ✅ 70% 화면 높이
+                height: MediaQuery.of(context).size.height * 0.8, // ✅ 70% 화면 높이
                 child: TabBarView(
                   children: [
                     SummaryTab(title: title, content: content),
@@ -55,7 +55,7 @@ class AiModalSheet extends StatelessWidget {
                       content: content,
                       onApplyTranslation: onApplyTranslation, // ✅ 이 줄 추가
                     ),
-                    ScheduleTab(title: title, content: content),
+                    /*ScheduleTab(title: title, content: content),*/
                     PlaceTab(title: title, content: content),
                     CaptionTab(title: title, content: content),
                   ],

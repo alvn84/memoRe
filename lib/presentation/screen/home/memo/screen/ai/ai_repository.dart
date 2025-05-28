@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:html_unescape/html_unescape.dart';
 import 'package:http/http.dart' as http;
 import 'package:memore/presentation/screen/auth/api_config.dart';
 import 'package:memore/presentation/screen/auth/token_storage.dart';
@@ -27,7 +28,12 @@ Future<String> translateText(String text) async {
 
   if (response.statusCode == 200) {
     final json = jsonDecode(response.body);
-    return json['translatedText'] ?? '번역 결과 없음';
+    final rawText = json['translatedText'] ?? '번역 결과 없음';
+
+    // ✅ HTML 엔티티 디코딩
+    final unescaped = HtmlUnescape().convert(rawText);
+
+    return unescaped;
   } else {
     return '번역 실패: ${response.statusCode}';
   }
