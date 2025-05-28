@@ -1,13 +1,7 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'dart:convert';
 import '../../../../auth/token_storage.dart';
 import '../../../../auth/api_config.dart';
-
-
-
+import 'ai_repository.dart'; // ✅ 요약 로직 사용
 
 class SummaryTab extends StatefulWidget {
   final String? title;
@@ -30,41 +24,30 @@ class _SummaryTabState extends State<SummaryTab> {
   @override
   void initState() {
     super.initState();
-    _summarize(); // 자동 실행
+    _summarize();
+  }
+
+  @override
+  void didUpdateWidget(covariant SummaryTab oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    if (widget.title != oldWidget.title ||
+        widget.content != oldWidget.content) {
+      _summarize(); // ✅ 내용이 바뀌면 요약 다시 실행
+    }
   }
 
   Future<void> _summarize() async {
     setState(() => _isLoading = true);
 
-    const apiUrl = '$baseUrl/api/openai/summarize'; // 👉 서버 주소로 변경
-    final requestBody = {
-      'title': widget.title,
-      'content': widget.content,
-    };
-
     try {
-      final response = await http.post(
-        Uri.parse(apiUrl),
-        headers: {
-          'Content-Type': 'application/json',
-          // OpenAI API 키는 프론트에서 보내지 않음 ❌ 서버가 내부적으로 처리
-        },
-        body: jsonEncode(requestBody),
+      final result = await summarizeText(
+        widget.title ?? '',
+        widget.content ?? '',
       );
-
-      if (response.statusCode == 200) {
-        setState(() {
-          _summary = response.body.trim();
-        });
-      } else {
-        setState(() {
-          _summary = '❌ 오류: ${response.statusCode}';
-        });
-      }
+      setState(() => _summary = result);
     } catch (e) {
-      setState(() {
-        _summary = '❌ 예외 발생: $e';
-      });
+      setState(() => _summary = '❌ 요약 실패: $e');
     } finally {
       setState(() => _isLoading = false);
     }
@@ -77,23 +60,16 @@ class _SummaryTabState extends State<SummaryTab> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            '📝 메모리 요약',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-          ),
+          const Text('📝 메모리 요약',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
           const SizedBox(height: 16),
           if (_isLoading)
             const Center(child: CircularProgressIndicator())
           else if (_summary.isNotEmpty)
-            Text(
-              _summary,
-              style: const TextStyle(fontSize: 14),
-            )
+            Text(_summary, style: const TextStyle(fontSize: 14))
           else
-            const Text(
-              '(요약 결과 없음)',
-              style: TextStyle(fontSize: 14, color: Colors.black87),
-            ),
+            const Text('(요약 결과 없음)',
+                style: TextStyle(fontSize: 14, color: Colors.black87)),
         ],
       ),
     );

@@ -10,12 +10,14 @@ class FolderTile extends StatelessWidget {
   final Folder folder;
   final VoidCallback? onTap;
   final VoidCallback? onLongPress;
+  final bool isFavoriteMode; // ⭐️ 추가
 
   const FolderTile({
     super.key,
     required this.folder,
     this.onTap,
     this.onLongPress,
+    this.isFavoriteMode = false,
   });
 
   @override
@@ -33,100 +35,96 @@ class FolderTile extends StatelessWidget {
         elevation: 4,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
         clipBehavior: Clip.antiAlias,
-        child: Stack(
-          children: [
-            // 배경 이미지
-            Container(
-              width: double.infinity,
-              height: 220,
-              decoration: BoxDecoration(
-                color: folder.color,
-                image: (folder.imageUrl != null &&
-                        folder.imageUrl != "null" &&
-                        folder.imageUrl!.isNotEmpty)
-                    ? DecorationImage(
-                        image: folder.imageUrl!.startsWith('http')
-                            ? NetworkImage(folder.imageUrl!) // ✅ 서버 이미지 처리 추가
-                            : folder.imageUrl!.startsWith('assets/')
-                                ? AssetImage(folder.imageUrl!) as ImageProvider
-                                : FileImage(
-                                    File(folder.imageUrl!)), // 기존 로컬 파일 처리 유지
-                        fit: BoxFit.cover,
-                        onError: (error, stackTrace) {
-                          print('❌ 이미지 로딩 실패: $error');
-                        },
-                      )
-                    : null,
-              ),
-            ),
-            // ✅ 즐겨찾기 아이콘 (오른쪽 상단에 조건부 표시)
-            if (folder.isStarred)
-              const Positioned(
-                top: 8,
-                right: 8,
-                child: Icon(
-                  Icons.star,
-                  color: Colors.amber,
-                  size: 28,
-                ),
-              ),
-            // 반투명 텍스트 배경 + 이름 표시
-            Positioned(
-              left: 0,
-              right: 0,
-              bottom: 0,
-              child: Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      Colors.black.withOpacity(0.5),
-                      Colors.transparent,
-                    ],
-                    begin: Alignment.bottomCenter,
-                    end: Alignment.topCenter,
+        child: Container(
+          height: isFavoriteMode ? 120 : 220,
+          width: double.infinity,
+          decoration: BoxDecoration(
+            color: folder.color,
+            image: (folder.imageUrl != null &&
+                    folder.imageUrl != "null" &&
+                    folder.imageUrl!.isNotEmpty)
+                ? DecorationImage(
+                    image: folder.imageUrl!.startsWith('http')
+                        ? NetworkImage(folder.imageUrl!)
+                        : folder.imageUrl!.startsWith('assets/')
+                            ? AssetImage(folder.imageUrl!) as ImageProvider
+                            : FileImage(File(folder.imageUrl!)),
+                    fit: BoxFit.cover,
+                  )
+                : null,
+          ),
+          child: Stack(
+            children: [
+              // 배경 이미지
+              // ✅ 즐겨찾기 아이콘 (오른쪽 상단에 조건부 표시)
+              if (isFavoriteMode || folder.isStarred)
+                const Positioned(
+                  top: 8,
+                  right: 8,
+                  child: Icon(
+                    Icons.star,
+                    color: Colors.amber,
+                    size: 28,
                   ),
                 ),
-                alignment: Alignment.bottomLeft,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      folder.name,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 22,
-                        fontWeight: FontWeight.bold,
-                        shadows: [
-                          Shadow(
-                            offset: Offset(1, 1),
-                            blurRadius: 2,
-                            color: Colors.black38,
-                          ),
-                        ],
+              // 반투명 텍스트 배경 + 이름 표시
+              Positioned(
+                left: 0,
+                right: 0,
+                bottom: 0,
+                child: Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        Colors.black.withOpacity(0.5),
+                        Colors.transparent,
+                      ],
+                      begin: Alignment.bottomCenter,
+                      end: Alignment.topCenter,
+                    ),
+                  ),
+                  alignment: Alignment.bottomLeft,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        folder.name,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                          shadows: [
+                            Shadow(
+                              offset: Offset(1, 1),
+                              blurRadius: 2,
+                              color: Colors.black38,
+                            ),
+                          ],
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    Text(
-                      locationText,
-                      style:
-                          const TextStyle(color: Colors.white70, fontSize: 14),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    Text(
-                      dateText,
-                      style:
-                          const TextStyle(color: Colors.white70, fontSize: 12),
-                    ),
-                  ],
+                      Text(
+                        locationText,
+                        style: const TextStyle(
+                            color: Colors.white70, fontSize: 14),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      Text(
+                        dateText,
+                        style: const TextStyle(
+                            color: Colors.white70, fontSize: 12),
+                      ),
+                    ],
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

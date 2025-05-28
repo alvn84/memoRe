@@ -1,40 +1,68 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import '../../../../auth/token_storage.dart';
-import '../../../../auth/api_config.dart';
+import 'package:memore/presentation/screen/auth/api_config.dart';
+import 'package:memore/presentation/screen/auth/token_storage.dart';
 
-// 메모 번역
-Future<String> translateText(String inputText, String targetLang) async {
-  final token = await TokenStorage.getToken(); // 로그인 기반 인증 사용 시
+Future<String> translateText(String text) async {
+  if (text.trim().isEmpty) return '번역할 텍스트 없음';
+
+  // 언어 감지: 한글이면 영어로, 영어면 한글로
+  final isKorean = RegExp(r'[가-힣]').hasMatch(text);
+  final targetLang = isKorean ? 'en' : 'ko';
+
+  final token = await TokenStorage.getToken();
   final url = Uri.parse('$baseUrl/api/translate');
 
-  print('📤 번역 요청 텍스트: $inputText');
-  print('📤 요청 URL: $url');
+  final response = await http.post(
+    url,
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer $token',
+    },
+    body: jsonEncode({
+      'text': text,
+      'targetLanguage': targetLang,
+    }),
+  );
 
+  if (response.statusCode == 200) {
+    final json = jsonDecode(response.body);
+    return json['translatedText'] ?? '번역 결과 없음';
+  } else {
+    return '번역 실패: ${response.statusCode}';
+  }
+}
+
+Future<String> summarizeText(String title, String content) async {
+  const apiUrl = '$baseUrl/api/openai/summarize';
+  final requestBody = {
+    'title': title,
+    'content': content,
+  };
+
+  print('📤 요약 요청 보냄:');
+  print('📌 제목: $title');
+  print('📝 내용: $content');
 
   try {
     final response = await http.post(
-      url,
+      Uri.parse(apiUrl),
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': 'Bearer $token', // 필요 없으면 제거 가능
+        // 토큰 없이 서버에서 OpenAI 처리
       },
-      body: jsonEncode({
-        'text': inputText,
-        'targetLanguage': targetLang,
-      }),
+      body: jsonEncode(requestBody),
     );
 
-    print('📥 응답 코드: ${response.statusCode}');
-    print('📥 응답 바디: ${response.body}');
-
+    print('📥 서버 응답 코드: ${response.statusCode}');
+    print('📥 서버 응답 바디: ${response.body}');
     if (response.statusCode == 200) {
-      final json = jsonDecode(response.body);
-      return json['translatedText'] ?? '번역 결과 없음';
+      return response.body.trim();
     } else {
-      return '번역 실패: ${response.statusCode}';
+      return '요약 실패: ${response.statusCode}';
     }
   } catch (e) {
-    return '서버 오류: $e';
+    return '요약 예외 발생: $e';
   }
 }
+

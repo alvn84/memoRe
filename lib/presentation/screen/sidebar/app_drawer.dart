@@ -6,13 +6,14 @@ import 'package:memore/presentation/screen/sidebar/trash/trash_screen.dart';
 import 'package:memore/presentation/screen/sidebar/friend/friend_screen.dart';
 import 'package:memore/presentation/screen/sidebar/setting/setting_screen.dart';
 import 'package:memore/presentation/screen/sidebar/shared/shared_screen.dart';
+
 class AppDrawer extends StatelessWidget {
   const AppDrawer({super.key});
 
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: MediaQuery.of(context).size.width * 0.8,  // 화면의 70% 너비
+      width: MediaQuery.of(context).size.width * 0.8, // 화면의 70% 너비
       child: Drawer(
         backgroundColor: Color(0xFFFAFAFA),
         child: Column(
@@ -24,56 +25,42 @@ class AppDrawer extends StatelessWidget {
             // 메뉴 리스트
             ListTile(
               leading: const Icon(Icons.auto_awesome, color: Color(0xFF6495ED)),
-              title: const Text('Favorites',style:TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+              title: const Text('Favorites',
+                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
               onTap: () {
                 Navigator.pop(context); // 드로어 닫고
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const FavoriteScreen()),
+                  MaterialPageRoute(
+                      builder: (context) => const FavoriteScreen()),
                 );
               },
             ),
-            ListTile(
-              leading: const Icon(Icons.group, color: Color(0xFF6495ED)),
-              title: const Text('Friends', style:TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const FriendScreen()),
-                );
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.share, color: Color(0xFF6495ED)),
-              title: const Text('Shared',style:TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const SharedScreen()),
-                );
-              },
-            ),
+
             ListTile(
               leading: const Icon(Icons.delete, color: Color(0xFF6495ED)),
-              title: const Text('Trash',style:TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+              title: const Text('Trash',
+                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
               onTap: () {
                 Navigator.pop(context);
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const TrashScreen()), // TrashScreen으로 이동
+                  MaterialPageRoute(
+                      builder: (context) =>
+                          const TrashScreen()), // TrashScreen으로 이동
                 );
               },
             ),
             ListTile(
               leading: const Icon(Icons.settings, color: Color(0xFF6495ED)),
-              title: const Text('Settings',style:TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+              title: const Text('Settings',
+                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
               onTap: () {
                 Navigator.pop(context);
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const SettingScreen()),
+                  MaterialPageRoute(
+                      builder: (context) => const SettingScreen()),
                 );
               },
             ),
@@ -83,9 +70,10 @@ class AppDrawer extends StatelessWidget {
             // 하단 영역
             Padding(
               padding:
-              const EdgeInsets.only(left: 16.0, right: 16.0, bottom: 16.0),
+                  const EdgeInsets.only(left: 16.0, right: 16.0, bottom: 16.0),
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween, // 👈 좌우 끝으로 배치
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                // 👈 좌우 끝으로 배치
                 children: [
                   const Text(
                     '© 2025 Memo:Re\n당신의 여행을 기록합니다.',

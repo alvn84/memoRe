@@ -162,7 +162,9 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
       appBar: AppBar(
         title: InkWell(
           onTap: _pickDate,
-          child: Text(_formattedDate(), style: const TextStyle(color: Colors.black87, fontWeight: FontWeight.bold)),
+          child: Text(_formattedDate(),
+              style: const TextStyle(
+                  color: Colors.black87, fontWeight: FontWeight.bold)),
         ),
         centerTitle: true,
         backgroundColor: Colors.transparent,
@@ -175,7 +177,6 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
               _quillController.undo();
               FocusScope.of(context).unfocus(); // 🔧 undo 후 키보드 강제 해제
             },
-
           ),
           IconButton(
             icon: const Icon(Icons.redo, color: Colors.black87),
@@ -237,8 +238,17 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
                             borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
                           ),
                           builder: (context) => AiModalSheet(
-                            title: title,
-                            content: content,
+                            key: UniqueKey(), // ✅ 매번 새로 마운트되도록
+                            title: _titleController.text,
+                            content: _quillController.document.toPlainText(), // ✅ 최신 메모 내용 전달
+                            onApplyTranslation: (translatedText) {
+                              setState(() {
+                                _quillController = QuillController(
+                                  document: Document()..insert(0, translatedText),
+                                  selection: const TextSelection.collapsed(offset: 0),
+                                );
+                              });
+                            },
                           ),
                         );
                       },

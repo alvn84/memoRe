@@ -182,4 +182,10 @@ class FolderRepository {
       throw Exception('즐겨찾기 토글 실패');
     }
   }
+
+  static Future<List<Folder>> loadStarredFolders() async {
+    final allFolders = await loadFolders(); // 기존 메서드 재사용
+    return allFolders.where((f) => f.isStarred).toList();
+  }
+
 }

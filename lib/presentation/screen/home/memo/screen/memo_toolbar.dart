@@ -11,7 +11,7 @@ class MemoToolbar extends StatelessWidget {
   const MemoToolbar({super.key, required this.controller});
 
   // 메모 번역 임시 함수
-  void _translateMemo(BuildContext context) async {
+  /*void _translateMemo(BuildContext context) async {
     final plainText = controller.document.toPlainText(); // Quill 텍스트 가져오기
     final result = await translateText(plainText, 'en'); // 실제 번역 실행
 
@@ -48,7 +48,7 @@ class MemoToolbar extends StatelessWidget {
         ],
       ),
     );
-  }
+  }*/
 
   @override
   Widget build(BuildContext context) {

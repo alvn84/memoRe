@@ -1,61 +1,68 @@
 import 'package:flutter/material.dart';
+import '../../home/tab1/folder/folder_grid.dart';
+import '../../home/tab1/folder/folder_repository.dart';
+import '../../home/folder_feature/folder_model.dart';
+import '../../home/folder_feature/folder_screen.dart';
 
-class FavoriteScreen extends StatelessWidget {
+class FavoriteScreen extends StatefulWidget {
   const FavoriteScreen({super.key});
 
-  final List<String> folderList = const [
-    '여행 메모',
-    '업무 기록',
-    '일상 노트',
-  ];
+  @override
+  State<FavoriteScreen> createState() => _FavoriteScreenState();
+}
 
-  final List<Map<String, String>> memoList = const [
-    {
-      'title': '제주도 여행 준비물',
-      'date': '2025.04.10',
-    },
-    {
-      'title': '회의록 - 서비스 기획',
-      'date': '2025.04.08',
-    },
-    {
-      'title': '맛집 리스트',
-      'date': '2025.04.01',
-    },
-  ];
+class _FavoriteScreenState extends State<FavoriteScreen> {
+  List<Folder> favoriteFolders = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadFavoriteFolders();
+  }
+
+  Future<void> _loadFavoriteFolders() async {
+    try {
+      final allFolders = await FolderRepository.loadFolders(); // 📡 전체 폴더 불러오기
+      final starred =
+          allFolders.where((f) => f.isStarred == true).toList(); // ⭐️ 즐겨찾기 필터링
+      setState(() {
+        favoriteFolders = starred;
+      });
+    } catch (e) {
+      print('❌ 즐겨찾기 폴더 로딩 실패: $e');
+    }
+  }
+
+  void _onTapFolder(Folder folder) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => FolderDetailScreen(
+          folder: folder,
+          folders:
+              favoriteFolders, // 👉 또는 전체 folders 리스트가 필요한 경우 loadFolders() 결과 전체 전달
+        ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('즐겨찾기'),
-        backgroundColor: Colors.transparent, // 배경 투명
+        backgroundColor: Colors.transparent,
       ),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          const Text(
-            '폴더',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 8),
-          ...folderList.map((folder) => ListTile(
-            leading: const Icon(Icons.folder, color: Color(0xFFB0E0E6)),
-            title: Text(folder),
-          )),
-          const Divider(height: 32),
-          const Text(
-            '메모',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 8),
-          ...memoList.map((memo) => ListTile(
-            leading: const Icon(Icons.note, color: Color(0xFF6495ED)),
-            title: Text(memo['title']!),
-            subtitle: Text('${memo['date']}'),
-          )),
-        ],
-      ),
+      body: favoriteFolders.isEmpty
+          ? const Center(child: Text('즐겨찾기된 폴더가 없습니다.'))
+          : FolderGrid(
+              folders: favoriteFolders,
+              filteredFolders: favoriteFolders,
+              onTapFolder: _onTapFolder,
+              onLongPressFolder: (_) {},
+              // 롱프레스 동작 필요 없으면 빈 함수
+              isFavoriteMode: true,
+            ),
     );
   }
 }

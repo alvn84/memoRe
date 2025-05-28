@@ -9,6 +9,7 @@ class FolderGrid extends StatelessWidget {
   final List<Folder> filteredFolders;
   final void Function(Folder folder) onTapFolder;
   final void Function(int originalIndex) onLongPressFolder;
+  final bool isFavoriteMode; // ⭐️ 추가
 
   const FolderGrid({
     super.key,
@@ -16,6 +17,7 @@ class FolderGrid extends StatelessWidget {
     required this.filteredFolders,
     required this.onTapFolder,
     required this.onLongPressFolder,
+    this.isFavoriteMode = false, // ⭐️ 추가
   });
 
   @override
@@ -28,11 +30,11 @@ class FolderGrid extends StatelessWidget {
       padding: const EdgeInsets.all(16.0),
       child: GridView.builder(
         itemCount: filteredFolders.length,
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2,
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: isFavoriteMode ? 1 : 2, // ⭐️ 열 개수 조건부 설정
           crossAxisSpacing: 12.0,
           mainAxisSpacing: 12.0,
-          childAspectRatio: 0.95,
+          childAspectRatio: isFavoriteMode ? 3.2 : 0.95, // ⭐️ 비율도 다르게
         ),
         itemBuilder: (context, index) {
           final folder = filteredFolders[index];
@@ -45,6 +47,7 @@ class FolderGrid extends StatelessWidget {
               key: ValueKey(
                   '${folder.id}_${folder.color.value}_${folder.imageUrl ?? ''}'),
               folder: folder,
+              isFavoriteMode: isFavoriteMode, // ⭐️ 전달
             ),
           );
         },

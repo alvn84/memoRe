@@ -18,6 +18,8 @@ class Tab1SearchAppBar extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     return AppBar(
+      leading: null, // ✅ 뒤로가기 버튼 제거
+      automaticallyImplyLeading: false, // ✅ 자동 삽입도 방지
       backgroundColor: Colors.transparent,
       title: SizedBox(
         height: 43,

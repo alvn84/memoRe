@@ -9,11 +9,13 @@ import 'ai_repository.dart';
 class AiModalSheet extends StatelessWidget {
   final String title;
   final String content;
+  final void Function(String translatedText)? onApplyTranslation;
 
   const AiModalSheet({
     super.key,
     required this.title,
     required this.content,
+    this.onApplyTranslation,
   });
 
   @override
@@ -48,7 +50,11 @@ class AiModalSheet extends StatelessWidget {
                 child: TabBarView(
                   children: [
                     SummaryTab(title: title, content: content),
-                    TranslateTab(title: title, content: content),
+                    TranslateTab(
+                      title: title,
+                      content: content,
+                      onApplyTranslation: onApplyTranslation, // ✅ 이 줄 추가
+                    ),
                     ScheduleTab(title: title, content: content),
                     PlaceTab(title: title, content: content),
                     CaptionTab(title: title, content: content),
