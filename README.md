@@ -46,8 +46,25 @@
 <br>
 
 ## 💡  Functions
+### AI Guide
+![createfolder](https://github.com/user-attachments/assets/9bca308b-cdf9-4faf-a42e-cb916f034adb)
 
+<br>
 
+### Summary
+![summary](https://github.com/user-attachments/assets/93d582ef-e99c-4a63-b12e-abcd82f611f9)
 
+<br>
 
+### Translate
+![translate](https://github.com/user-attachments/assets/e0fe9080-9eb1-43d8-8e2a-93ffbe8d931a)
 
+<br>
+
+### Mapping
+<img width="251" alt="mapping" src="https://github.com/user-attachments/assets/ae6bfcd0-3cf1-40ec-b9b8-c2a6f8dc6b85" />
+
+<br>
+
+### Hashtag recommendations
+<img width="250" alt="hashtag" src="https://github.com/user-attachments/assets/b0c640d5-40a8-4636-a72c-9087d59d53f4" />
