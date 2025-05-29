@@ -365,7 +365,7 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
                         );
                       },
                       child: Image.asset(
-                        'assets/icons/llama1.jpeg',
+                        'assets/icons/meta_icon.png',
                         width: 28,
                         height: 28,
                       ),
