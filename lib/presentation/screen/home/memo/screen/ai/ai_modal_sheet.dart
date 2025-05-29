@@ -9,12 +9,14 @@ import 'ai_repository.dart';
 class AiModalSheet extends StatelessWidget {
   final String title;
   final String content;
+  final String? folderLocation; // ✅ 추가
   final void Function(String translatedText)? onApplyTranslation;
 
   const AiModalSheet({
     super.key,
     required this.title,
     required this.content,
+    this.folderLocation, // ✅ 추가
     this.onApplyTranslation,
   });
 
@@ -56,7 +58,11 @@ class AiModalSheet extends StatelessWidget {
                       onApplyTranslation: onApplyTranslation, // ✅ 이 줄 추가
                     ),
                     /*ScheduleTab(title: title, content: content),*/
-                    PlaceTab(title: title, content: content),
+                    PlaceTab(
+                      title: title,
+                      content: content,
+                      folderLocation: folderLocation, // ✅ 이 줄 추가!
+                    ),
                     CaptionTab(title: title, content: content),
                   ],
                 ),

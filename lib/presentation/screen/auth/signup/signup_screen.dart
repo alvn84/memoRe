@@ -130,16 +130,16 @@ class _SignUpScreenState extends State<SignUpScreen> {
               child: PageView(
                 controller: _pageController,
                 physics: const NeverScrollableScrollPhysics(),
+                onPageChanged: (int page) {
+                  setState(() {
+                    _currentPage = page;
+                  });
+                },
                 children: [
                   SignUpEmail(onNext: _goToNextPage, signUpData: _signUpData),
-                  // ✅ 수정
-                  SignUpPassword(
-                      onNext: _goToNextPage, signUpData: _signUpData),
-                  // ✅ 수정
+                  SignUpPassword(onNext: _goToNextPage, signUpData: _signUpData),
                   SignUpProfile(
-                    onComplete: () {
-                      _submitSignUp(); // ✅ 서버에 보내기
-                    },
+                    onComplete: _submitSignUp,
                     signUpData: _signUpData,
                   ),
                 ],

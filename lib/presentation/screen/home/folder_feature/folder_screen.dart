@@ -391,9 +391,13 @@ class _FolderDetailScreenState extends State<FolderDetailScreen> {
         ],
       ),
       floatingActionButton: FloatingActionButton(
+        shape: const CircleBorder(),
         onPressed: _addNewNote,
         backgroundColor: const Color(0xFF6495ED),
-        child: const Icon(Icons.add),
+        child: const Icon(
+          Icons.add,
+          color: Color(0xFFFAFAFA),
+        ),
       ),
     );
   }

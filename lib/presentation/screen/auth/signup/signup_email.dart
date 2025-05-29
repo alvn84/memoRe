@@ -45,7 +45,7 @@ class _SignUpEmailState extends State<SignUpEmail> {
     }
 
     // 이메일 유효성 검사
-    /*if (!emailRegex.hasMatch(email)) {
+    if (!emailRegex.hasMatch(email)) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text(
@@ -55,7 +55,7 @@ class _SignUpEmailState extends State<SignUpEmail> {
         ),
       );
       return;
-    }*/
+    }
 
     // ✅ 입력한 이메일을 signUpData에 저장
     widget.signUpData.email = email;

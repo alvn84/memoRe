@@ -145,7 +145,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                     ),
 
-                    Center(
+                    /*Center(
                       child: Text(
                         "Continue with Social Account",
                         style: TextStyle(
@@ -179,7 +179,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           _refreshForm();
                         });
                       },
-                    ),
+                    ),*/
                   ],
                 ),
               ),

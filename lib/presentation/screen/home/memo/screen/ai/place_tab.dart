@@ -9,11 +9,13 @@ import 'package:geolocator/geolocator.dart';
 class PlaceTab extends StatefulWidget {
   final String? title;
   final String? content;
+  final String? folderLocation; // ✅ 추가
 
   const PlaceTab({
     super.key,
     required this.title,
     required this.content,
+    this.folderLocation, // ✅ 추가
   });
 
   @override
@@ -38,9 +40,14 @@ class _PlaceTabState extends State<PlaceTab> {
   }
 
   void _loadPlaces() async {
+    print('📩 fallback location: ${widget.folderLocation}');
+    print('📤 memo text: ${widget.content}');
     try {
       // ✅ memoId 제거
-      final places = await extractMapPlaces(widget.content ?? '');
+      final places = await extractMapPlaces(
+        memoText: widget.content ?? '',
+        folderLocation: widget.folderLocation ?? '',
+      );
       final markers = places.map((place) {
         return Marker(
           markerId: MarkerId(place.name),

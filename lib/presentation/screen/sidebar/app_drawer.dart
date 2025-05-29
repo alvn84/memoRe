@@ -37,7 +37,7 @@ class AppDrawer extends StatelessWidget {
               },
             ),
 
-            ListTile(
+            /*ListTile(
               leading: const Icon(Icons.delete, color: Color(0xFF6495ED)),
               title: const Text('Trash',
                   style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
@@ -50,7 +50,7 @@ class AppDrawer extends StatelessWidget {
                           const TrashScreen()), // TrashScreen으로 이동
                 );
               },
-            ),
+            ),*/
             ListTile(
               leading: const Icon(Icons.settings, color: Color(0xFF6495ED)),
               title: const Text('Settings',

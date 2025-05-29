@@ -109,7 +109,11 @@ class MapPlace {
   }
 }
 
-Future<List<MapPlace>> extractMapPlaces(String memoText) async {
+// ✅ 이 함수만 남기고 위쪽 기존 함수 삭제!
+Future<List<MapPlace>> extractMapPlaces({
+  required String memoText,
+  required String folderLocation,
+}) async {
   final token = await TokenStorage.getToken();
   final url = Uri.parse('$baseUrl/api/maps');
 
@@ -120,14 +124,14 @@ Future<List<MapPlace>> extractMapPlaces(String memoText) async {
       'Authorization': 'Bearer $token',
     },
     body: jsonEncode({
-      'memoText': memoText, // ✅ memoId 제거
+      'memoText': memoText,
+      'folderLocation': folderLocation,
     }),
   );
 
   if (response.statusCode == 200) {
     final json = jsonDecode(response.body);
     final List places = json['places'] ?? [];
-
     return places.map((place) => MapPlace.fromJson(place)).toList();
   } else {
     throw Exception('장소 추출 실패: ${response.statusCode}');

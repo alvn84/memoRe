@@ -21,6 +21,7 @@ class NoteEditScreen extends StatefulWidget {
   final int? folderId; // ✅ folderId로 수정
   final VoidCallback onNoteSaved;
   final bool isQuickMemo; // ← ✅ 이걸 추가
+  final String? folderLocation; // ✅ 추가
 
   const NoteEditScreen({
     super.key,
@@ -28,6 +29,7 @@ class NoteEditScreen extends StatefulWidget {
     required this.onNoteSaved,
     this.initialMemo,
     this.isQuickMemo = false, // 기본값은 일반 메모
+    this.folderLocation, // ✅ 생성자에 추가
   });
 
   @override
@@ -263,6 +265,7 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
                                       title: _titleController.text,
                                       content: _quillController.document
                                           .toPlainText(),
+                                      folderLocation: widget.folderLocation, // ✅ 전달
                                       onApplyTranslation: (translatedText) {
                                         setState(() {
                                           _quillController = QuillController(
