@@ -92,19 +92,24 @@ class ProfileCard extends StatelessWidget {
                         backgroundImage:
                             AssetImage('assets/images/profile.png'),
                         backgroundColor: Color(0xFFE0E0E0),
+                        child: Icon(Icons.person, color: Colors.white),
                       ),
                       const SizedBox(width: 16),
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            user != null ? extractIdFromEmail(user.email) : '로딩 중...',
+                            user != null
+                                ? extractIdFromEmail(user.email)
+                                : '로딩 중...',
                             style: const TextStyle(
                                 fontSize: 15, fontWeight: FontWeight.bold),
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            user != null ? extractDomainFromEmail(user.email) : '',
+                            user != null
+                                ? extractDomainFromEmail(user.email)
+                                : '',
                             style: const TextStyle(
                                 fontSize: 11, color: Colors.grey),
                           ),

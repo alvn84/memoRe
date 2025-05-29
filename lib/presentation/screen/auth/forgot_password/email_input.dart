@@ -137,16 +137,11 @@ class _EmailInputScreenState extends State<EmailInputScreen> {
                     Center(
                       child: SizedBox(
                         width: 150,
-                        height: 48,
+                        height: 45,
                         child: ElevatedButton(
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.purple[100],
-                            foregroundColor: Colors.white,
-                            textStyle: const TextStyle(
-                              fontFamily: 'Anton',
-                              fontSize: 13,
-                              fontWeight: FontWeight.w600,
-                            ),
+                            backgroundColor: Color(0xFF6495ED), // 배경색
+                            foregroundColor: Color(0xFFFAFAFA),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(25),
                             ),

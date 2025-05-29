@@ -85,7 +85,7 @@ class Folder {
       final rawColor = json['color'];
       final int colorInt = rawColor is int
           ? rawColor
-          : int.tryParse(rawColor.toString(), radix: 16) ?? 0xFFFFE082;
+          : int.tryParse(rawColor.toString(), radix: 16) ?? 0xFFECEFF1;
 
       return Folder(
         id: json['id'],
