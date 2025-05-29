@@ -110,12 +110,12 @@ class MapPlace {
 }
 
 // ✅ 이 함수만 남기고 위쪽 기존 함수 삭제!
+
 Future<List<MapPlace>> extractMapPlaces({
   required String memoText,
-  required String folderLocation,
 }) async {
   final token = await TokenStorage.getToken();
-  final url = Uri.parse('$baseUrl/api/maps');
+  final url = Uri.parse('$baseUrl/api/maps/memo');
 
   final response = await http.post(
     url,
@@ -125,15 +125,46 @@ Future<List<MapPlace>> extractMapPlaces({
     },
     body: jsonEncode({
       'memoText': memoText,
+    }),
+  );
+
+  if (response.statusCode == 200) {
+    final data = jsonDecode(response.body);
+    final List<dynamic> places = data['places'] ?? [];
+
+    return places.map((placeJson) => MapPlace.fromJson(placeJson)).toList();
+  } else {
+    print('❌ 장소 추출 실패: ${response.body}');
+    throw Exception('장소 추출 실패: ${response.statusCode}');
+  }
+}
+
+Future<MapPlace?> extractLocation(String folderLocation) async {
+  if (folderLocation.trim().isEmpty) return null;
+
+  final token = await TokenStorage.getToken();
+  final url = Uri.parse('$baseUrl/api/maps/folder');
+
+  final response = await http.post(
+    url,
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer $token',
+    },
+    body: jsonEncode({
       'folderLocation': folderLocation,
     }),
   );
 
   if (response.statusCode == 200) {
-    final json = jsonDecode(response.body);
-    final List places = json['places'] ?? [];
-    return places.map((place) => MapPlace.fromJson(place)).toList();
+    final data = jsonDecode(response.body);
+    final List<dynamic> places = data['places'] ?? [];
+    if (places.isNotEmpty) {
+      return MapPlace.fromJson(places.first);
+    }
+    return null;
   } else {
-    throw Exception('장소 추출 실패: ${response.statusCode}');
+    print('❌ 폴더 장소 추출 실패: ${response.body}');
+    throw Exception('폴더 장소 추출 실패: ${response.statusCode}');
   }
 }

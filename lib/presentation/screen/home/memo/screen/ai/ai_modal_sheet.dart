@@ -51,7 +51,11 @@ class AiModalSheet extends StatelessWidget {
                 height: MediaQuery.of(context).size.height * 0.8, // ✅ 70% 화면 높이
                 child: TabBarView(
                   children: [
-                    SummaryTab(title: title, content: content),
+                    SummaryTab(
+                      title: title,
+                      content: content,
+                      onApplyTranslation: onApplyTranslation,
+                    ),
                     TranslateTab(
                       title: title,
                       content: content,

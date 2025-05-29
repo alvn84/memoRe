@@ -6,11 +6,13 @@ import 'ai_repository.dart'; // ✅ 요약 로직 사용
 class SummaryTab extends StatefulWidget {
   final String? title;
   final String? content;
+  final void Function(String translatedText)? onApplyTranslation;
 
   const SummaryTab({
     super.key,
     required this.title,
     required this.content,
+    this.onApplyTranslation,
   });
 
   @override
@@ -66,7 +68,41 @@ class _SummaryTabState extends State<SummaryTab> {
           if (_isLoading)
             const Center(child: CircularProgressIndicator())
           else if (_summary.isNotEmpty)
-            SelectableText(_summary, style: const TextStyle(fontSize: 14))
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SelectableText(_summary, style: const TextStyle(fontSize: 14)),
+                const SizedBox(height: 12),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      if (widget.onApplyTranslation != null) {
+                        widget.onApplyTranslation!(_summary);
+                        Navigator.pop(context);
+                      }
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFFE6F0FB),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 18, vertical: 10),
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: const Text(
+                      '본문 대체',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: Color(0xFF4A90E2),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            )
           else
             const Text('(요약 결과 없음)',
                 style: TextStyle(fontSize: 14, color: Colors.black87)),

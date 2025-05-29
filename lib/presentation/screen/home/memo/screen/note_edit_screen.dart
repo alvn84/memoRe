@@ -50,6 +50,9 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
   void initState() {
     super.initState();
 
+    print('📍 폴더 위치: ${widget.folderLocation}');
+
+
     if (widget.initialMemo != null) {
       _titleController.text = widget.initialMemo!.title;
       _quillController = QuillController(

@@ -56,6 +56,7 @@ class _FolderDetailScreenState extends State<FolderDetailScreen> {
       MaterialPageRoute(
         builder: (_) => NoteEditScreen(
           folderId: widget.folder.id!,
+          folderLocation: widget.folder.location, // ✅ 추가
           onNoteSaved: _refresh,
         ),
       ),
@@ -264,6 +265,7 @@ class _FolderDetailScreenState extends State<FolderDetailScreen> {
                             MaterialPageRoute(
                               builder: (_) => NoteEditScreen(
                                 folderId: widget.folder.id!,
+                                folderLocation: widget.folder.location, // ✅ 추가
                                 initialMemo: memo,
                                 onNoteSaved: _refresh,
                               ),

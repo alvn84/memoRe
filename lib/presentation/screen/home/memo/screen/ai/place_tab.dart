@@ -4,7 +4,6 @@ import 'package:flutter/foundation.dart'; // ✅ Factory 클래스
 import 'package:flutter/gestures.dart';
 
 import 'ai_repository.dart'; // ✅ OneSequenceGestureRecognizer, EagerGestureRecognizer
-import 'package:geolocator/geolocator.dart';
 
 class PlaceTab extends StatefulWidget {
   final String? title;
@@ -24,10 +23,10 @@ class PlaceTab extends StatefulWidget {
 
 class _PlaceTabState extends State<PlaceTab> {
   GoogleMapController? _mapController;
-  static const LatLng _defaultLatLng = LatLng(35.6895, 139.6917);
   final _gestureRecognizers = <Factory<OneSequenceGestureRecognizer>>{
     Factory(() => EagerGestureRecognizer()),
   };
+  LatLng? _initialLatLng; // ✅ 도쿄 대신 폴더 기반 초기 위치
 
   Set<Marker> _markers = {};
   List<MapPlace> _places = [];
@@ -36,18 +35,48 @@ class _PlaceTabState extends State<PlaceTab> {
   @override
   void initState() {
     super.initState();
+    print('📍 전달된 folderLocation: ${widget.folderLocation}');
+    initLocation();
     _loadPlaces();
   }
 
+  void initLocation() async {
+    if (widget.folderLocation == null ||
+        widget.folderLocation!.trim().isEmpty) {
+      print('⚠️ folderLocation이 비어 있음');
+      return;
+    }
+
+    try {
+      final place = await extractLocation(widget.folderLocation!);
+      if (place != null) {
+        final latLng = LatLng(place.lat, place.lng);
+        print('📍 폴더 장소 초기 위치 설정됨: ${place.name} (${place.lat}, ${place.lng})');
+        setState(() {
+          _initialLatLng = latLng;
+        });
+
+        // ✅ 지도 생성된 이후일 경우 바로 이동
+        if (_mapController != null) {
+          _mapController!.animateCamera(
+            CameraUpdate.newLatLng(latLng),
+          );
+        }
+      } else {
+        print('⚠️ extractLocation 결과가 null');
+      }
+    } catch (e) {
+      print('❌ 폴더 장소 초기화 실패: $e');
+    }
+  }
+
   void _loadPlaces() async {
-    print('📩 fallback location: ${widget.folderLocation}');
     print('📤 memo text: ${widget.content}');
     try {
-      // ✅ memoId 제거
       final places = await extractMapPlaces(
         memoText: widget.content ?? '',
-        folderLocation: widget.folderLocation ?? '',
       );
+
       final markers = places.map((place) {
         return Marker(
           markerId: MarkerId(place.name),
@@ -57,14 +86,12 @@ class _PlaceTabState extends State<PlaceTab> {
       }).toSet();
 
       setState(() {
-        _markers = markers;
         _places = places;
+        _markers = markers;
         _isLoading = false;
 
-        if (markers.isNotEmpty) {
-          _mapController
-              ?.moveCamera(CameraUpdate.newLatLng(markers.first.position));
-        }
+        // ❌ 더 이상 _initialLatLng을 메모 기반으로 덮어쓰지 않음
+        // ✅ 폴더 장소만 최초 기본값으로 유지
       });
     } catch (e) {
       print('❌ 장소 로딩 실패: $e');
@@ -90,11 +117,19 @@ class _PlaceTabState extends State<PlaceTab> {
                 SizedBox(
                   height: 250, // 적당히 고정된 지도 높이
                   child: GoogleMap(
-                    initialCameraPosition: const CameraPosition(
-                      target: _defaultLatLng,
+                    initialCameraPosition: CameraPosition(
+                      target: _initialLatLng!,
                       zoom: 12,
                     ),
-                    onMapCreated: (controller) => _mapController = controller,
+                    onMapCreated: (controller) {
+                      _mapController = controller;
+
+                      if (_initialLatLng != null) {
+                        _mapController!.animateCamera(
+                          CameraUpdate.newLatLng(_initialLatLng!),
+                        );
+                      }
+                    },
                     gestureRecognizers: _gestureRecognizers,
                     markers: _markers,
                   ),
