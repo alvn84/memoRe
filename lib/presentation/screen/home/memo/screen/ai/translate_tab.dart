@@ -94,124 +94,168 @@ class _TranslateTabState extends State<TranslateTab> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          /*const Text(
             '📘 메모리 번역',
             style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-          ),
+          ),*/
           const SizedBox(height: 12),
           if (_isLoading)
             const Center(child: CircularProgressIndicator())
+
           else if (_translated.isNotEmpty) ...[
-            SelectableText(
-              _translated,
-              style: const TextStyle(fontSize: 14),
-            ),
-            Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-              Row(
-                children: [
-                  ElevatedButton(
-                    onPressed: _summarizeThenTranslate,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFFF6F6F6), // 연한 회색 배경
-                      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
-                      elevation: 0,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                    child: Text(
-                      _isSummaryMode ? '전체 번역' : '요약 번역',
-                      style: const TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w500,
-                        color: Colors.black87,
-                      ),
-                    ),
+            Container(
+              decoration: BoxDecoration(
+                color: const Color(0xFFF6F9FF),
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.05),
+                    blurRadius: 6,
+                    offset: const Offset(0, 3),
                   ),
-                  if (_isSummarizing) const SizedBox(width: 8),
-                  if (_isSummarizing)
-                    const SizedBox(
-                      width: 16,
-                      height: 16,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    ),
                 ],
               ),
-              ElevatedButton(
-                onPressed: () {
-                  if (widget.onApplyTranslation != null) {
-                    widget.onApplyTranslation!(_translated);
-                    Navigator.pop(context);
-                  }
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFFE6F0FB),
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
-                  elevation: 0,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    '🌍 전체 번역 결과',
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF4A90E2),
+                    ),
                   ),
-                ),
-                child: const Text(
-                  '본문 대체',
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: Color(0xFF4A90E2),
+                  const SizedBox(height: 15),
+                  SelectableText(
+                    _translated,
+                    style: const TextStyle(fontSize: 14, height: 1.6),
                   ),
-                ),
+                  const SizedBox(height: 16),
+
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      // 왼쪽 버튼 (요약 or 전체 번역 전환)
+                      Row(
+                        children: [
+                          ElevatedButton(
+                            onPressed: _summarizeThenTranslate,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFFEAEAEA),
+                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                              elevation: 0,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                            child: Text(
+                              _isSummaryMode ? '전체 번역' : '요약 번역',
+                              style: const TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.black87,
+                              ),
+                            ),
+                          ),
+                          if (_isSummarizing) const SizedBox(width: 10),
+                          if (_isSummarizing)
+                            const SizedBox(
+                              width: 16,
+                              height: 16,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            ),
+                        ],
+                      ),
+
+                      // 오른쪽 버튼 (본문에 적용)
+                      ElevatedButton(
+                        onPressed: () {
+                          widget.onApplyTranslation?.call(_translated);
+                          Navigator.pop(context);
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFFE6F0FB),
+                          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+                          elevation: 0,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        child: const Text(
+                          '본문 대체',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: Color(0xFF4A90E2),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ),
-            ]),
-            const SizedBox(height: 10),
-          ] else
-          // ✅ 요약 번역 결과 블록
-          if (_isSummarizing)
-            const Padding(
-              padding: EdgeInsets.only(top: 16),
-              child: Center(child: CircularProgressIndicator()),
-            )
-          else if (_summarizedTranslation.isNotEmpty) ...[
-            const Divider(height: 32),
-            const Text(
-              '🧾 요약된 번역',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             ),
-            const SizedBox(height: 8),
-            SelectableText(
-              _summarizedTranslation,
-              style: const TextStyle(fontSize: 14),
-            ),
-            const SizedBox(height: 12),
-            Align(
-              alignment: Alignment.centerRight,
-              child: ElevatedButton(
-                onPressed: () {
-                  if (widget.onApplyTranslation != null) {
-                    widget.onApplyTranslation!(_summarizedTranslation);
-                    Navigator.pop(context);
-                  }
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFFF2F8FF),
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                  elevation: 0,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+            const SizedBox(height: 20),
+          ]
+
+          else if (_isSummarizing)
+              const Padding(
+                padding: EdgeInsets.only(top: 16),
+                child: Center(child: CircularProgressIndicator()),
+              )
+
+            else if (_summarizedTranslation.isNotEmpty) ...[
+                Container(
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFFCFCFC),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: const Color(0xFFE0E0E0)),
+                  ),
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        '🧾 요약된 번역',
+                        style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(height: 8),
+                      SelectableText(
+                        _summarizedTranslation,
+                        style: const TextStyle(fontSize: 14, height: 1.6),
+                      ),
+                      const SizedBox(height: 16),
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: ElevatedButton(
+                          onPressed: () {
+                            widget.onApplyTranslation?.call(_summarizedTranslation);
+                            Navigator.pop(context);
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFFF2F8FF),
+                            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                            elevation: 0,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          child: const Text(
+                            '요약 번역으로 대치',
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              color: Color(0xFF4A90E2),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-                child: const Text(
-                  '요약 번역으로 대치',
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: Color(0xFF4A90E2),
-                  ),
-                ),
-              ),
-            ),
-          ],
+              ],
         ],
       ),
     );

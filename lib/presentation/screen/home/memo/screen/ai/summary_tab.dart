@@ -62,50 +62,82 @@ class _SummaryTabState extends State<SummaryTab> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('📝 메모리 요약',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-          const SizedBox(height: 16),
+          /*const Text(
+            '📝 메모리 요약',
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          ),*/
+          const SizedBox(height: 12),
           if (_isLoading)
             const Center(child: CircularProgressIndicator())
           else if (_summary.isNotEmpty)
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                SelectableText(_summary, style: const TextStyle(fontSize: 14)),
-                const SizedBox(height: 12),
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: ElevatedButton(
-                    onPressed: () {
-                      if (widget.onApplyTranslation != null) {
-                        widget.onApplyTranslation!(_summary);
-                        Navigator.pop(context);
-                      }
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFFE6F0FB),
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 18, vertical: 10),
-                      elevation: 0,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+            Container(
+              decoration: BoxDecoration(
+                color: const Color(0xFFF5F9FF),
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.05),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: const [
+                      Icon(Icons.notes, color: Color(0xFF4A90E2)),
+                      SizedBox(width: 8),
+                      Text(
+                        'AI 요약 결과',
+                        style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w600,
+                            color: Color(0xFF4A90E2)),
                       ),
-                    ),
-                    child: const Text(
-                      '본문 대체',
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: Color(0xFF4A90E2),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  SelectableText(
+                    _summary,
+                    style: const TextStyle(fontSize: 14, height: 1.6),
+                  ),
+                  const SizedBox(height: 16),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: ElevatedButton.icon(
+                      onPressed: () {
+                        if (widget.onApplyTranslation != null) {
+                          widget.onApplyTranslation!(_summary);
+                          Navigator.pop(context);
+                        }
+                      },
+                      icon: const Icon(Icons.swap_horiz, size: 18),
+                      label: const Text('본문 대체'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFFE6F0FB),
+                        elevation: 0,
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 20, vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        foregroundColor: const Color(0xFF4A90E2),
+                        textStyle: const TextStyle(
+                            fontSize: 14, fontWeight: FontWeight.w600),
                       ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             )
           else
-            const Text('(요약 결과 없음)',
-                style: TextStyle(fontSize: 14, color: Colors.black87)),
+            const Text(
+              '(요약 결과 없음)',
+              style: TextStyle(fontSize: 14, color: Colors.black87),
+            ),
         ],
       ),
     );

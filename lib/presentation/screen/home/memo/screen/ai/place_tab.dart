@@ -22,6 +22,7 @@ class PlaceTab extends StatefulWidget {
 }
 
 class _PlaceTabState extends State<PlaceTab> {
+  String? _selectedPlaceName;
   GoogleMapController? _mapController;
   final _gestureRecognizers = <Factory<OneSequenceGestureRecognizer>>{
     Factory(() => EagerGestureRecognizer()),
@@ -109,29 +110,74 @@ class _PlaceTabState extends State<PlaceTab> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const SizedBox(height: 16),
-                const Text(
-                  ' 📍 메모리 지도',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 16),
-                SizedBox(
-                  height: 250, // 적당히 고정된 지도 높이
-                  child: GoogleMap(
-                    initialCameraPosition: CameraPosition(
-                      target: _initialLatLng!,
-                      zoom: 12,
-                    ),
-                    onMapCreated: (controller) {
-                      _mapController = controller;
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(16),
+                  child: Stack(
+                    children: [
+                      Container(
+                        height: 250,
+                        decoration: BoxDecoration(
+                          color: Colors.grey[300],
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.05),
+                              blurRadius: 6,
+                              offset: const Offset(0, 3),
+                            ),
+                          ],
+                        ),
+                        child: GoogleMap(
+                          initialCameraPosition: CameraPosition(
+                            target: _initialLatLng!,
+                            zoom: 12,
+                          ),
+                          onMapCreated: (controller) {
+                            _mapController = controller;
+                            if (_initialLatLng != null) {
+                              _mapController!.animateCamera(
+                                CameraUpdate.newLatLng(_initialLatLng!),
+                              );
+                            }
+                          },
+                          gestureRecognizers: _gestureRecognizers,
+                          markers: _markers,
+                          zoomControlsEnabled: false,
+                          myLocationButtonEnabled: false,
+                        ),
+                      ),
 
-                      if (_initialLatLng != null) {
-                        _mapController!.animateCamera(
-                          CameraUpdate.newLatLng(_initialLatLng!),
-                        );
-                      }
-                    },
-                    gestureRecognizers: _gestureRecognizers,
-                    markers: _markers,
+                      // 지도 위에 반투명 장소명 배너
+                      Positioned(
+                        top: 12,
+                        left: 12,
+                        right: 12,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 12, vertical: 8),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.85),
+                            borderRadius: BorderRadius.circular(12),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.05),
+                                blurRadius: 4,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                          child: Text(
+                            _selectedPlaceName ??
+                                widget.folderLocation ??
+                                '알 수 없는 장소',
+                            style: const TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w500,
+                              color: Color(0xFF4A90E2),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
                 const SizedBox(height: 16), // 간격
@@ -147,16 +193,62 @@ class _PlaceTabState extends State<PlaceTab> {
                     itemCount: _places.length,
                     itemBuilder: (context, index) {
                       final place = _places[index];
-                      return ListTile(
-                        leading: const Icon(Icons.place),
-                        title: Text(place.name),
+                      return GestureDetector(
                         onTap: () {
-                          // ✅ 마커 위치로 부드럽게 카메라 이동
+                          final latLng = LatLng(place.lat, place.lng);
+
+                          setState(() {
+                            _selectedPlaceName =
+                                place.name; // ✅ 지도 상단 배너 텍스트 변경
+                            _initialLatLng = latLng; // ✅ 중심 위치도 갱신
+                            _markers = {
+                              Marker(
+                                markerId: const MarkerId('selected'),
+                                position: latLng,
+                                infoWindow: InfoWindow(title: place.name),
+                              ),
+                            }; // ✅ 선택된 장소만 마커로 표시
+                          });
+
                           _mapController?.animateCamera(
-                            CameraUpdate.newLatLng(
-                                LatLng(place.lat, place.lng)),
+                            CameraUpdate.newLatLng(latLng),
                           );
                         },
+                        child: Card(
+                          elevation: 4,
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12)),
+                          margin: const EdgeInsets.symmetric(
+                              vertical: 8, horizontal: 12),
+                          child: Padding(
+                            padding: const EdgeInsets.all(16),
+                            child: Row(
+                              children: [
+                                const Icon(Icons.place,
+                                    color: Color(0xFF6495ED), size: 30),
+                                const SizedBox(width: 16),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        place.name,
+                                        style: const TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 4),
+                                    ],
+                                  ),
+                                ),
+                                const Icon(Icons.arrow_forward_ios,
+                                    size: 16, color: Colors.grey),
+                              ],
+                            ),
+                          ),
+                        ),
                       );
                     },
                   )
