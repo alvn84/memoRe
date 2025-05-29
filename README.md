@@ -10,17 +10,42 @@
   
 <br>
 
-## 🎬 시연영상
-▶️ 바로가기
+## 🔗  Link
+### 시연영상
+- [🎬 바로가기](https://github.com/EASYME-md/client)
+  
+<br>
+
+## 👥  Team Members
+- **이다민** : 서버 개발 및 Api 구축, ai기능 연동, AWS EC 서버 배포 및 운영
+- **박규나** : PM, UI/UX 디자인, Flutter 활용 UI/UX 개발
+- **백준호** : 서버 아키텍처 설계 및 API 구현, 데이터 처리, 보안 및 DB 관리
+- **송정원** : Flutter 활용 UI/UX 개발, 서버 연동, API 연동, 앱 기능 테스트
+- **차재혁** : UI/UX 디자인, Flutter 활용 세부 UI/UX 개발
+
 
 <br>
 
-## 👥 Team Members
-- **이다민** :
-- **박규나** :
-- **백준호** : 
-- **송정원** : 
-- **차재혁** : 
+## ⚙️  Development Environment
+|Category|Details|
+|:---:|:---|
+|Operating System|<img src="https://img.shields.io/badge/windows-%230078D6.svg?&style=for-the-badge&logo=windows&logoColor=white" /><img src="https://img.shields.io/badge/macos-%23000000.svg?&style=for-the-badge&logo=macos&logoColor=white" />|
+|IDE|<img src="https://img.shields.io/badge/intellij%20idea-%23000000.svg?&style=for-the-badge&logo=intellij%20idea&logoColor=white" /><img src="https://img.shields.io/badge/visual%20studio%20code-%23007ACC.svg?&style=for-the-badge&logo=visual%20studio%20code&logoColor=white" /><img src="https://img.shields.io/badge/android%20studio-%233DDC84.svg?&style=for-the-badge&logo=android%20studio&logoColor=black" />|
+|Framework|<img src="https://img.shields.io/badge/spring-%236DB33F.svg?&style=for-the-badge&logo=spring&logoColor=white" /><img src="https://img.shields.io/badge/flutter-%2302569B.svg?&style=for-the-badge&logo=flutter&logoColor=white" />|
+|Database|<img src="https://img.shields.io/badge/mysql-%234479A1.svg?&style=for-the-badge&logo=mysql&logoColor=white" />|
+|Server|Spring Boot (v3.x)|
+|Package Manager|Maven, pub|
+|Runtime Environment|Java 17, Dart v3.4.3|
+|AI Models/Libraries|Llama (LLM), QAIHub, Google Translate API|
+
+<br>
+
+## 🔧  Architecture
+![구조](https://github.com/user-attachments/assets/3144e8d0-41ce-4f1e-a9d6-8e1bb48ee438)
+
+<br>
+
+## 💡  Functions
 
 
 
