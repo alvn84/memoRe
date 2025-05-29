@@ -12,7 +12,7 @@
 
 ## 🔗  Link
 ### 시연영상
-- [🎬 바로가기](https://github.com/EASYME-md/client)
+- [🎬 바로가기](https://youtu.be/wbn-6RhCAZk)
   
 <br>
 
