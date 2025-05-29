@@ -7,6 +7,7 @@ import 'package:flutter_quill/flutter_quill.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
+import 'package:memore/presentation/screen/home/memo/screen/llama/llama_modal_sheet.dart';
 
 import '../../../auth/api_config.dart';
 import '../../../auth/token_storage.dart';
@@ -313,9 +314,58 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
                       mini: true,
                       shape: const CircleBorder(),
                       backgroundColor: const Color(0xFFFAFAFA),
-                      onPressed: () {},
+                      onPressed: () {
+                        final title = _titleController.text;
+                        final content = _quillController.document.toPlainText();
+
+                        showModalBottomSheet(
+                          context: context,
+                          isScrollControlled: true,
+                          backgroundColor: Colors.transparent, // 배경 투명하게
+                          builder: (context) {
+                            return DraggableScrollableSheet(
+                              initialChildSize: 0.5,
+                              // 시트가 처음 차지하는 화면 비율 (50%)
+                              minChildSize: 0.3,
+                              maxChildSize: 0.95,
+                              // 최대 확장 가능 비율
+                              expand: false,
+                              builder: (context, scrollController) {
+                                return Container(
+                                  decoration: const BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.vertical(
+                                        top: Radius.circular(20)),
+                                  ),
+                                  child: SingleChildScrollView(
+                                    controller: scrollController,
+                                    child: LlamaModalSheet(
+                                      key: UniqueKey(),
+                                      title: _titleController.text,
+                                      content: _quillController.document
+                                          .toPlainText(),
+                                      folderLocation: widget.folderLocation, // ✅ 전달
+                                      onApplyTranslation: (translatedText) {
+                                        setState(() {
+                                          _quillController = QuillController(
+                                            document: Document()
+                                              ..insert(0, translatedText),
+                                            selection:
+                                            const TextSelection.collapsed(
+                                                offset: 0),
+                                          );
+                                        });
+                                      },
+                                    ),
+                                  ),
+                                );
+                              },
+                            );
+                          },
+                        );
+                      },
                       child: Image.asset(
-                        'assets/icons/meta_icon.png',
+                        'assets/icons/llama1.jpeg',
                         width: 28,
                         height: 28,
                       ),

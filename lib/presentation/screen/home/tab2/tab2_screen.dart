@@ -44,6 +44,7 @@ class _Tab2ScreenState extends State<Tab2Screen> {
       body: CustomScrollView(
         slivers: [
           SliverAppBar(
+            automaticallyImplyLeading: false, // ← 뒤로가기 버튼 제거
             pinned: true,
             expandedHeight: 320,
             flexibleSpace: Container(
