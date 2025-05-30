@@ -57,6 +57,8 @@
 <br>
 
 ### Translate
+<img width="251" alt="mapping" src="[https://github.com/user-attachments/assets/ae6bfcd0-3cf1-40ec-b9b8-c2a6f8dc6b85](https://github.com/user-attachments/assets/e0fe9080-9eb1-43d8-8e2a-93ffbe8d931a)" />
+
 ![translate](https://github.com/user-attachments/assets/e0fe9080-9eb1-43d8-8e2a-93ffbe8d931a)
 
 <br>
